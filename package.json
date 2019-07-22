@@ -1,0 +1,64 @@
+{
+    "name": "fettec-esc-config",
+    "version": "0.1.5",
+    "description": "Configuration tool for FETtec ESC",
+    "main": "src/js/launcher_nw.js",
+    "single-instance": true,
+    "scripts": {
+        "start": "gulp debug",
+        "postinstall": "platform-dependent-modules",
+        "gulp": "gulp",
+        "build": "gulp release",
+        "build_all": "gulp release --osx64 --win64 --linux64 --chromeos"
+    },
+    "window": {
+        "title": "FETtec ESC Configurator",
+        "icon": "images/icon_128.png",
+        "min_width": 900,
+        "min_height": 650,
+        "fullscreen": false,
+        "resizable": true,
+        "toolbar": true,
+        "frame": true
+    },
+    "chromium-args": "--child-clean-exit --enable-webgl --ignore-gpu-blacklist --disable-pinch",
+    "webkit": {
+        "plugin": true
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/FETtec/ESC-Configurator"
+    },
+    "author": "FETtec",
+    "license": "GPL-3.0",
+    "devDependencies": {
+        "archiver": "^3.0.0",
+        "command-exists": "^1.2.8",
+        "del": "^4.1.0",
+        "follow-redirects": "^1.7.0",
+        "fs-extra": "^7.0.1",
+        "git-rev-sync": "^1.12.0",
+        "gulp": "^4.0.2",
+        "gulp-concat": "^2.6.1",
+        "gulp-debian": "^0.1.9",
+        "gulp-git": "^2.9.0",
+        "gulp-rename": "^1.4.0",
+        "gulp-yarn": "^2.0.0",
+        "gulp-zip": "^4.2.0",
+        "makensis": "^0.17.0",
+        "nw": "^0.37.4",
+        "nw-builder": "^3.5.7",
+        "os": "^0.1.1",
+        "platform-dependent-modules": "0.0.14",
+        "rpm-builder": "^1.1.0",
+        "targz": "^1.0.1",
+        "temp": "^0.9.0"
+    },
+    "config": {
+        "platformDependentModules": {
+            "darwin": [
+                "gulp-appdmg@1.0.3"
+            ]
+        }
+    }
+}
