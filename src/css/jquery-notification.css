@@ -1,0 +1,92 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+
+.ui-notification-container {
+    width: 300px;
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+}
+
+
+.ui-notification-bar {
+    position: relative;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    overflow: hidden;
+}
+
+.ui-notification-bar .ui-notification {
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+    -o-box-radius: 0;
+    -moz-border-radius: 0;
+    -webkit-border-radius: 0;
+}
+
+
+
+
+.ui-notification {
+    padding: 5px 10px;
+    -o-box-shadow: 2px 2px 2px #ccc;
+    -moz-box-shadow: 2px 2px 2px #ccc;
+    -webkit-box-shadow: 2px 2px 2px #ccc;
+    box-shadow: 2px 2px 2px #ccc;
+}
+
+.ui-notification .ui-notification-content {
+    font-size: 12px;    
+}
+
+.ui-notification .ui-notification-content h4 {
+    font-size: 14px;
+}
+
+.ui-notification .ui-notification-content p {
+    font-size: 12px;
+}
+.ui-notification .ui-notification-content a {
+    color: #6180A3;
+    font-weight: bold;
+
+}
+
+.ui-notification .ui-notification-content span {
+    padding: 4px;
+    display: inline;
+    border-radius: 2px;
+    border: 0;
+    margin: 0 2px;
+    background: red;
+    font-size: 14px;    
+    line-height: 16px;
+    color: white;
+    box-sizing: content-box;
+
+
+}
+
+.ui-notification .ui-notification-close {
+    display: inline-block;
+    width: 19px;
+    padding: 1px;
+    height: 18px;
+    margin: -2px -2px 0 2px;
+}
+
+.ui-notification .ui-notification-close:hover,
+.ui-notification .ui-notification-close:focus {
+    padding: 0;
+}
+
+.ui-notification .ui-notification-close span {
+    display: block;
+    margin: 1px;
+}

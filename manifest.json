@@ -1,0 +1,30 @@
+{
+    "name": "FETtec ESC Configurator",
+    "short_name": "FETtecESCConfig",
+    "description": "Configuration tool for FETtec ESC",
+    "offline_enabled": true,
+    "author": "FETtec",
+    "version": "0.1.5",
+    "manifest_version": 2,
+    "minimum_chrome_version": "36",
+    "permissions": [
+        "serial",
+        "usb",
+        "storage",
+        "fileSystem",
+        "notifications",
+        "https://*.github.com/",
+        "https://*.s3.amazonaws.com/"
+    ],
+    "icons": {
+        "16": "src/images/icon_16.png",
+        "128": "src/images/icon_128.png"
+    },
+    "app": {
+        "background": {
+            "scripts": [
+                "src/js/launcher_manifest.js"
+            ]
+        }
+    }
+}

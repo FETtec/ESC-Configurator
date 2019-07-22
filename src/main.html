@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link type="text/css" rel="stylesheet" href="css/jquery-ui.css" media="all" />
+    <link type="text/css" rel="stylesheet" href="css/jquery-ui.theme.css" media="all" />
+    <link type="text/css" rel="stylesheet" href="css/jquery-ui.structure.css" media="all" />
+    <link type="text/css" rel="stylesheet" href="css/jquery-notification.css" media="all" />
+    <link type="text/css" rel="stylesheet" href="css/styles.css" media="all" />
+
+
+    <script type="text/javascript" src="js/main.js"></script>
+    <script type="text/javascript" src="js/serial.js"></script>
+    <script type="text/javascript" src="js/github.js"></script>
+    <script type="text/javascript" src="js/semver.js"></script>
+    <script type="text/javascript" src="js/protocol/kiss_pt.js"></script>
+    <script type="text/javascript" src="js/protocol/bf_pt.js"></script>
+    <script type="text/javascript" src="js/lib/jquery.js"></script>
+    <script type="text/javascript" src="js/lib/jquery-ui.js"></script>
+    <script type="text/javascript" src="js/lib/jquery-notification.js"></script>
+
+</head>
+
+<body>
+    <script>
+        var gui = require('nw.gui');
+        var win = gui.Window.get();
+        win.on('new-win-policy', function (frame, url, policy) {
+            gui.Shell.openExternal(url);
+            policy.ignore();
+        });
+    </script>
+    <div id="header">
+        <img src="images/logo_50px.png" />
+        <h1>Configurator</h1>
+    </div>
+    <div class="ui-notification-container"></div>
+    <div class="flex-container">
+        <div id="menu"></div>
+        <div id="con_area">
+
+            <select id="con_type">
+            </select>
+            <select id="con_port" title="Port"></select>
+            <button id="con_button" class="ui-button ui-widget ui-corner-all">Connect</button>
+
+        </div>
+    </div>
+
+    <div id="dialog" title="Warning"></div>
+    <div id="content">
+        <div id="toolbar"></div>
+        <div id="progressbar">
+            <div class="progress-label"></div>
+        </div>
+
+        <div id="overview"></div>
+    </div>
+</body>
+
+</html>

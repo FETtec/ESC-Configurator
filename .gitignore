@@ -1,0 +1,16 @@
+apps/
+cache/
+debug/
+dist/
+nbproject/
+node_modules/
+release/
+tmp/
+.vscode/
+.settings/
+
+.DS_store
+.idea
+.project
+.editorconfig
+*.log
