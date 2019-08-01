@@ -2429,10 +2429,10 @@ function saveSettingsOfId(ID) {
     if (ESCs[ID].ESC_settings[99].changed) {
         var ID_is_free = 1;
         for (i = 0; i < read_ESC_ids.length; i++) {
-            if (newSettingsValues.ID == read_ESC_ids[i]) ID_is_free = 0;
+            if (newSettingsValues[99] == read_ESC_ids[i]) ID_is_free = 0;
         }
         if (ID_is_free == 0) {
-            $("#dialog").text("the ID:" + newSettingsValues.ID + " is already in use, please choose another one.");
+            $("#dialog").text("ESC ID:" + newSettingsValues[99] + " is already in use, please choose another one.");
             $("#dialog").dialog({
                 modal: true,
                 buttons: {
