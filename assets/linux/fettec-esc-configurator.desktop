@@ -2,7 +2,7 @@
 Name=FETtec ESC Configurator
 Comment=Configuration tool for FETtec ESC
 Exec=/opt/fettec-esc-config/fettec-esc-config/fettec-esc-config
-Icon=/opt/fettec-esc-config/fettec-esc-config/icon/icon_128.png
+Icon=/opt/fettec-esc-config/fettec-esc-config/icon/fettec-256x256.png
 Terminal=false
 Type=Application
 Categories=Utility

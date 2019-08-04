@@ -4,7 +4,7 @@
     "description": "Configuration tool for FETtec ESC",
     "offline_enabled": true,
     "author": "FETtec",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "manifest_version": 2,
     "minimum_chrome_version": "36",
     "permissions": [
@@ -17,8 +17,7 @@
         "https://*.s3.amazonaws.com/"
     ],
     "icons": {
-        "16": "src/images/icon_16.png",
-        "128": "src/images/icon_128.png"
+        "144": "src/images/fettec-256x256.png"
     },
     "app": {
         "background": {
