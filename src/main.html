@@ -20,17 +20,13 @@
     <script type="text/javascript" src="js/lib/jquery-ui.js"></script>
     <script type="text/javascript" src="js/lib/jquery-notification.js"></script>
 
+    <script type="text/javascript" src="js/external.js"></script>
 </head>
 
 <body>
-    <script>
-        var gui = require('nw.gui');
-        var win = gui.Window.get();
-        win.on('new-win-policy', function (frame, url, policy) {
-            gui.Shell.openExternal(url);
-            policy.ignore();
-        });
-    </script>
+
+
+
     <div id="header">
         <img src="images/logo_50px.png" />
         <h1>Configurator</h1>

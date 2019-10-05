@@ -3,6 +3,9 @@ html, body {
     padding: 0;
 }
 
+#content {
+    padding: 10px;
+}
 
 .ui-notification-container {
     width: 300px;
@@ -10,7 +13,6 @@ html, body {
     left: 10px;
     bottom: 10px;
 }
-
 
 .ui-notification-bar {
     position: relative;
@@ -30,9 +32,6 @@ html, body {
     -webkit-border-radius: 0;
 }
 
-
-
-
 .ui-notification {
     padding: 5px 10px;
     -o-box-shadow: 2px 2px 2px #ccc;
@@ -42,7 +41,7 @@ html, body {
 }
 
 .ui-notification .ui-notification-content {
-    font-size: 12px;    
+    font-size: 12px;
 }
 
 .ui-notification .ui-notification-content h4 {
@@ -52,37 +51,17 @@ html, body {
 .ui-notification .ui-notification-content p {
     font-size: 12px;
 }
-.ui-notification .ui-notification-content a {
-    color: #6180A3;
-    font-weight: bold;
-
-}
-
-.ui-notification .ui-notification-content span {
-    padding: 4px;
-    display: inline;
-    border-radius: 2px;
-    border: 0;
-    margin: 0 2px;
-    background: red;
-    font-size: 14px;    
-    line-height: 16px;
-    color: white;
-    box-sizing: content-box;
-
-
-}
 
 .ui-notification .ui-notification-close {
     display: inline-block;
+    float: right;
     width: 19px;
     padding: 1px;
     height: 18px;
     margin: -2px -2px 0 2px;
 }
 
-.ui-notification .ui-notification-close:hover,
-.ui-notification .ui-notification-close:focus {
+.ui-notification .ui-notification-close:hover, .ui-notification .ui-notification-close:focus {
     padding: 0;
 }
 

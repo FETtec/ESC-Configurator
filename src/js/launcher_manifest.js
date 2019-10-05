@@ -11,7 +11,7 @@ chrome.app.runtime.onLaunched.addListener(function () {
     },
         function (createdWindow) {
             if (getChromeVersion() >= 54) {
-                createdWindow.icon = 'src/images/icon_128.png';
+                createdWindow.icon = 'images/android-chrome-144x144.png';
             }
         }
     );

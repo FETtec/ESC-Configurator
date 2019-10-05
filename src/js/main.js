@@ -92,6 +92,7 @@ function ESC() {
     this.ESC_select_Input = 0;
     this.selected = true;
     this.loadingBar = 0;
+    this.warning = false;
 
     this.settingsActive = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0];
     this.ThrottleStickDiv = 0;
@@ -300,8 +301,12 @@ onload = function () {
             $(".ui-notification-container").notification("create", {
                 title: updateHeader,
                 content: updateText,
-                duration: 10000
-            });
+            },
+                {
+                    /*    duration: 10000 */
+                    sticky: true
+                }
+            );
         }
     }, 1000);
 
@@ -327,9 +332,9 @@ onclose = function () {
 }
 
 //===================================================================================== port handling
-function checkPorts(ports) {
+function checkPorts(ports, force) {
     // check if not connected and if serial port count change
-    if (SerialConnection.connected == 0 && ports.length != SerialConnection.FoundPorts.length) {
+    if ((SerialConnection.connected == 0 && ports.length != SerialConnection.FoundPorts.length) || typeof (force) !== 'undefined') {
         SerialConnection.FoundPorts = ports;
         GenSerialDropdown(SerialConnection.FoundPorts);
     }
@@ -353,13 +358,18 @@ function UpdateSerialSection(status) {
 function GenSerialDropdown(ports) {
     $('#con_port').empty()
     for (var i in ports) {
-        $('#con_port').append($("<option/>", {
-            value: ports[i].path,
-            text: ports[i].path
-        }));
+        if (ports[i].path.toLowerCase().indexOf("/dev/cu.") === -1) // ignore cu. interfaces
+            $('#con_port').append($("<option/>", {
+                value: ports[i].path,
+                text: ports[i].path
+            }));
     }
+    // selecting last entry
+    $('#con_port').val($('#con_port option:last-child').val());
+
     $("#con_port").selectmenu();
     $('#con_port').selectmenu("refresh");
+
 }
 
 function Gen_Types_Dropdown(array) {
@@ -476,10 +486,6 @@ function onPortOpen(cInfo) {
                     Ok: function () {
                         $(this).dialog("close");
                         disconnect();
-                        $("#progressbar").hide();
-                        $('#overview').empty();
-                        $('#toolbar').empty();
-                        Gen_Menu_Buttons(-1, true);
                     }
                 }
             });
@@ -529,7 +535,11 @@ function disconnect() {
     FW_update.preparedPages = [];
     FW_update.pagesCount = 0;
 
-    GenSerialDropdown(SerialConnection.FoundPorts);
+    // recheck for port changes
+    chrome.serial.getDevices(function (ports) {
+        checkPorts(ports, true);
+    });
+
     interval_Speedup_Done = 0;
     clearInterval(loopInterval);
     loopInterval = setInterval(function () { Internal_Loop(); }, 50);
@@ -538,6 +548,11 @@ function disconnect() {
     SerialConnection.pass_through_fails = 0;
     SerialConnection.connected = false;
     UpdateSerialSection("disconnect");
+
+    // cleanup
+    $("#progressbar").hide();
+    $('#overview').empty();
+    $('#toolbar').empty();
     Gen_Menu_Buttons(-1, true);
 
 }
@@ -713,10 +728,6 @@ function Internal_Loop() {
                                         $(this).dialog("close");
                                         PT_status = 0;
                                         disconnect();
-                                        $("#progressbar").hide();
-                                        $('#overview').empty();
-                                        $('#toolbar').empty();
-                                        Gen_Menu_Buttons(-1, false);
                                     }
                                 }
                             });
@@ -763,10 +774,6 @@ function Internal_Loop() {
                             connection_attempts = 0;
                             // disconnect + cleanup
                             disconnect();
-                            $("#progressbar").hide();
-                            $('#overview').empty();
-                            $('#toolbar').empty();
-                            Gen_Menu_Buttons(-1, true);
                             noLoop = 0;
                         }
                     }
@@ -1028,12 +1035,14 @@ function ChangeDisplay(displayType) {
 
 
 //===================================================================================== ESC communication
-function toHex(value) {
-    hexString = value.toString(16);
-    if (hexString.length % 2) {
-        hexString = '0' + hexString;
+function toHex(val) {
+    if (typeof val !== "undefined") {
+        var hexString = val.toString(16);
+        if (hexString.length % 2) {
+            hexString = '0' + hexString;
+        }
+        return hexString.toUpperCase();
     }
-    return hexString.toUpperCase();
 }
 
 function update_crc8(crc, crc_seed) {
@@ -1309,8 +1318,6 @@ function displayESCs(ParentElement) {
 
             setting_Checkbox_label.appendChild(checkmark_div);
 
-
-
             ESC_selectDiv.appendChild(ESCs[i].ESC_select_Input);
             ESC_selectDiv.appendChild(setting_Checkbox_label);
 
@@ -1379,7 +1386,6 @@ function displayESCs(ParentElement) {
 
                         ESC_setting.appendChild(setting_Checkbox_label);
                     } else {
-                        //ESC_setting.className += " setting_container_active";
                         settingNumber = document.createElement('input');
                         settingNumber.type = "number";
                         settingNumber.style.width = ((ESCs[i].ESC_settings[y].max.toString(10).length * 12) + 5) + "px";
@@ -1577,11 +1583,11 @@ function initFWUpdater() {
                     }));
                     $.each(data, function (index, release) {
                         if (DEBUG) console.log("Processing releases: " + release.name);
-                        var release_name = ESC_types.find(x => x.id === ESCs[scanID].type).name + " " + release.tag_name;
+                        var release_name = ESC_types.find(x => x.id === ESCs[ESCs.length - 1].type).name + " " + release.tag_name;
                         if (release.prerelease == true)
                             release_name += " (BETA)"
                         $.each(release.assets, function (index2, asset) {
-                            if (asset.name.endsWith(".hex") && asset.name.startsWith(ESCs[scanID].CompatibleFW_filename)) {
+                            if (asset.name.endsWith(".hex")) {
                                 if (DEBUG) console.log("Processing firmware: " + asset.name);
                                 $('#remoteFWSelect').append($("<option/>", {
                                     value: asset.browser_download_url,
@@ -1657,7 +1663,7 @@ var act_ESC_sent_Page = 0;
 var afterFlashedDisplay = 0;
 
 function FlashProcessLoop() {
-    while ((!(FlashESC_ID in ESCs) || !ESCs[FlashESC_ID].selected || FW_update.loadedFileName.indexOf(ESCs[FlashESC_ID].CompatibleFW_filename) == -1) && FlashESC_ID < 25) FlashESC_ID++;
+    while ((!(FlashESC_ID in ESCs) || !ESCs[FlashESC_ID].selected) && FlashESC_ID < 25) FlashESC_ID++;
     if (FlashESC_ID != 25) {
         if (waitForResponseID == 0) {
             if (act_ESC_flash_Stat < 2) {
@@ -1676,7 +1682,7 @@ function FlashProcessLoop() {
                     if (DEBUG) console.log("check if ESC with ID: " + FlashESC_ID + " is in bootloader mode");
                 }
             } else if (act_ESC_flash_Stat == 2) {
-                send_ESC_package(FlashESC_ID, 0, [OW_BL_PAGES_TO_FLASH, FW_update.pagesCount]);
+                send_ESC_package(FlashESC_ID, 0, [OW_BL_PAGES_TO_FLASH, (FW_update.pagesCount & 0xFF), (FW_update.pagesCount >> 8)]);
                 act_ESC_sent_Page = FW_update.pagesCount;
                 waitForResponseID = FlashESC_ID;
                 waitForResponseType = 0;
@@ -1754,6 +1760,29 @@ function FlashProcessLoop() {
                             FlashProcessLoop();
                         } else {
                             if (DEBUG) console.log("page could not be written. error: " + responsePackage[5]);
+                            // unable to write block 255 (require BL Update)
+                            if (act_ESC_sent_Page == 255 && responsePackage[5] == 2) {
+                                if (DEBUG) console.log("Bootloader not supporting more than 255 pages ");
+                                $("#dialog").text("This ESC doesn't have the latest Bootloader and can't support firmware > 255 pages. Please update using the provided Bootloader update firmware.");
+                                FlashESC_ID = 0;
+                                FW_update.FlashProcessActive = 0;
+                                $("#dialog").dialog({
+                                    modal: true,
+                                    buttons: {
+                                        Ok: function () {
+                                            $(this).dialog("close");
+
+                                            FW_update.fileUploadInput.disabled = false;
+                                            FW_update.startUpdateInput.disabled = false;
+                                            change_ESCs_status(0, 1, 1);
+                                            $('#toolbar').empty();
+                                            initFWUpdater(); //lets reset the
+                                        }
+                                    }
+                                });
+
+                            }
+
                             timeoutESC_IDs[FlashESC_ID] = 0;
                             act_ESC_flash_Stat = 2;
                             waitForResponseID = 0;
@@ -1967,6 +1996,7 @@ function sentFastThrottleSignal() {
 var wait_for_TLM = 0;
 var wait_for_TLM_loops = 0;
 var display_TLM = 0;
+var start_check = 0;
 
 function ToolProcessLoop() {
     var blProblem = 0;
@@ -1994,8 +2024,55 @@ function ToolProcessLoop() {
                 wait_for_TLM_loops = 0;
             }
         }
+        if (start_check > 20) {
+            // check for ESC error but wait some time
+            for (var i in ESCs) {
+                if (ESCs[i].warning == false) {
+
+                    if (ESCs[i].TLMValues[4] == 7357) {
+                        ESCs[i].warning = true;
+                        var message = "";
+                        switch (ESCs[i].TLMValues[2]) {
+                            case 1000:
+                                message = "Failure on LOW side FETs/gatedriver detected."
+                                break;
+                            case 2000:
+                                message = "No motor detected or failure on HIGH side FETs/gatedriver"
+                                break;
+                            case 3000:
+                                console.log(ESC_types.find(x => x.id === ESCs[i].TLMValues[5]).name)
+                                console.log(ESC_types.find(x => x.id === ESCs[i].TLMValues[6]).name)
+                                var detected_esc = (ESC_types.find(x => x.id === ESCs[i].TLMValues[5]).name)
+                                var expected_esc = (ESC_types.find(x => x.id === ESCs[i].TLMValues[6]).name)
+                                message = "Firmware mismatch to hardware.<br><br>Expected HW: " + expected_esc + "<br>Detected HW: " + detected_esc;
+                                break;
+
+                            default:
+                                message = "An unexpected error occurred. (" + ESCs[i].TLMValues[2] + ")";
+                                break;
+
+                        }
+
+                        $(".ui-notification-container").notification("create", {
+                            title: "Problem on ESC id " + i + " detected",
+                            content: message,
+                        },
+                            {
+                                /*    duration: 10000 */
+                                sticky: true
+                            }
+                        );
+
+                    }
+                }
+            }
+        }
+
         displayTLMValues(display_TLM++);
-        if (display_TLM == 8) display_TLM = 0;
+        if (display_TLM == 8) {
+            display_TLM = 0;
+        }
+        start_check++;
         if (wait_for_TLM_loops == 0) {
             if (++lastRequestedTLM > 7) lastRequestedTLM = 0;
             sentFastThrottleSignal();
@@ -2291,7 +2368,7 @@ function ConfigLoop() {
                 ESC_ID_Index++;
             }
         }
-        /////////////////////////// save settings
+        // save settings
     } else if (saveNewSettingsToId) {
         if (waitForResponseID == 0) {
             while (ESC_Setting_Index < read_ESC_settings.length && ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].changed == false) ESC_Setting_Index++;
