@@ -1,6 +1,6 @@
 {
   "name": "fettec-esc-config",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Configuration tool for FETtec ESC",
   "main": "src/js/launcher_nw.js",
   "single-instance": true,
