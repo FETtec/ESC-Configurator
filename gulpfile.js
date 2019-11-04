@@ -7,13 +7,13 @@ const pkg = require("./package.json");
 const fs = require("fs");
 const path = require("path");
 const exec = require("child_process").exec;
+const execSync = require("child_process").execSync;
 
 const zip = require("gulp-zip");
 const del = require("del");
 const NwBuilder = require("nw-builder");
 const makensis = require("makensis");
 
-const deb = require("gulp-debian");
 const buildRpm = require("rpm-builder");
 const commandExistsSync = require("command-exists").sync;
 
@@ -34,7 +34,10 @@ var nwBuilderOptions = {
   version: "0.36.4",
   files: "./dist/**/*",
   macIcns: "./src/images/fettec-256x256.icns",
-  macPlist: { CFBundleDisplayName: "FETtec ESC Configurator" },
+  macPlist: {
+    CFBundleDisplayName: "FETtec ESC Configurator",
+    CFBundleIdentifier: "com.fettec.configurator"
+  },
   //    winIco: './src/images/fettec-256x256.ico',
   zip: false
 };
@@ -529,6 +532,19 @@ function getLinuxPackageArch(type, arch) {
   return packArch;
 }
 // Create distribution package for macOS platform
+function osx64_sign(done) {
+  if (commandExistsSync("tmp/codesign.sh")) {
+    console.log("Codesign activity...");
+    execSync("tmp/codesign.sh", function(error, stdOut, stdErr) {
+    });
+  } else {
+    console.log("No valid script for codesign");
+  }
+  release_zip("osx64",done);
+  release_osx64(done);
+  return done();
+}
+
 function release_osx64(done) {
   // Create DMG
   createDirIfNotExists(RELEASE_DIR);
@@ -550,8 +566,8 @@ function release_osx64(done) {
       format: "UDZO",
       window: {
         size: {
-            width: 638,
-            height: 479
+          width: 638,
+          height: 479
         }
       }
     }
@@ -564,7 +580,7 @@ function release_osx64(done) {
   ee.on("error", function(err) {
     console.log(err);
   });
-  
+
   return done();
 }
 
@@ -614,14 +630,9 @@ function listReleaseTasks(done) {
   }
 
   if (platforms.indexOf("osx64") !== -1) {
-
-    releaseTasks.push(function release_osx64_dmg(done) {
-      return release_osx64(done);
+    releaseTasks.push(function release_osx64_all(done) {
+      return osx64_sign(done);
     });
-    
-    releaseTasks.push(function release_osx64_zip() {
-      return release_zip("osx64");
-    });   
   }
 
   if (platforms.indexOf("win32") !== -1) {
