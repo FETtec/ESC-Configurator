@@ -213,8 +213,6 @@ function getReleaseFilename(platform, ext) {
     "_" +
     pkg.version +
     "-" +
-    git.branch() +
-    "_" +
     git.short() +
     "-" +
     platform +
