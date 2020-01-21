@@ -580,7 +580,6 @@ function release_osx64(done) {
   ee.on("error", function(err) {
     console.log(err);
   });
-
   return done();
 }
 
