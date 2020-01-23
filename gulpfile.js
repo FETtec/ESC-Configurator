@@ -213,8 +213,6 @@ function getReleaseFilename(platform, ext) {
     "_" +
     pkg.version +
     "-" +
-    git.branch() +
-    "_" +
     git.short() +
     "-" +
     platform +
@@ -580,7 +578,6 @@ function release_osx64(done) {
   ee.on("error", function(err) {
     console.log(err);
   });
-
   return done();
 }
 

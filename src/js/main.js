@@ -72,10 +72,13 @@ const ESC_types = [
     { id: 1, name: "FETtec ESC 35A", filename: 'FETTEC_35A_ESC_G0_' },
     { id: 2, name: "FETtec ESC 50A", filename: 'FETTEC_50A_ESC_G0_' },
     { id: 3, name: "FETtec ESC 7", filename: 'FETTEC_7A_ESC_G0_' },
-    { id: 4, name: "undefined", filename: '' },
+    { id: 4, name: "G4_ESC", filename: '' },
     { id: 5, name: "ESCS32K", filename: '' },
     { id: 6, name: "FETtec ESC 45A", filename: 'FETTEC_45A_ESC_G0_' },
-    { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_' }
+    { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_' },
+    { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_' },
+    { id: 128, name: "G4 USB Bootloader", filename: '' },
+    { id: 129, name: "OSD", filename: '' }
 ];
 
 // helper to prevent single arrays in all settings
@@ -126,7 +129,8 @@ function ESC() {
 const serial_options = [
     { id: 0, name: 'KISS FC Passthrough', connect_bitrate: 115200, disabled: false },
     { id: 1, name: 'Betaflight Passthrough', connect_bitrate: 115200, disabled: false },
-    { id: 2, name: 'USB UART', connect_bitrate: 2000000, disabled: false }
+    { id: 2, name: 'USB UART', connect_bitrate: 2000000, disabled: false },
+    { id: 3, name: 'USB', connect_bitrate: 2000000, disabled: true }
 ];
 
 const menu_options = [
@@ -216,6 +220,9 @@ var ESC_package = [];
 var KISS_PT = 0;
 var BF_PT = 1;
 var USB_UART = 2;
+var VCP = 3;
+
+var is_USB_only_bootloader = 0
 
 var buttonsDisabled = 0;
 var ConnectionType = KISS_PT;
@@ -263,6 +270,7 @@ onload = function () {
         if (DataIn) {
             if (DataIn.data.byteLength > 0) {
                 var data = new Uint8Array(DataIn.data);
+                if (DEBUG) console.log(data);
                 for (var i = 0; i < data.length; i++) {
                     if (OneWire) {
                         if (ignoreOwnBytesIndex > 0) {
@@ -450,6 +458,11 @@ function OpenPort(port) {
                 PT_status = 0;
                 OneWire = 1;
                 break;
+            case VCP:
+                use_bit_rate = 2000000;
+                PT_status = 0;
+                OneWire = 0;
+                break;
         }
     } else {
         switch (ConnectionType) {
@@ -462,10 +475,15 @@ function OpenPort(port) {
             case USB_UART:
                 use_bit_rate = 2000000;
                 break;
+            case VCP:
+                use_bit_rate = 2000000;
+                break;
         }
     }
     chrome.serial.connect(port, { bitrate: use_bit_rate, bufferSize: 200000, persistent: true }, onPortOpen);
 }
+
+var reconnectOnTxDone = 0;
 
 function onPortOpen(cInfo) {
     if (typeof cInfo !== 'undefined') {
@@ -476,7 +494,8 @@ function onPortOpen(cInfo) {
             waitLoops = 10;
             if (DEBUG) console.log("Entered BF CLI");
         }
-        $("#progressbar").show();
+        if (reconnectOnTxDone == 0) $("#progressbar").show();
+        else reconnectOnTxDone = 0;
     } else {
         if (++SerialConnection.connectionErr >= 10) {
             $("#dialog").text("Serial connection error. Please reconnect the USB port and try again.");
@@ -600,10 +619,51 @@ function TX() {
     chrome.serial.send(SerialConnection.connection.connectionId, str2ab(sendBuf), TX_done);
 }
 
+var oldPortPath;
+function ReconnectOnSend(reconnectState) {
+    if (ConnectionType == VCP) {
+        if (reconnectState == 0) { // wait for data to be sent
+            if (DEBUG) console.log("reconnect, wait for data to be sent");
+            reconnectOnTxDone = 1;
+        } else if (reconnectState == 2) { // close com port
+            if (DEBUG) console.log("reconnect, closing old port");
+            oldPortPath = SerialConnection.Port;
+            if (typeof SerialConnection.connection.connectionId !== 'undefined')
+                chrome.serial.disconnect(SerialConnection.connection.connectionId, function () { ReconnectOnSend(3); });
+            reconnectOnTxDone = 3;
+        } else if (reconnectState == 3) { // port Closed, reconnect
+            chrome.serial.getDevices(function (ports) {
+                ReconnectToOldPort(ports);
+            });
+        }
+    }
+}
+
+function ReconnectToOldPort(ports) {
+    if (DEBUG) console.log("reconnect, search new port");
+    var foundPort;
+    if (DEBUG) console.log("reconnect, oldPortPath = " + oldPortPath);
+    for (var i in ports) {
+        if (ports[i].path == oldPortPath) {
+            if (DEBUG) console.log("reconnect, connect to new port");
+            if (DEBUG) console.log("reconnect, foundPortPath = " + ports[i].path);
+            chrome.serial.connect(ports[i].path, { bitrate: use_bit_rate, bufferSize: 200000, persistent: true }, onPortOpen);
+            return;
+        }
+    }
+    if (DEBUG) console.log("reconnect, port not found");
+    ReconnectOnSend(3);
+}
+
 function TX_done() {
     if (SerialConnection.TX_tail != SerialConnection.TX_head) TX();
     else {
         TX_busy = 0;
+        if (reconnectOnTxDone == 1) {
+            reconnectOnTxDone = 2;
+            if (DEBUG) console.log("reconnect, data sent...");
+            setTimeout(function () { ReconnectOnSend(reconnectOnTxDone); }, 500);
+        }
     }
 }
 
@@ -680,6 +740,9 @@ function Internal_Loop() {
                         break
                     case USB_UART:
                         if (DEBUG) console.log("UART connected");
+                        break;
+                    case VCP:
+                        if (DEBUG) console.log("VCP connected");
                         break;
                 }
                 do_not_Update_Progress_Bar = 0;
@@ -862,6 +925,8 @@ function check_ESCs_In_BL() {
         waitLoops--;
         return;
     }
+    if (reconnectOnTxDone != 0 && ConnectionType == VCP) return;
+
     if (waitForResponseID == 0) {
         while ((!(SwitchESCsFW_ID in ESCs)) && SwitchESCsFW_ID < 25) SwitchESCsFW_ID++;
         if (SwitchESCsFW_ID == 25) {
@@ -911,6 +976,12 @@ function check_ESCs_In_BL() {
                     if (switchProblem == 0) {
                         if (DEBUG) console.log("switching ESC with id: " + SwitchESCsFW_ID);
                         send_ESC_package(SwitchESCsFW_ID, 0, [SwitchCommand]);
+                        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        if (ConnectionType == VCP) {
+                            if (DEBUG) console.log("starting reconnect procedure 1");
+                            ReconnectOnSend(0);
+                        }
+                        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                         switchProblem++;
                         waitLoops = 20;
                     } else if (switchProblem < 20) {
@@ -929,7 +1000,7 @@ function check_ESCs_In_BL() {
                 ESCs[SwitchESCsFW_ID].version = (responsePackage[5] / 10);
                 ESCs[SwitchESCsFW_ID].subversion = (responsePackage[6] / 100);
 
-                if (DEBUG) console.log("ESC with id: " + SwitchESCsFW_ID + " software version is: " + ESCs[scanID].version + "." + ESCs[scanID].subversion);
+                if (DEBUG) console.log("ESC with id: " + SwitchESCsFW_ID + " software version is: " + ESCs[SwitchESCsFW_ID].version + "." + ESCs[SwitchESCsFW_ID].subversion);
                 SwitchStatus = 0;
                 SwitchESCsFW_ID++;
             }
@@ -956,6 +1027,18 @@ function refresh_displayed_version() {
 
 function ChangeDisplay(displayType) {
     if (menuEnabled == 0 || scanDone == 0) return;
+    if (is_USB_only_bootloader == 1 && displayType != 0) {
+        $("#dialog").text("USB Bootloaders are for update FW only");
+        $("#dialog").dialog({
+            modal: true,
+            buttons: {
+                Ok: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+        return;
+    }
     if ((scanDone == 0 && displayType != 0) || (ESCs.length == 0 && displayType == 0) && displayType != 99) {
         $("#dialog").text("Select a COM port first, to scan for available ESC's !");
         $("#dialog").dialog({
@@ -1167,6 +1250,10 @@ function ScanForESCs() {
                 } else if (scanStep == 1) {
 
                     ESCs[scanID].type = responsePackage[5];
+                    if (ESCs[scanID].type > 127) {
+                        is_USB_only_bootloader = 1;
+                        if (DEBUG) console.log("Board type is USB bootloader only!");
+                    }
                     ESCs[scanID].CompatibleFW_filename = ESC_types.find(x => x.id === ESCs[scanID].type).filename;
 
                     if (DEBUG) console.log("ESC with id: " + scanID + " is from type: " + ESCs[scanID].type);
@@ -1189,7 +1276,7 @@ function ScanForESCs() {
                         console.log(ESCs[scanID].SN);
                     }
                     scanStep = 0;
-                    if (++scanID == 25) {
+                    if (++scanID == 25 || is_USB_only_bootloader == 1) {
                         $("#progressbar").hide();
                         scanDone = 1;
                         scanID = 1;
@@ -1551,6 +1638,7 @@ function initFWUpdater() {
     FW_update.fileUploadInput.id = "file_upload";
     FW_update.fileUploadInput.addEventListener('change', function (evt) {
         var fileLoaded = this.value.split('\\');
+        FW_update.hexString = null;
         FW_update.loadedFileName = fileLoaded[fileLoaded.length - 1];
         if (DEBUG) console.log('reading file: ' + FW_update.loadedFileName);
         var reader = new FileReader();
@@ -1790,11 +1878,11 @@ function FlashProcessLoop() {
                         }
                     }
                 }
-            } else if (++timeoutESC_IDs[FlashESC_ID] == 25 || timeoutESC_IDs[FlashESC_ID] == 50 || timeoutESC_IDs[FlashESC_ID] == 100) {
+            } else if (++timeoutESC_IDs[FlashESC_ID] == 100 || timeoutESC_IDs[FlashESC_ID] == 200 || timeoutESC_IDs[FlashESC_ID] == 300) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
 
-            } else if (timeoutESC_IDs[FlashESC_ID] > 450) {
+            } else if (timeoutESC_IDs[FlashESC_ID] > 550) {
                 send_ESC_package(FlashESC_ID, 0xFFFF, [FlashESC_ID + 10, FlashESC_ID + 20]);
                 timeoutESC_IDs[FlashESC_ID] = 0;
                 act_ESC_flash_Stat = 2;
@@ -1805,11 +1893,24 @@ function FlashProcessLoop() {
         }
     } else {
         if (afterFlashedDisplay == 0) {
-            change_ESCs_status(1);
+            if (is_USB_only_bootloader == 0) change_ESCs_status(1);
+            else {
+                $("#dialog").text("Firmware update done! Please power cycle board.");
+                $("#dialog").dialog({
+                    modal: true,
+                    buttons: {
+                        Ok: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+                enableButtons();
+                ChangeDisplay(0);
+            }
             afterFlashedDisplay = 1;
         } else if (afterFlashedDisplay < 50) afterFlashedDisplay++;
         else if (afterFlashedDisplay == 50) {
-            change_ESCs_status(0);
+            if (is_USB_only_bootloader == 0) change_ESCs_status(0);
             afterFlashedDisplay = 51;
         } else if (afterFlashedDisplay == 51) {
             if (DEBUG) console.log('flash process done!');
@@ -1817,7 +1918,7 @@ function FlashProcessLoop() {
             FW_update.FlashProcessActive = 0;
             FW_update.fileUploadInput.disabled = false;
             FW_update.startUpdateInput.disabled = false;
-            change_ESCs_status(0, 1, 1);
+            if (is_USB_only_bootloader == 0) change_ESCs_status(0, 1, 1);
             $('#toolbar').empty();
             initFWUpdater(); //lets reset the
         }
