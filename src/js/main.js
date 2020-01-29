@@ -1673,9 +1673,11 @@ function initFWUpdater() {
                         if (DEBUG) console.log("Processing releases: " + release.name);
                         var release_name = ESC_types.find(x => x.id === ESCs[ESCs.length - 1].type).name + " " + release.tag_name;
                         if (release.prerelease == true)
-                            release_name += " (BETA)"
+                            release_name += " (BETA)" 
                         $.each(release.assets, function (index2, asset) {
                             if (asset.name.endsWith(".hex") && asset.name.startsWith(ESC_types.find(x => x.id === ESCs[ESCs.length - 1].type).filename)) {
+                                if (asset.name.includes("_BLUPDATE_"))
+                                    release_name += " BOOTLOADER"
                                 if (DEBUG) console.log("Processing firmware: " + asset.name);
                                 $('#remoteFWSelect').append($("<option/>", {
                                     value: asset.browser_download_url,
