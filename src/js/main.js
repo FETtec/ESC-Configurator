@@ -115,7 +115,7 @@ function ESC() {
         40: { command: OW_GET_ROTATION_DIRECTION, name: "Reverse rotation direction", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
         41: { command: OW_GET_USE_SIN_START, name: "Slow start", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
         42: { command: OW_GET_3D_MODE, name: "3D Mode", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, escTypes: onAllESCs },
-        43: { command: OW_GET_RESERVED, name: "", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: [] },
+        43: { command: OW_GET_LINTHR, name: "Crisp response", min: 0, max: 1, active: 0, changed: false, eever: 16 },
         44: { command: OW_GET_PWM_MIN, name: "PWM Min. Signal", min: 1000, max: 1400, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
         45: { command: OW_GET_PWM_MAX, name: "PWM Max. Signal", min: 1600, max: 2000, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
         46: { command: OW_GET_ESC_BEEP, name: "ESC beeps", min: 0, max: 1, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
