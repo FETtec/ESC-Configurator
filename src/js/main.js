@@ -50,8 +50,8 @@ const OW_SET_3D_MODE = 33;
 const OW_GET_ID = 34;
 const OW_SET_ID = 35;
 
-const OW_GET_RESERVED = 36;
-const OW_SET_RESERVED = 37;
+const OW_GET_LINTHR = 36;
+const OW_SET_LINTHR = 37;
 
 const OW_GET_PWM_MIN = 39;
 const OW_SET_PWM_MIN = 40;
