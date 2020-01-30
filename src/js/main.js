@@ -2506,6 +2506,8 @@ function ConfigLoop() {
                     send_ESC_package(saveNewSettingsToId, 0, [(ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].setCommand), newSettingsValues[read_ESC_settings[ESC_Setting_Index]]]);
                 } else if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 2) {
                     send_ESC_package(saveNewSettingsToId, 0, [(ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].setCommand), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 8), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] & 0xFF)]);
+                } else if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 4) {
+                    send_ESC_package(saveNewSettingsToId, 0, [(ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].setCommand), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 24), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 16) & 0xFF,(newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 8) & 0xFF, (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] & 0xFF)]);
                 }
                 if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name == "ESC ID") {
                     waitForResponseID = newSettingsValues[read_ESC_settings[ESC_Setting_Index]];
@@ -2526,6 +2528,9 @@ function ConfigLoop() {
                         responsePayload = responsePackage[5];
                     } else if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 2) {
                         responsePayload = (responsePackage[5] << 8) | responsePackage[6];
+                    }
+                    else if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 4) {
+                        responsePayload = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
                     }
                     if (responsePayload == ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active) {
                         if (DEBUG) console.log("GET response correct");
