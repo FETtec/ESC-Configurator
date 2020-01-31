@@ -1742,7 +1742,7 @@ function PrepareUpdate() {
                     StartFlashProcess();
                 }))
             ;
-        $("#FW_flash").append().html("Flash selected ESC's");
+        $("#FW_flash").append().html("Flash selected!");
     }
 }
 var FlashESC_ID = 0;
@@ -2597,7 +2597,7 @@ function checkChangedSettings(ID) {
                     document.getElementById(ESCs[ID].ESC_settings[y].getCommand + "_setting_id_" + ID).parentElement.className = "setting_container setting_container_inactive";
                 }
             } else { // value
-                newSettingsValues[y] = parseInt(document.getElementById(ESCs[ID].ESC_settings[y].command + "_setting_id_" + ID).value);
+                newSettingsValues[y] = parseInt(document.getElementById(ESCs[ID].ESC_settings[y].getCommand + "_setting_id_" + ID).value);
                 if (newSettingsValues[y] > ESCs[ID].ESC_settings[y].max) newSettingsValues[y] = ESCs[ID].ESC_settings[y].max;
                 if (newSettingsValues[y] < ESCs[ID].ESC_settings[y].min) newSettingsValues[y] = ESCs[ID].ESC_settings[y].min;
                 document.getElementById(ESCs[ID].ESC_settings[y].getCommand + "_setting_id_" + ID).value = newSettingsValues[y];
