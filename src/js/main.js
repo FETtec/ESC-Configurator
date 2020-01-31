@@ -1441,27 +1441,21 @@ function displayESCs(ParentElement) {
             ESC_div.appendChild(ESC_info_div);
 
             for (var y in ESCs[i].ESC_settings) {
-                // BEGIN - section to decide what type of field
+
+                // Type decision
                 switch (ESCs[i].ESC_settings[y].type) {
                     case "checkbox":
-                    case "slider":
-                    case "value":
-                    case "readonly":
-                    default:
-                }
-                if ((ESCs[i].ESC_settings[y].min != 0 || ESCs[i].ESC_settings[y].max != 0) && ESCs[i].ESC_settings[y].escTypes.indexOf(ESCs[i].type) != -1) {// hide non adjustable settings or settings that are not supported by the ESC
-                    var ESC_setting = document.createElement('div');
-                    ESC_setting.className = "setting_container";
-                    if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
+                        var ESC_setting = document.createElement('div');
+                        ESC_setting.className = "setting_container";
+                        if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
 
-                    ESC_setting_text = document.createElement('div')
-                    ESC_setting_text.className = "setting_text";
+                        ESC_setting_text = document.createElement('div')
+                        ESC_setting_text.className = "setting_text";
 
-                    ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
+                        ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
 
-                    ESC_setting.appendChild(ESC_setting_text);
-                    ESC_info_div.appendChild(ESC_setting);
-                    if (ESCs[i].ESC_settings[y].min == 0 && ESCs[i].ESC_settings[y].max == 1) {// just on or off
+                        ESC_setting.appendChild(ESC_setting_text);
+                        ESC_info_div.appendChild(ESC_setting);
                         settingCheckbox = document.createElement('input');
                         settingCheckbox.type = "checkbox";
                         settingCheckbox.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
@@ -1493,7 +1487,21 @@ function displayESCs(ParentElement) {
                         setting_Checkbox_label.appendChild(checkmark_div);
 
                         ESC_setting.appendChild(setting_Checkbox_label);
-                    } else {
+                        break
+                    case "colorpick":
+                    case "slider":
+                    case "value":
+                        var ESC_setting = document.createElement('div');
+                        ESC_setting.className = "setting_container";
+                        if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
+
+                        ESC_setting_text = document.createElement('div')
+                        ESC_setting_text.className = "setting_text";
+
+                        ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
+
+                        ESC_setting.appendChild(ESC_setting_text);
+                        ESC_info_div.appendChild(ESC_setting);
                         settingNumber = document.createElement('input');
                         settingNumber.type = "number";
                         settingNumber.style.width = ((ESCs[i].ESC_settings[y].max.toString(10).length * 12) + 5) + "px";
@@ -1504,9 +1512,10 @@ function displayESCs(ParentElement) {
                             SettingsChanged(this.id);
                         }
                         ESC_setting.appendChild(settingNumber);
-                    }
+                        break
+                    case "readonly":
+                    default:
                 }
-                // END - section to decide what type of field
             }
 
             ESC_save_Input = document.createElement('input');
