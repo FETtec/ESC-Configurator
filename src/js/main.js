@@ -1441,6 +1441,14 @@ function displayESCs(ParentElement) {
             ESC_div.appendChild(ESC_info_div);
 
             for (var y in ESCs[i].ESC_settings) {
+                // BEGIN - section to decide what type of field
+                switch (ESCs[i].ESC_settings[y].type) {
+                    case "checkbox":
+                    case "slider":
+                    case "value":
+                    case "readonly":
+                    default:
+                }
                 if ((ESCs[i].ESC_settings[y].min != 0 || ESCs[i].ESC_settings[y].max != 0) && ESCs[i].ESC_settings[y].escTypes.indexOf(ESCs[i].type) != -1) {// hide non adjustable settings or settings that are not supported by the ESC
                     var ESC_setting = document.createElement('div');
                     ESC_setting.className = "setting_container";
@@ -1498,6 +1506,7 @@ function displayESCs(ParentElement) {
                         ESC_setting.appendChild(settingNumber);
                     }
                 }
+                // END - section to decide what type of field
             }
 
             ESC_save_Input = document.createElement('input');
