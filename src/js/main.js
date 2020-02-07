@@ -125,19 +125,19 @@ function ESC() {
     this.ESC_settings = {
         0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "readonly", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, escTypes: onAllESCs }, // must always be 0
 
-        40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse rotation direction", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
-        41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
-        42: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, escTypes: onAllESCs },
-        43: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
-        44: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min. Signal", type: "slider", min: 1000, max: 1400, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
-        45: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max. Signal", type: "slider", min: 1600, max: 2000, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
-        46: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
-        47: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", type: "value", min: 75, max: 125, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
-        48: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
-        49: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
-        50: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", type: "colorpick", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, escTypes: onAllESCs },
-        51: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, escTypes: onAllESCs },
-        99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "ESC ID", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs } // must always be 99 and the last one
+        40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse rotation direction", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
+        41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
+        42: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, escTypes: onAllESCs },
+        43: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
+        44: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min. Signal", type: "slider", feature: "advanced", min: 1000, max: 1400, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
+        45: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max. Signal", type: "slider", feature: "advanced", min: 1600, max: 2000, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
+        46: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
+        47: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
+        48: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
+        49: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
+        50: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "colorpick", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, escTypes: onAllESCs },
+        51: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, escTypes: onAllESCs },
+        99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "ESC ID", feature: "advanced", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs } // must always be 99 and the last one
     };
 
 }
