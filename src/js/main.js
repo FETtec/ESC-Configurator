@@ -76,6 +76,8 @@ const OW_SET_LED_TMP_COLOR = 51;
 const OW_GET_LED_COLOR = 52;
 const OW_SET_LED_COLOR = 53;
 
+const OW_GET_SOFT_BRAKE = 54;
+const OW_SET_SOFT_BRAKE = 55;
 //
 
 const ESC_types = [
@@ -134,6 +136,7 @@ function ESC() {
         48: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
         49: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
         50: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", type: "colorpick", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, escTypes: onAllESCs },
+        51: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, escTypes: onAllESCs },
         99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "ESC ID", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs } // must always be 99 and the last one
     };
 
