@@ -71,12 +71,62 @@ const ESC_types = [
     { id: 0, name: "none", filename: '' },
     { id: 1, name: "FETtec ESC 35A", filename: 'FETTEC_35A_ESC_G0_' },
     { id: 2, name: "FETtec ESC 50A", filename: 'FETTEC_50A_ESC_G0_' },
-    { id: 3, name: "FETtec ESC 7", filename: 'FETTEC_7A_ESC_G0_' },
+    { id: 3, name: "FETtec ESC 7A", filename: 'FETTEC_7A_ESC_G0_' },
     { id: 4, name: "G4_ESC", filename: '' },
     { id: 5, name: "ESCS32K", filename: '' },
     { id: 6, name: "FETtec ESC 45A", filename: 'FETTEC_45A_ESC_G0_' },
     { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_' },
     { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_' },
+    { id: 64, name: "ESC 15A", filename: '15A_ESC_G0_DEF_' },
+    { id: 65, name: "ESC 15A", filename: '15A_ESC_G0_ADV_' },
+    { id: 66, name: "ESC 15A", filename: '' },
+    { id: 67, name: "ESC 15A", filename: '' },
+    { id: 68, name: "ESC 25A", filename: '25A_ESC_G0_DEF_' },
+    { id: 69, name: "ESC 25A", filename: '25A_ESC_G0_ADV_' },
+    { id: 70, name: "ESC 25A", filename: '' },
+    { id: 71, name: "ESC 25A", filename: '' },
+    { id: 72, name: "ESC 35A", filename: '35A_ESC_G0_DEF_' },
+    { id: 73, name: "ESC 35A", filename: '35A_ESC_G0_ADV_' },
+    { id: 74, name: "ESC 35A", filename: '35A_ESC_G4_DEF_' },
+    { id: 75, name: "ESC 35A", filename: '35A_ESC_G4_ADV_' },
+    { id: 76, name: "ESC 35A", filename: '' },
+    { id: 77, name: "ESC 35A", filename: '' },
+    { id: 78, name: "ESC 45A", filename: '45A_ESC_G0_DEF_' },
+    { id: 79, name: "ESC 45A", filename: '45A_ESC_G0_ADV_' },
+    { id: 80, name: "ESC 45A", filename: '45A_ESC_G4_DEF_' },
+    { id: 81, name: "ESC 45A", filename: '45A_ESC_G4_ADV_' },
+    { id: 82, name: "ESC 45A", filename: '45A_ESC_S32K_DEF_' },
+    { id: 83, name: "ESC 45A", filename: '45A_ESC_S32K_ADV_' },
+    { id: 84, name: "ESC 45A", filename: '' },
+    { id: 85, name: "ESC 45A", filename: '' },
+    { id: 86, name: "ESC 55A", filename: '55A_ESC_G0_DEF_' },
+    { id: 87, name: "ESC 55A", filename: '55A_ESC_G0_ADV_' },
+    { id: 88, name: "ESC 55A", filename: '55A_ESC_G4_DEF_' },
+    { id: 89, name: "ESC 55A", filename: '55A_ESC_G4_ADV_' },
+    { id: 90, name: "ESC 55A", filename: '55A_ESC_S32K_DEF_' },
+    { id: 91, name: "ESC 55A", filename: '55A_ESC_S32K_ADV_' },
+    { id: 92, name: "ESC 55A", filename: '' },
+    { id: 93, name: "ESC 55A", filename: '' },
+    { id: 94, name: "ESC 65A", filename: '65A_ESC_G0_DEF_' },
+    { id: 95, name: "ESC 65A", filename: '65A_ESC_G0_ADV_' },
+    { id: 96, name: "ESC 65A", filename: '65A_ESC_G4_DEF_' },
+    { id: 96, name: "ESC 65A", filename: '65A_ESC_G4_ADV_' },
+    { id: 98, name: "ESC 65A", filename: '65A_ESC_S32K_DEF_' },
+    { id: 99, name: "ESC 65A", filename: '65A_ESC_S32K_ADV_' },
+    { id: 100, name: "ESC 65A", filename: '' },
+    { id: 101, name: "ESC 65A", filename: '' },
+    { id: 102, name: "ESC 80A", filename: '80A_ESC_G4_DEF_' },
+    { id: 103, name: "ESC 80A", filename: '80A_ESC_G4_ADV_' },
+    { id: 104, name: "ESC 80A", filename: '80A_ESC_S32K_DEF_' },
+    { id: 105, name: "ESC 80A", filename: '80A_ESC_S32K_ADV_' },
+    { id: 106, name: "ESC 80A", filename: '' },
+    { id: 107, name: "ESC 80A", filename: '' },
+    { id: 102, name: "ESC 100A", filename: '100A_ESC_G4_DEF_' },
+    { id: 103, name: "ESC 100A", filename: '100A_ESC_G4_ADV_' },
+    { id: 104, name: "ESC 100A", filename: '100A_ESC_S32K_DEF_' },
+    { id: 105, name: "ESC 100A", filename: '100A_ESC_S32K_ADV_' },
+    { id: 106, name: "ESC 100A", filename: '' },
+    { id: 107, name: "ESC 100A", filename: '' },
     { id: 128, name: "G4 USB Bootloader", filename: '' },
     { id: 129, name: "OSD", filename: '' }
 ];
@@ -96,22 +146,17 @@ function ESC() {
     this.selected = true;
     this.loadingBar = 0;
     this.warning = false;
-
     this.settingsActive = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0];
     this.ThrottleStickDiv = 0;
     this.commandedThrottle = 0;
     this.readyForFastCommand = false;
-
     this.TLMValues = [0, 0, 0, 0, 0, 0, 0, 0];
     this.TLMValueElements = [];
     this.TLMCanvasElement;
     this.TLMCanvasCTX;
-
     this.CompatibleFW_filename = "";
-
     this.ESC_settings = {
         0: { command: OW_GET_EEVER, name: "ESC EEprom version", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, escTypes: onAllESCs }, // must always be 0
-
         40: { command: OW_GET_ROTATION_DIRECTION, name: "Reverse rotation direction", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
         41: { command: OW_GET_USE_SIN_START, name: "Slow start", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
         42: { command: OW_GET_3D_MODE, name: "3D Mode", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, escTypes: onAllESCs },
@@ -120,10 +165,8 @@ function ESC() {
         45: { command: OW_GET_PWM_MAX, name: "PWM Max. Signal", min: 1600, max: 2000, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
         46: { command: OW_GET_ESC_BEEP, name: "ESC beeps", min: 0, max: 1, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
         47: { command: OW_GET_CURRENT_CALIB, name: "Current calibration (%)", min: 75, max: 125, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
-
         99: { command: OW_GET_ID, name: "ESC ID", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs } // must always be 99 and the last one
     };
-
 }
 
 const serial_options = [
@@ -1239,11 +1282,9 @@ function ScanForESCs() {
             if (responsePackage[1] == scanID) {
                 timeoutESC_IDs[scanID] = 0;
                 if (scanStep == 0) {
-
                     ESCs[scanID] = new ESC();
                     ESCs[scanID].id = scanID;
                     ESCs[scanID].asBL = (responsePackage[0] == 0x02);
-
                     if (DEBUG) console.log("found ID: " + ESCs[scanID].id + ", is a bootloader: " + ESCs[scanID].asBL);
                     scanStep = 1;
                     ScanForESCs();
@@ -1673,7 +1714,7 @@ function initFWUpdater() {
                         if (DEBUG) console.log("Processing releases: " + release.name);
                         var release_name = ESC_types.find(x => x.id === ESCs[ESCs.length - 1].type).name + " " + release.tag_name;
                         if (release.prerelease == true)
-                            release_name += " (BETA)" 
+                            release_name += " (BETA)"
                         $.each(release.assets, function (index2, asset) {
                             if (asset.name.endsWith(".hex") && asset.name.startsWith(ESC_types.find(x => x.id === ESCs[ESCs.length - 1].type).filename)) {
                                 if (asset.name.includes("_BLUPDATE_"))
