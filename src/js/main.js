@@ -1851,7 +1851,7 @@ function FlashProcessLoop() {
                             // unable to write block 255 (require BL Update)
                             if (act_ESC_sent_Page == 255 && responsePackage[5] == 2) {
                                 if (DEBUG) console.log("Bootloader not supporting more than 255 pages ");
-                                $("#dialog").text("This ESC doesn't have the latest Bootloader and can't support firmware > 255 pages. Please update using the provided Bootloader update firmware.");
+                                $("#dialog").text("This ESC doesn't have the latest bootloader and can't support this firmware. Please flash the available bootloader update. Once completed please flash again this version.");
                                 FlashESC_ID = 0;
                                 FW_update.FlashProcessActive = 0;
                                 $("#dialog").dialog({
@@ -1893,8 +1893,9 @@ function FlashProcessLoop() {
         }
     } else {
         if (afterFlashedDisplay == 0) {
-            if (is_USB_only_bootloader == 0) change_ESCs_status(1);
-            else {
+            if (is_USB_only_bootloader == 0) {
+                change_ESCs_status(1);
+            } else {
                 $("#dialog").text("Firmware update done! Please power cycle board.");
                 $("#dialog").dialog({
                     modal: true,
@@ -1914,6 +1915,15 @@ function FlashProcessLoop() {
             afterFlashedDisplay = 51;
         } else if (afterFlashedDisplay == 51) {
             if (DEBUG) console.log('flash process done!');
+            $("#dialog").text("Firmware update done! For health and safety always remove all propellers! Please check motor direction.");
+            $("#dialog").dialog({
+                modal: true,
+                buttons: {
+                    Ok: function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
             FlashESC_ID = 0;
             FW_update.FlashProcessActive = 0;
             FW_update.fileUploadInput.disabled = false;
