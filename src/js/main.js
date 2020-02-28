@@ -1677,6 +1677,12 @@ function displayESCs(ParentElement) {
                     flashInterval = setInterval(function () { flash_throttle_Button("SE_" + tmpESCid + "_8"); }, 50);
                 }
             }
+            ESCs[i].ThrottleValue.addEventListener('dblclick',  function (evt) {
+                var tmpESCid = parseInt(this.id.replace(/ESC_Thr_Value_/, ''))
+                ESCs[tmpESCid].ThrottleValue.value = 0
+                ESCs[tmpESCid].commandedThrottle = 0
+            })
+            
             ESC_ThrottleDiv.appendChild(ESCs[i].ThrottleValue);
 
         }
