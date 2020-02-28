@@ -32,7 +32,6 @@ const OW_THROTTLE = 11;
 const OW_REQ_TLM = 12;
 const OW_BEEP = 13;
 const OW_SET_FAST_COM_LENGTH = 26;
-const OW_GET_EEVER = 38;
 
 
 // all OW_GET_XXX are always readable.
@@ -50,8 +49,10 @@ const OW_SET_3D_MODE = 33;
 const OW_GET_ID = 34;
 const OW_SET_ID = 35;
 
-const OW_GET_RESERVED = 36;
-const OW_SET_RESERVED = 37;
+const OW_GET_LINEAR_THRUST = 36;
+const OW_SET_LINEAR_THRUST = 37;
+
+const OW_GET_EEVER = 38;
 
 const OW_GET_PWM_MIN = 39;
 const OW_SET_PWM_MIN = 40;
@@ -65,6 +66,18 @@ const OW_SET_ESC_BEEP = 44;
 const OW_GET_CURRENT_CALIB = 45;
 const OW_SET_CURRENT_CALIB = 46;
 
+const OW_GET_LOW_RAMP = 47;
+const OW_SET_LOW_RAMP = 48;
+
+const OW_GET_HIGH_RAMP = 49;
+const OW_SET_HIGH_RAMP = 50;
+
+const OW_SET_LED_TMP_COLOR = 51;
+const OW_GET_LED_COLOR = 52;
+const OW_SET_LED_COLOR = 53;
+
+const OW_GET_SOFT_BRAKE = 54;
+const OW_SET_SOFT_BRAKE = 55;
 //
 
 const ESC_types = [
@@ -155,16 +168,21 @@ function ESC() {
     this.TLMCanvasCTX;
     this.CompatibleFW_filename = "";
     this.ESC_settings = {
-        0: { command: OW_GET_EEVER, name: "ESC EEprom version", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, escTypes: onAllESCs }, // must always be 0
-        40: { command: OW_GET_ROTATION_DIRECTION, name: "Reverse rotation direction", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
-        41: { command: OW_GET_USE_SIN_START, name: "Slow start", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
-        42: { command: OW_GET_3D_MODE, name: "3D Mode", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, escTypes: onAllESCs },
-        43: { command: OW_GET_RESERVED, name: "", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: [] },
-        44: { command: OW_GET_PWM_MIN, name: "PWM Min. Signal", min: 1000, max: 1400, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
-        45: { command: OW_GET_PWM_MAX, name: "PWM Max. Signal", min: 1600, max: 2000, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
-        46: { command: OW_GET_ESC_BEEP, name: "ESC beeps", min: 0, max: 1, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
-        47: { command: OW_GET_CURRENT_CALIB, name: "Current calibration (%)", min: 75, max: 125, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
-        99: { command: OW_GET_ID, name: "ESC ID", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs } // must always be 99 and the last one
+        0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "readonly", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, escTypes: onAllESCs }, // must always be 0
+
+        40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse rotation direction", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
+        41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
+        42: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, escTypes: onAllESCs },
+        43: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
+        44: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min. Signal", type: "slider", feature: "advanced", min: 1000, max: 1400, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
+        45: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max. Signal", type: "slider", feature: "advanced", min: 1600, max: 2000, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
+        46: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
+        47: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
+        48: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
+        49: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
+        50: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "colorpick", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, escTypes: onAllESCs },
+        51: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, escTypes: onAllESCs },
+        99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "ESC ID", feature: "advanced", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs } // must always be 99 and the last one
     };
 }
 
@@ -1463,22 +1481,24 @@ function displayESCs(ParentElement) {
             ESC_div.appendChild(ESC_info_div);
 
             for (var y in ESCs[i].ESC_settings) {
-                if ((ESCs[i].ESC_settings[y].min != 0 || ESCs[i].ESC_settings[y].max != 0) && ESCs[i].ESC_settings[y].escTypes.indexOf(ESCs[i].type) != -1) {// hide non adjustable settings or settings that are not supported by the ESC
-                    var ESC_setting = document.createElement('div');
-                    ESC_setting.className = "setting_container";
-                    if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
 
-                    ESC_setting_text = document.createElement('div')
-                    ESC_setting_text.className = "setting_text";
+                // Type decision
+                switch (ESCs[i].ESC_settings[y].type) {
+                    case "checkbox":
+                        var ESC_setting = document.createElement('div');
+                        ESC_setting.className = "setting_container";
+                        if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
 
-                    ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
+                        ESC_setting_text = document.createElement('div')
+                        ESC_setting_text.className = "setting_text";
 
-                    ESC_setting.appendChild(ESC_setting_text);
-                    ESC_info_div.appendChild(ESC_setting);
-                    if (ESCs[i].ESC_settings[y].min == 0 && ESCs[i].ESC_settings[y].max == 1) {// just on or off
+                        ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
+
+                        ESC_setting.appendChild(ESC_setting_text);
+                        ESC_info_div.appendChild(ESC_setting);
                         settingCheckbox = document.createElement('input');
                         settingCheckbox.type = "checkbox";
-                        settingCheckbox.id = ESCs[i].ESC_settings[y].command + "_setting_id_" + i;
+                        settingCheckbox.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
                         settingCheckbox.onchange = function () {
                             SettingsChanged(this.id);
                         }
@@ -1490,7 +1510,7 @@ function displayESCs(ParentElement) {
                         }
                         ESC_setting.appendChild(settingCheckbox);
                         setting_Checkbox_label = document.createElement('label');
-                        setting_Checkbox_label.htmlFor = ESCs[i].ESC_settings[y].command + "_setting_id_" + i;
+                        setting_Checkbox_label.htmlFor = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
                         setting_Checkbox_label.className = "checklabel";
 
                         checkmark_div = document.createElement('div');
@@ -1507,18 +1527,34 @@ function displayESCs(ParentElement) {
                         setting_Checkbox_label.appendChild(checkmark_div);
 
                         ESC_setting.appendChild(setting_Checkbox_label);
-                    } else {
+                        break
+                    case "colorpick":
+                    case "slider":
+                    case "value":
+                        var ESC_setting = document.createElement('div');
+                        ESC_setting.className = "setting_container";
+                        if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
+
+                        ESC_setting_text = document.createElement('div')
+                        ESC_setting_text.className = "setting_text";
+
+                        ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
+
+                        ESC_setting.appendChild(ESC_setting_text);
+                        ESC_info_div.appendChild(ESC_setting);
                         settingNumber = document.createElement('input');
                         settingNumber.type = "number";
                         settingNumber.style.width = ((ESCs[i].ESC_settings[y].max.toString(10).length * 12) + 5) + "px";
                         settingNumber.className = "settings_numberBox"; //  ui-corner-all
                         settingNumber.value = ESCs[i].ESC_settings[y].active;
-                        settingNumber.id = ESCs[i].ESC_settings[y].command + "_setting_id_" + i;
+                        settingNumber.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
                         settingNumber.onchange = function () {
                             SettingsChanged(this.id);
                         }
                         ESC_setting.appendChild(settingNumber);
-                    }
+                        break
+                    case "readonly":
+                    default:
                 }
             }
 
@@ -1781,7 +1817,7 @@ function PrepareUpdate() {
                     StartFlashProcess();
                 }))
             ;
-        $("#FW_flash").append().html("Flash selected ESC's");
+        $("#FW_flash").append().html("Flash selected!");
     }
 }
 var FlashESC_ID = 0;
@@ -2432,11 +2468,11 @@ function ConfigLoop() {
                 waitForResponseLength = 7;
                 if (DEBUG) console.log("check with id: " + read_ESC_ids[ESC_ID_Index] + " ");
             } else {
-                send_ESC_package(read_ESC_ids[ESC_ID_Index], 0, [ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].command]);
+                send_ESC_package(read_ESC_ids[ESC_ID_Index], 0, [ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand]);
                 waitForResponseID = read_ESC_ids[ESC_ID_Index];
                 waitForResponseType = 0;
                 waitForResponseLength = 6 + ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount;
-                if (DEBUG) console.log("requesting Setting " + ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].command + " from ESC with id: " + read_ESC_ids[ESC_ID_Index] + " ");
+                if (DEBUG) console.log("requesting Setting " + ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand + " from ESC with id: " + read_ESC_ids[ESC_ID_Index] + " ");
             }
         } else {
             var responsePackage = checkForRespPackage();
@@ -2464,9 +2500,11 @@ function ConfigLoop() {
                         ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active = responsePackage[5];
                     } else if (ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 2) {
                         ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active = (responsePackage[5] << 8) | responsePackage[6];
+                    } else if (ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 4) {
+                        ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
                     }
                     checkESCsStat = 0;
-                    if (DEBUG) console.log("Setting " + ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " from ESC with id: " + read_ESC_ids[ESC_ID_Index] + " is " + ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active);
+                    if (DEBUG) console.log("Setting " + ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " from ESC with id: " + read_ESC_ids[ESC_ID_Index] + " is " + ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active + " bytecound: " + ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount);
                     ESC_Setting_Index++;
                 }
             } else if (++timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == 150 || timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == 300 || timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == 450) {
@@ -2492,16 +2530,18 @@ function ConfigLoop() {
             }
 
             if (checkESCsStat == 0) {
-                send_ESC_package(saveNewSettingsToId, 0, [ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].command]);
+                send_ESC_package(saveNewSettingsToId, 0, [ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand]);
                 waitForResponseID = saveNewSettingsToId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("GET Setting " + ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].command + " from ESC with id: " + saveNewSettingsToId + " ");
+                if (DEBUG) console.log("GET Setting " + ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand + " from ESC with id: " + saveNewSettingsToId + " ");
             } else {
                 if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 1) {
-                    send_ESC_package(saveNewSettingsToId, 0, [(ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].command + 1), newSettingsValues[read_ESC_settings[ESC_Setting_Index]]]);
+                    send_ESC_package(saveNewSettingsToId, 0, [(ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].setCommand), newSettingsValues[read_ESC_settings[ESC_Setting_Index]]]);
                 } else if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 2) {
-                    send_ESC_package(saveNewSettingsToId, 0, [(ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].command + 1), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 8), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] & 0xFF)]);
+                    send_ESC_package(saveNewSettingsToId, 0, [(ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].setCommand), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 8), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] & 0xFF)]);
+                } else if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 4) {
+                    send_ESC_package(saveNewSettingsToId, 0, [(ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].setCommand), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 24), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 16) & 0xFF, (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 8) & 0xFF, (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] & 0xFF)]);
                 }
                 if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name == "ESC ID") {
                     waitForResponseID = newSettingsValues[read_ESC_settings[ESC_Setting_Index]];
@@ -2510,7 +2550,7 @@ function ConfigLoop() {
                 }
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("SET Setting " + ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].command + 1) + " to:" + newSettingsValues[read_ESC_settings[ESC_Setting_Index]] + " at ESC with id: " + saveNewSettingsToId + " ");
+                if (DEBUG) console.log("SET Setting " + ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand + 1) + " to:" + newSettingsValues[read_ESC_settings[ESC_Setting_Index]] + " at ESC with id: " + saveNewSettingsToId + " ");
             }
         } else {
             var responsePackage = checkForRespPackage();
@@ -2522,6 +2562,9 @@ function ConfigLoop() {
                         responsePayload = responsePackage[5];
                     } else if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 2) {
                         responsePayload = (responsePackage[5] << 8) | responsePackage[6];
+                    }
+                    else if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 4) {
+                        responsePayload = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
                     }
                     if (responsePayload == ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active) {
                         if (DEBUG) console.log("GET response correct");
@@ -2537,7 +2580,7 @@ function ConfigLoop() {
                         ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].changed = false;
                         ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active = newSettingsValues[read_ESC_settings[ESC_Setting_Index]];
                         checkESCsStat = 0;
-                        if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name == "ESC ID") {
+                        if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand == OW_GET_ID) {
                             $("#dialog").text("A ESC id was changed. GUI must reset! please connect again.");
                             $("#dialog").dialog({
                                 modal: true,
@@ -2580,18 +2623,18 @@ function checkChangedSettings(ID) {
     for (var y in ESCs[ID].ESC_settings) {
         if ((ESCs[ID].ESC_settings[y].min != 0 || ESCs[ID].ESC_settings[y].max != 0) && ESCs[ID].ESC_settings[y].escTypes.indexOf(ESCs[ID].type) != -1) {
             if (ESCs[ID].ESC_settings[y].min == 0 && ESCs[ID].ESC_settings[y].max == 1) { // just active or inactive
-                if (document.getElementById(ESCs[ID].ESC_settings[y].command + "_setting_id_" + ID).checked) {
+                if (document.getElementById(ESCs[ID].ESC_settings[y].getCommand + "_setting_id_" + ID).checked) {
                     newSettingsValues[y] = 1;
-                    document.getElementById(ESCs[ID].ESC_settings[y].command + "_setting_id_" + ID).parentElement.className = "setting_container setting_container_active";
+                    document.getElementById(ESCs[ID].ESC_settings[y].getCommand + "_setting_id_" + ID).parentElement.className = "setting_container setting_container_active";
                 } else {
                     newSettingsValues[y] = 0;
-                    document.getElementById(ESCs[ID].ESC_settings[y].command + "_setting_id_" + ID).parentElement.className = "setting_container setting_container_inactive";
+                    document.getElementById(ESCs[ID].ESC_settings[y].getCommand + "_setting_id_" + ID).parentElement.className = "setting_container setting_container_inactive";
                 }
             } else { // value
-                newSettingsValues[y] = parseInt(document.getElementById(ESCs[ID].ESC_settings[y].command + "_setting_id_" + ID).value);
+                newSettingsValues[y] = parseInt(document.getElementById(ESCs[ID].ESC_settings[y].getCommand + "_setting_id_" + ID).value);
                 if (newSettingsValues[y] > ESCs[ID].ESC_settings[y].max) newSettingsValues[y] = ESCs[ID].ESC_settings[y].max;
                 if (newSettingsValues[y] < ESCs[ID].ESC_settings[y].min) newSettingsValues[y] = ESCs[ID].ESC_settings[y].min;
-                document.getElementById(ESCs[ID].ESC_settings[y].command + "_setting_id_" + ID).value = newSettingsValues[y];
+                document.getElementById(ESCs[ID].ESC_settings[y].getCommand + "_setting_id_" + ID).value = newSettingsValues[y];
             }
             if (newSettingsValues[y] != ESCs[ID].ESC_settings[y].active) {
                 ESCs[ID].ESC_settings[y].changed = true;
