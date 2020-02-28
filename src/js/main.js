@@ -147,7 +147,6 @@ function ESC() {
     this.loadingBar = 0;
     this.warning = false;
     this.settingsActive = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0];
-    this.ThrottleStickDiv = 0;
     this.commandedThrottle = 0;
     this.readyForFastCommand = false;
     this.TLMValues = [0, 0, 0, 0, 0, 0, 0, 0];
@@ -289,11 +288,6 @@ onload = function () {
     chrome.serial.getDevices(function (ports) {
         checkPorts(ports);
     });
-
-    document.onmouseup = function (e) { doMouseup(e); };
-    document.onmousemove = function (e) { doDrag(e); };
-
-
 
     $("#con_button").click(function () {
         var el = $(this);
@@ -1622,19 +1616,34 @@ function displayESCs(ParentElement) {
             ESC_ThrottleDiv.className = "throttle_bar_div";
             throttleContainerDiv.appendChild(ESC_ThrottleDiv);
 
-
-            ESCs[i].ThrottleStickDiv = document.createElement('div');
-            ESCs[i].ThrottleStickDiv.className = "throttle_stick_div";
-            ESCs[i].ThrottleStickDiv.style.marginLeft = "180px"; // needs to stay
-            ESCs[i].ThrottleStickDiv.innerHTML = "0%";
-            ESCs[i].ThrottleStickDiv.id = "Stick_" + i;
-            ESCs[i].ThrottleStickDiv.onmousedown = function (e) {
-                moveStick(parseInt(this.id.replace(/Stick_/, '')), e);
+            ESCs[i].ThrottleValue = document.createElement('input');
+            ESCs[i].ThrottleValue.type = "range";
+            ESCs[i].ThrottleValue.value = 0;
+            ESCs[i].ThrottleValue.className = "ThrottleSlider";
+            ESCs[i].ThrottleValue.min = -100;
+            ESCs[i].ThrottleValue.max = 100;
+            ESCs[i].ThrottleValue.id = "ESC_Thr_Value_" + i;
+            ESCs[i].ThrottleValue.oninput = function () {
+                var tmpESCval = parseInt(this.valueAsNumber);
+                var tmpESCid = parseInt(this.id.replace(/ESC_Thr_Value_/, ''))
+                if (ESCs[tmpESCid].settingsActive[8]) {
+                    if (!ESCs[tmpESCid].settingsActive[9] && tmpESCval < 0) {
+                        // reverse not active prevent negative values
+                        ESCs[tmpESCid].ThrottleValue.value = 0
+                    } else {
+                        // update throttle value
+                        ESCs[tmpESCid].commandedThrottle = tmpESCval;
+                    }
+                } else {
+                    // ESC not enabled
+                    ESCs[tmpESCid].ThrottleValue.value = 0
+                    button_flashed = 0;
+                    flashInterval = setInterval(function () { flash_throttle_Button("SE_" + tmpESCid + "_8"); }, 50);
+                }
             }
-            ESC_ThrottleDiv.appendChild(ESCs[i].ThrottleStickDiv);
-            // Throttle to end
-        }
+            ESC_ThrottleDiv.appendChild(ESCs[i].ThrottleValue);
 
+        }
         ParentElement.appendChild(ESC_div);
     }
 }
@@ -2049,10 +2058,6 @@ function parseHexFile(hexData) {
 
 //===================================================================================== Tools
 
-var mousePos = 0;
-var dragElement = 0;
-var dragElementPos = 0;
-var dragESCid = 0;
 var throttleWarningDone = 0;
 var button_flashed = 0;
 var flashInterval = 0;
@@ -2338,26 +2343,10 @@ function CheckSetting(settingID, active) {
         });
     }
     if (!active && (settingId == 8 || (settingId == 9 && ESCs[ESCid].commandedThrottle < 0))) {
-        ESCs[ESCid].ThrottleStickDiv.innerHTML = "0%";
-        ESCs[ESCid].ThrottleStickDiv.style.marginLeft = "180px";
+        ESCs[ESCid].ThrottleValue.value = 0;
         ESCs[ESCid].commandedThrottle = 0;
     }
     ESCs[ESCid].settingsActive[settingId] = active;
-}
-
-
-function moveStick(num, e) {
-    e = e || window.event;
-    e.preventDefault();
-    mousePos = e.clientX;
-    dragESCid = num;
-    if (ESCs[num].settingsActive[8]) {
-        dragElementPos = parseInt(ESCs[num].ThrottleStickDiv.style.marginLeft);
-        dragElement = ESCs[num].ThrottleStickDiv;
-    } else {
-        button_flashed = 0;
-        flashInterval = setInterval(function () { flash_throttle_Button("SE_" + num + "_8"); }, 50);
-    }
 }
 
 function flash_throttle_Button(flash_button) {
@@ -2386,37 +2375,6 @@ function colorFromCSSClass(className) {
     document.body.removeChild(tmp);
     return color
 }
-
-
-function doMouseup(e) {
-    dragElement = 0;
-}
-
-function doDrag(e) {
-    e = e || window.event;
-    if (dragElement != 0) {
-        var newPos = dragElementPos + (e.clientX - mousePos);
-        if (ESCs[dragESCid].settingsActive[9]) {
-            if (newPos < 0) newPos = 0;
-        } else {
-            if (newPos < 180) {
-                newPos = 180;
-                if (flashInterval == 0) {
-
-                    button_flashed = 0;
-                    flashInterval = setInterval(function () { flash_throttle_Button("SE_" + dragESCid + "_9"); }, 50);
-                }
-            }
-        }
-        if (newPos > 360) newPos = 360;
-        dragElement.style.marginLeft = (newPos - 1) + "px";
-        var ThrVal = Math.round((100 / 180 * newPos) - 100);
-        ESCs[dragESCid].commandedThrottle = ThrVal;
-        dragElement.innerHTML = ThrVal + "%";
-    }
-}
-
-
 
 //===================================================================================== ConfigurationLoop
 
