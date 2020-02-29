@@ -1666,6 +1666,7 @@ function displayESCs(ParentElement) {
                     if (!ESCs[tmpESCid].settingsActive[9] && tmpESCval < 0) {
                         // reverse not active prevent negative values
                         ESCs[tmpESCid].ThrottleValue.value = 0
+                        flash_button("SE_" + tmpESCid + "_9");
                     } else {
                         // update throttle value
                         ESCs[tmpESCid].commandedThrottle = tmpESCval;
@@ -1673,16 +1674,15 @@ function displayESCs(ParentElement) {
                 } else {
                     // ESC not enabled
                     ESCs[tmpESCid].ThrottleValue.value = 0
-                    button_flashed = 0;
-                    flashInterval = setInterval(function () { flash_throttle_Button("SE_" + tmpESCid + "_8"); }, 50);
+                    flash_button("SE_" + tmpESCid + "_8");
                 }
             }
-            ESCs[i].ThrottleValue.addEventListener('dblclick',  function (evt) {
+            ESCs[i].ThrottleValue.addEventListener('dblclick', function (evt) {
                 var tmpESCid = parseInt(this.id.replace(/ESC_Thr_Value_/, ''))
                 ESCs[tmpESCid].ThrottleValue.value = 0
                 ESCs[tmpESCid].commandedThrottle = 0
             })
-            
+
             ESC_ThrottleDiv.appendChild(ESCs[i].ThrottleValue);
 
         }
@@ -2101,8 +2101,6 @@ function parseHexFile(hexData) {
 //===================================================================================== Tools
 
 var throttleWarningDone = 0;
-var button_flashed = 0;
-var flashInterval = 0;
 
 var MaxESCid = 0;
 var MinESCid = 0;
@@ -2391,20 +2389,23 @@ function CheckSetting(settingID, active) {
     ESCs[ESCid].settingsActive[settingId] = active;
 }
 
-function flash_throttle_Button(flash_button) {
-    if (DEBUG) console.log(flash_button);
-    if (button_flashed < 4) {
-        button_flashed++;
-        if (button_flashed % 2) {
-            document.getElementById(flash_button).className = "button_active";
-        } else {
-            document.getElementById(flash_button).className = "button_inactive";
-        }
+function flash_button(button) {
+    var button_flashed = 0;
+    var flashInterval = 0;
+    flashInterval = setInterval(function () {
+        if (button_flashed < 4) {
+            button_flashed++;
+            if (button_flashed % 2) {
+                document.getElementById(button).className = "button_active";
+            } else {
+                document.getElementById(button).className = "button_inactive";
+            }
 
-    } else {
-        clearInterval(flashInterval);
-        flashInterval = 0;
-    }
+        } else {
+            clearInterval(flashInterval);
+            flashInterval = 0;
+        }
+    }, 50);
 }
 
 function colorFromCSSClass(className) {
