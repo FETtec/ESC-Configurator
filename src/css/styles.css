@@ -342,6 +342,40 @@ img {
     color: #606060;
 }
 
+.settings_rangeSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100px;
+    height: 12px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.settings_rangeSlider:hover {
+    opacity: 1;
+}
+
+
+.settings_rangeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 7px;
+    height: 12px;
+    background: #6180A3;
+    cursor: pointer;
+}
+
+.settings_rangeSlider::-moz-range-thumb {
+    width: 7px;
+    height: 12px;
+    background: #6180A3;
+    cursor: pointer;
+}
+
+
 .settings_save_button_active {
     position: absolute;
     right: 24px;
@@ -382,41 +416,38 @@ img {
     margin-left: 61px;
 }
 
-/* The slider itself */
 .ThrottleSlider {
-    -webkit-appearance: none;  /* Override default CSS styles */
+    -webkit-appearance: none;
     appearance: none;
-    width: 99%; /* Full-width */
-    height: 20px; /* Specified height */
-    background: #d3d3d3; /* Grey background */
-    outline: none; /* Remove outline */
-    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
-    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    width: 99%;
+    height: 20px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
     transition: opacity .2s;
-  }
-  
-  /* Mouse-over effects */
-  .ThrottleSlider:hover {
-    opacity: 1; /* Fully shown on mouse-over */
-  }
-  
-  /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
-  .ThrottleSlider::-webkit-slider-thumb {
-    -webkit-appearance: none; /* Override default look */
-    appearance: none;
-    width: 20px; /* Set a specific slider handle width */
-    height: 20px; /* Slider handle height */
-    background: #6180A3; /* Green background */
-    cursor: pointer; /* Cursor on hover */
-  }
-  
-  .ThrottleSlider::-moz-range-thumb {
-    width: 20px; /* Set a specific slider handle width */
-    height: 20px; /* Slider handle height */
-    background: #6180A3; /* Green background */
-    cursor: pointer; /* Cursor on hover */
-  }
+}
 
+.ThrottleSlider:hover {
+    opacity: 1;
+}
+
+
+.ThrottleSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #6180A3;
+    cursor: pointer;
+}
+
+.ThrottleSlider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #6180A3;
+    cursor: pointer;
+}
 
 textarea:focus, input:focus {
     outline: none;
@@ -454,6 +485,12 @@ input[type="checkbox"]:checked+label {
 .setting_text {
     padding: 2px;
     float: left;
+}
+
+.setting_value {
+    width: 40px;
+    text-align: center;
+    display: inline-block;
 }
 
 .checkmark {

@@ -1529,18 +1529,49 @@ function displayESCs(ParentElement) {
 
                         ESC_setting.appendChild(setting_Checkbox_label);
                         break
-                    case "colorpick":
                     case "slider":
-                    case "value":
                         var ESC_setting = document.createElement('div');
                         ESC_setting.className = "setting_container";
                         if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
 
                         ESC_setting_text = document.createElement('div')
                         ESC_setting_text.className = "setting_text";
-
                         ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
+                        ESC_setting.appendChild(ESC_setting_text);
+                        ESC_info_div.appendChild(ESC_setting);
+                        settingSlider = document.createElement('input');
+                        settingSlider.type = "range";
+                        settingSlider.min =  ESCs[i].ESC_settings[y].min
+                        settingSlider.max =  ESCs[i].ESC_settings[y].max
+                        settingSlider.className = "settings_rangeSlider"; //  ui-corner-all
+                        settingSlider.value = ESCs[i].ESC_settings[y].active;
+                        settingSlider.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
+                        settingSlider.onchange = function () {
+                            SettingsChanged(this.id);
+                        }
+                        settingSlider.oninput = function () {
+                            var tmpid=this.id.replace(/setting_id_/, "setting_id_value_")
+                            document.getElementById(tmpid).value = document.getElementById(this.id).value
+                        }                        
+                         
+                        ESC_setting.appendChild(settingSlider);
+                        
+                        settingNumber = document.createElement('output');
+                        settingNumber.className = "setting_value";
+                        settingNumber.style = "width: 50px"
+                        settingNumber.value = ESCs[i].ESC_settings[y].active;
+                        settingNumber.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_value_" + i;
+                        ESC_setting.appendChild(settingNumber);
 
+                        break
+                    case "colorpick":
+                    case "value":
+                        var ESC_setting = document.createElement('div');
+                        ESC_setting.className = "setting_container";
+                        if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
+                        ESC_setting_text = document.createElement('div')
+                        ESC_setting_text.className = "setting_text";
+                        ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
                         ESC_setting.appendChild(ESC_setting_text);
                         ESC_info_div.appendChild(ESC_setting);
                         settingNumber = document.createElement('input');
