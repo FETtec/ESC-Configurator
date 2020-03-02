@@ -170,7 +170,6 @@ function ESC() {
     this.CompatibleFW_filename = "";
     this.ESC_settings = {
         0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "readonly", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, escTypes: onAllESCs }, // must always be 0
-
         40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse rotation direction", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
         41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
         42: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, escTypes: onAllESCs },
@@ -200,7 +199,7 @@ const menu_options = [
     { id: 2, name: 'Telemetry', icon: "ui-icon-heart", disabled: false },
 ];
 
-var ESC_stats = [
+const ESC_stats = [
     "Temp",
     "Voltage",
     "Current",
@@ -213,7 +212,7 @@ var ESC_stats = [
     "Reversible"
 ];
 
-var TLM_Graph_Scales = [
+const TLM_Graph_Scales = [
     1.5,
     30,
     30,
@@ -223,7 +222,8 @@ var TLM_Graph_Scales = [
     15,
     100
 ];
-var TLM_scales = [
+
+const TLM_scales = [
     1,
     1,
     1,
@@ -1660,13 +1660,14 @@ function displayESCs(ParentElement) {
             ESCs[i].ThrottleValue.min = -100;
             ESCs[i].ThrottleValue.max = 100;
             ESCs[i].ThrottleValue.id = "ESC_Thr_Value_" + i;
-            ESCs[i].ThrottleValue.oninput = function () {
+            ESCs[i].ThrottleValue.addEventListener('input', function (evt) {
                 var tmpESCval = parseInt(this.valueAsNumber);
                 var tmpESCid = parseInt(this.id.replace(/ESC_Thr_Value_/, ''))
                 if (ESCs[tmpESCid].settingsActive[8]) {
                     if (!ESCs[tmpESCid].settingsActive[9] && tmpESCval < 0) {
                         // reverse not active prevent negative values
                         ESCs[tmpESCid].ThrottleValue.value = 0
+                        ESCs[tmpESCid].commandedThrottle = 0
                         flash_button("SE_" + tmpESCid + "_9");
                     } else {
                         // update throttle value
@@ -1677,7 +1678,7 @@ function displayESCs(ParentElement) {
                     ESCs[tmpESCid].ThrottleValue.value = 0
                     flash_button("SE_" + tmpESCid + "_8");
                 }
-            }
+            })
             ESCs[i].ThrottleValue.addEventListener('dblclick', function (evt) {
                 var tmpESCid = parseInt(this.id.replace(/ESC_Thr_Value_/, ''))
                 ESCs[tmpESCid].ThrottleValue.value = 0
