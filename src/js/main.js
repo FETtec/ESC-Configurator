@@ -79,6 +79,9 @@ const OW_SET_LED_COLOR = 53;
 
 const OW_GET_SOFT_BRAKE = 54;
 const OW_SET_SOFT_BRAKE = 55;
+
+const OW_GET_ACTIVATION = 56;
+const OW_SET_ACTIVATION = 57;
 //
 
 const ESC_types = [
@@ -156,6 +159,7 @@ function ESC() {
     this.SN = [];
     this.version = 0;
     this.subversion = 0;
+    this.activated = 0;
     this.ESC_select_Input = 0;
     this.selected = true;
     this.loadingBar = 0;
@@ -182,6 +186,8 @@ function ESC() {
         49: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
         50: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "colorpick", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, escTypes: onAllESCs },
         51: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, escTypes: onAllESCs },
+        56: { getCommand: OW_GET_ACTIVATION, setCommand: null, name: "Activated", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, escTypes: onAllESCs },
+
         99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "ESC ID", feature: "advanced", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs } // must always be 99 and the last one
     };
 }
@@ -1032,12 +1038,10 @@ function check_ESCs_In_BL() {
                     if (switchProblem == 0) {
                         if (DEBUG) console.log("switching ESC with id: " + SwitchESCsFW_ID);
                         send_ESC_package(SwitchESCsFW_ID, 0, [SwitchCommand]);
-                        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                         if (ConnectionType == VCP) {
                             if (DEBUG) console.log("starting reconnect procedure 1");
                             ReconnectOnSend(0);
                         }
-                        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                         switchProblem++;
                         waitLoops = 20;
                     } else if (switchProblem < 20) {
@@ -1055,7 +1059,6 @@ function check_ESCs_In_BL() {
             } else {
                 ESCs[SwitchESCsFW_ID].version = (responsePackage[5] / 10);
                 ESCs[SwitchESCsFW_ID].subversion = (responsePackage[6] / 100);
-
                 if (DEBUG) console.log("ESC with id: " + SwitchESCsFW_ID + " software version is: " + ESCs[SwitchESCsFW_ID].version + "." + ESCs[SwitchESCsFW_ID].subversion);
                 SwitchStatus = 0;
                 SwitchESCsFW_ID++;
@@ -1171,34 +1174,7 @@ function ChangeDisplay(displayType) {
     }
 }
 
-
-
 //===================================================================================== ESC communication
-function toHex(val) {
-    if (typeof val !== "undefined") {
-        var hexString = val.toString(16);
-        if (hexString.length % 2) {
-            hexString = '0' + hexString;
-        }
-        return hexString.toUpperCase();
-    }
-}
-
-function update_crc8(crc, crc_seed) {
-    crc_u = crc;
-    crc_u ^= crc_seed;
-    for (i = 0; i < 8; i++) {
-        crc_u = (crc_u & 0x80) ? 0x7 ^ (crc_u << 1) : (crc_u << 1);
-        if (crc_u > 256) crc_u -= 256;
-    }
-    return (crc_u);
-}
-
-function getCRC(ByteArray, count) {
-    var crc = 0;
-    for (var i = 0; i < count; i++) crc = update_crc8(ByteArray[i], crc);
-    return crc;
-}
 
 function send_ESC_package(id, type, bytes) {
     var B_length = bytes.length + 6;
@@ -1371,25 +1347,18 @@ function ScanForESCs() {
     }
 }
 
-
-
 //===================================================================================== Display ESC's
-
-
 
 function displayESCs(ParentElement) {
     for (var i in ESCs) {
         var ESC_div = document.createElement('div');
         Gen_Menu_Buttons(selectedMenu, false);
         if (selectedMenu == 0) {
-            // ---------------------------------------------------------------------------------------------------// FW
             ESC_div.id = "ESC_container_" + i;
-
             if (ESCs[i].selected || selectedMenu != 0)
                 ESC_div.className = "esc_active";
             else
                 ESC_div.className = "esc_inactive";
-
 
             var ESC_ID_div = document.createElement('div');
             ESC_ID_div.className = "esc_info_id";
@@ -1414,7 +1383,7 @@ function displayESCs(ParentElement) {
             ESC_SNDiv.className = "esc_info_sn";
             ESC_SNDiv.innerHTML = "SN: ";
             for (var y = 0; y < 12; y++)
-                ESC_SNDiv.innerHTML += toHex(ESCs[i].SN[y]) + " ";
+                ESC_SNDiv.innerHTML += dec2hex(ESCs[i].SN[y]) + " ";
             ESC_info_div.appendChild(ESC_SNDiv);
 
             var ESC_selectDiv = document.createElement('div');
@@ -1465,12 +1434,12 @@ function displayESCs(ParentElement) {
             ESCs[i].loadingBar = document.createElement('div');
             ESCs[i].loadingBar.id = "esc_info_progress_bar_" + i;
             ESC_div.appendChild(ESCs[i].loadingBar);
-        } else if (selectedMenu == 1) { // ---------------------------------------------------------------------------------------------------// settings
+        } else if (selectedMenu == 1) {
+            // ---------------------------------------------------------------------------------------------------// settings
             // ESC_settings
             ESC_div.id = "ESC_container_" + i;
 
             ESC_div.className = "settings_container";
-
 
             var ESC_ID_div = document.createElement('div');
             ESC_ID_div.className = "esc_info_id";
@@ -1482,7 +1451,6 @@ function displayESCs(ParentElement) {
             ESC_div.appendChild(ESC_info_div);
 
             for (var y in ESCs[i].ESC_settings) {
-
                 // Type decision
                 switch (ESCs[i].ESC_settings[y].type) {
                     case "checkbox":
@@ -1541,8 +1509,8 @@ function displayESCs(ParentElement) {
                         ESC_info_div.appendChild(ESC_setting);
                         settingSlider = document.createElement('input');
                         settingSlider.type = "range";
-                        settingSlider.min =  ESCs[i].ESC_settings[y].min
-                        settingSlider.max =  ESCs[i].ESC_settings[y].max
+                        settingSlider.min = ESCs[i].ESC_settings[y].min
+                        settingSlider.max = ESCs[i].ESC_settings[y].max
                         settingSlider.className = "settings_rangeSlider"; //  ui-corner-all
                         settingSlider.value = ESCs[i].ESC_settings[y].active;
                         settingSlider.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
@@ -1550,21 +1518,77 @@ function displayESCs(ParentElement) {
                             SettingsChanged(this.id);
                         }
                         settingSlider.oninput = function () {
-                            var tmpid=this.id.replace(/setting_id_/, "setting_id_value_")
+                            var tmpid = this.id.replace(/setting_id_/, "setting_id_value_")
                             document.getElementById(tmpid).value = document.getElementById(this.id).value
-                        }                        
-                         
+                        }
+
                         ESC_setting.appendChild(settingSlider);
-                        
+
                         settingNumber = document.createElement('output');
                         settingNumber.className = "setting_value";
-                        settingNumber.style = "width: 50px"
+                        //settingNumber.style = "width: 50px"
+                        settingNumber.type = "hidden"
                         settingNumber.value = ESCs[i].ESC_settings[y].active;
                         settingNumber.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_value_" + i;
                         ESC_setting.appendChild(settingNumber);
 
                         break
                     case "colorpick":
+                        //console.log(ESCs[i].ESC_settings[y].active)
+                        var colorpickarray = [];
+                        colorpickarray['Type'] = (ESCs[i].ESC_settings[y].active) & 0xFF       // 0=off, 1=RGB, 2=GRB
+                        if (colorpickarray['Type'] = 2) {
+                            colorpickarray['G'] = (ESCs[i].ESC_settings[y].active >> 24) & 0xFF
+                            colorpickarray['R'] = (ESCs[i].ESC_settings[y].active >> 16) & 0xFF
+                        } else {
+                            colorpickarray['R'] = (ESCs[i].ESC_settings[y].active >> 24) & 0xFF
+                            colorpickarray['G'] = (ESCs[i].ESC_settings[y].active >> 16) & 0xFF
+                        }
+                        colorpickarray['B'] = (ESCs[i].ESC_settings[y].active >> 8) & 0xFF
+                        console.dir(colorpickarray)
+                        var ESC_setting = document.createElement('div');
+                        ESC_setting.className = "setting_container";
+                        if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
+                        ESC_setting_text = document.createElement('div')
+                        ESC_setting_text.className = "setting_text";
+                        ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
+                        ESC_setting.appendChild(ESC_setting_text);
+                        ESC_info_div.appendChild(ESC_setting);
+                        settingNumber = document.createElement('input');
+                        settingNumber.type = "number";
+                        settingNumber.readOnly = true;
+                        settingNumber.style.width = ((ESCs[i].ESC_settings[y].max.toString(10).length * 12) + 5) + "px";
+                        settingNumber.className = "settings_numberBox"; //  ui-corner-all
+                        settingNumber.value = ESCs[i].ESC_settings[y].active;
+                        settingNumber.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
+                        settingNumber.onchange = function () {
+                            SettingsChanged(this.id);
+                        }
+                        ESC_setting.appendChild(settingNumber);
+                        break
+
+
+                    /*
+                                            var ESC_setting = document.createElement('div');
+                                            ESC_setting.className = "setting_container";
+                                            if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
+                                            ESC_setting_text = document.createElement('div')
+                                            ESC_setting_text.className = "setting_text";
+                                            ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
+                                            ESC_setting.appendChild(ESC_setting_text);
+                                            ESC_info_div.appendChild(ESC_setting);
+                                            settingNumber = document.createElement('input');
+                                            //settingNumber.type = "number";
+                                            settingNumber.style.width = ((ESCs[i].ESC_settings[y].max.toString(10).length * 12) + 5) + "px";
+                                            settingNumber.className = "jscolor"; //  ui-corner-all
+                                            settingNumber.value = dec2hex(colorpickarray['R']) + dec2hex(colorpickarray['G']) + dec2hex(colorpickarray['B']);
+                                            settingNumber.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
+                                            settingNumber.onchange = function () {
+                                                SettingsChanged(this.id);
+                                            }
+                                            ESC_setting.appendChild(settingNumber);
+                                            break
+                    */
                     case "value":
                         var ESC_setting = document.createElement('div');
                         ESC_setting.className = "setting_container";
@@ -1586,6 +1610,26 @@ function displayESCs(ParentElement) {
                         ESC_setting.appendChild(settingNumber);
                         break
                     case "readonly":
+                        var ESC_setting = document.createElement('div');
+                        ESC_setting.className = "setting_container";
+                        if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
+                        ESC_setting_text = document.createElement('div')
+                        ESC_setting_text.className = "setting_text";
+                        ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
+                        ESC_setting.appendChild(ESC_setting_text);
+                        ESC_info_div.appendChild(ESC_setting);
+                        settingNumber = document.createElement('input');
+                        settingNumber.type = "number";
+                        settingNumber.readOnly = true;
+                        settingNumber.style.width = ((ESCs[i].ESC_settings[y].max.toString(10).length * 12) + 20) + "px";
+                        settingNumber.className = "settings_numberBox"; //  ui-corner-all
+                        settingNumber.value = ESCs[i].ESC_settings[y].active;
+                        settingNumber.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
+                        settingNumber.onchange = function () {
+                            SettingsChanged(this.id);
+                        }
+                        ESC_setting.appendChild(settingNumber);
+                        break;
                     default:
                 }
             }
@@ -2022,6 +2066,7 @@ function FlashProcessLoop() {
         if (afterFlashedDisplay == 0) {
             if (is_USB_only_bootloader == 0) {
                 change_ESCs_status(1);
+
             } else {
                 $("#dialog").text("Firmware update done! Please power cycle board.");
                 $("#dialog").dialog({
@@ -2077,7 +2122,7 @@ function parseHexFile(hexData) {
         if ((i == 2 && hexStartFound == 0) || (i == 1 && parseInt(lineArr[1]) != 2)) {
             hexStartFound = 1;
             address_Counter = hex_Line_Address;
-            if (DEBUG) console.log('hex start at: ' + toHex(address_Counter));
+            if (DEBUG) console.log('hex start at: ' + dec2hex(address_Counter));
         }
         if (i == 3) {
             if (((parseInt(lineArr[2]) == 1 && parseInt(lineArr[3])) == 8) || ((parseInt(lineArr[2]) == 3 && parseInt(lineArr[3])) == 8) || parseInt(lineArr[2]) == 4) {

@@ -67,7 +67,7 @@ img {
     margin-top: 10px;
     margin-left: 10px;
     margin-right: 10px;
-    height: 55px;
+    height: 90px; /* height: 55px */
     padding: 10px;
     border-radius: 3px;
 }
@@ -345,7 +345,7 @@ img {
 .settings_rangeSlider {
     -webkit-appearance: none;
     appearance: none;
-    width: 100px;
+    width: 80px;
     height: 12px;
     background: #d3d3d3;
     outline: none;
