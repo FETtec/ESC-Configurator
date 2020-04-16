@@ -903,7 +903,7 @@ function Internal_Loop() {
                         var getPT = kissProtocol_preparePassthrough();
                         sendBytes(getPT);
                         if (DEBUG) console.log("Requested KISS passthrough via " + getPT);
-                        waitLoops = 25;                        
+                        waitLoops = 25;
                         break;
                     case BF_PT:
                         SerialConnection.RX_tail = SerialConnection.RX_head;
@@ -1239,6 +1239,7 @@ function ChangeDisplay(displayType) {
             var maxID = 0;
             var ID_count = 0;
             for (var i in ESCs) {
+                if (ESCs[i].type > 127) break; //TODO make this smarter
                 if (minID == 0) minID = i;
                 maxID = i;
                 ID_count++;
@@ -1552,6 +1553,7 @@ function displayESCs(ParentElement) {
         } else if (selectedMenu == 1) {
             // ---------------------------------------------------------------------------------------------------// settings
             // ESC_settings
+            if (ESCs[i].type > 127) break; //TODO make this smarter
             ESC_div.id = "ESC_container_" + i;
 
             ESC_div.className = "settings_container";
@@ -1762,7 +1764,7 @@ function displayESCs(ParentElement) {
 
         } else if (selectedMenu == 2) {
             // ---------------------------------------------------------------------------------------------------// tools
-
+            if (ESCs[i].type > 127) break; //TODO make this smarter
             ESC_div.id = "ESC_Canvas_Container_" + i;
 
             var ESC_ToolDiv = document.createElement('div');
@@ -2534,6 +2536,7 @@ function ToolProcessLoop() {
 
 function displayTLMValues(tlmVal) {
     for (var i in ESCs) {
+        if (ESCs[i].type > 127) break; //TODO make this smarter
         ESCs[i].TLMValueElements[tlmVal].innerHTML = ESCs[i].TLMValues[tlmVal] * TLM_scales[tlmVal];
 
 
@@ -2632,10 +2635,18 @@ function initConfig() {
     ESC_Setting_Index = 0;
     checkESCsStat = 0;
     for (var ESC_IDs in ESCs) {
-        read_ESC_ids.push(ESC_IDs);
-        timeoutESC_IDs[ESC_IDs] = 0;
+        if (ESCs[ESC_IDs].type < 127) {
+            console.log("BLABLA")
+            console.log(ESCs[ESC_IDs])
+            read_ESC_ids.push(ESC_IDs);
+            timeoutESC_IDs[ESC_IDs] = 0;
+        }
     }
-    for (var ESC_Settings in ESCs[read_ESC_ids[0]].ESC_settings) read_ESC_settings.push(ESC_Settings);
+    for (var ESC_Settings in ESCs[read_ESC_ids[0]].ESC_settings) {
+        read_ESC_settings.push(ESC_Settings);
+        console.log("BLUBBLUB");
+        console.log(ESC_Settings);
+    }
 }
 
 var saveNewSettingsToId = 0;
