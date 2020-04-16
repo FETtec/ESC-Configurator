@@ -1,8 +1,9 @@
 "user strict";
 
-const DEBUG = 0;
+const DEBUG = 1;
 
-const MAX_TRY = 10;
+const MAX_TRY = 3;
+const DEFAULT_TIMEOUT = 200;
 
 var toolbar = 0;
 var OneWire = 0;
@@ -25,6 +26,9 @@ const OW_REQ_TYPE = 5;
 const OW_REQ_SN = 6;
 const OW_REQ_SW_VER = 7;
 //
+
+const OW_RESPONSE_IN_BL = 0x02;
+const OW_RESPONSE_IN_FW = 0x03;
 
 //OW_ESC
 const OW_RESET_TO_BL = 10;
@@ -160,17 +164,20 @@ function ESC() {
     this.version = 0;
     this.subversion = 0;
     this.activated = 0;
+    this.activationkey = 0;
     this.ESC_select_Input = 0;
     this.selected = true;
     this.loadingBar = 0;
     this.warning = false;
-    this.settingsActive = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0];
+    // begin ESC specific settings
+    this.settingsActive = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]; // TLM buttons
     this.commandedThrottle = 0;
     this.readyForFastCommand = false;
     this.TLMValues = [0, 0, 0, 0, 0, 0, 0, 0];
     this.TLMValueElements = [];
     this.TLMCanvasElement;
     this.TLMCanvasCTX;
+    // end ESC specific settings
     this.CompatibleFW_filename = "";
     this.ESC_settings = {
         0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "readonly", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, escTypes: onAllESCs }, // must always be 0
@@ -186,7 +193,7 @@ function ESC() {
         49: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
         50: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "colorpick", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, escTypes: onAllESCs },
         51: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, escTypes: onAllESCs },
-        56: { getCommand: OW_GET_ACTIVATION, setCommand: null, name: "Activated", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, escTypes: onAllESCs },
+        56: { getCommand: OW_GET_ACTIVATION, setCommand: null, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, escTypes: onAllESCs },
 
         99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "ESC ID", feature: "advanced", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs } // must always be 99 and the last one
     };
@@ -196,7 +203,7 @@ const serial_options = [
     { id: 0, name: 'KISS FC Passthrough', connect_bitrate: 115200, disabled: false },
     { id: 1, name: 'Betaflight Passthrough', connect_bitrate: 115200, disabled: false },
     { id: 2, name: 'USB UART', connect_bitrate: 2000000, disabled: false },
-    { id: 3, name: 'USB', connect_bitrate: 2000000, disabled: true }
+    { id: 3, name: 'USB', connect_bitrate: 2000000, disabled: false }
 ];
 
 const menu_options = [
@@ -279,6 +286,7 @@ var LastSentData = [];
 var loopInterval = 0;
 var interval_Speedup_Done = 0;
 var selectedMenu = 0;
+var activationActive = 0;
 var ESCsToBL = 0;
 var menuEnabled = 1;
 var ESC_package = [];
@@ -625,6 +633,7 @@ function disconnect() {
     clearInterval(loopInterval);
     loopInterval = setInterval(function () { Internal_Loop(); }, 50);
     selectedMenu = 0;
+    activationActive = 0;
     SerialConnection.pass_through = 0;
     SerialConnection.pass_through_fails = 0;
     SerialConnection.connected = false;
@@ -749,6 +758,109 @@ var str2ab = function (arr) {
 };
 
 
+// New functions
+var ESCactivateID = 0;
+
+function OW_activate() {
+    activationActive = 1;
+    ESCactivateID = 0;
+}
+
+function activationLoop() {
+    if (DEBUG) console.log("Activation loop starting");
+    if (waitForResponseID == 0) {
+        while ((!(ESCactivateID in ESCs)) && ESCactivateID < 25) ESCactivateID++;
+        if (ESCactivateID == 25) {
+            activationActive = 0;
+            return;
+        }
+        if (SwitchStatus == 0) {
+            // request
+            if (DEBUG) console.log("ESC " + ESCactivateID + " send OK_OK cmd");
+            send_ESC_package(ESCactivateID, 0, [OW_OK]);
+            waitForResponseID = ESCactivateID;
+            waitForResponseType = 0;
+            waitForResponseLength = 7;
+        } else {
+            if (DEBUG) console.log("ESC " + ESCactivateID + " send OW_GET_ACTIVATION cmd");
+            send_ESC_package(ESCactivateID, 0, [OW_GET_ACTIVATION]);
+            waitForResponseID = ESCactivateID;
+            waitForResponseType = 0;
+            waitForResponseLength = 7;
+        }
+    } else {
+        var responsePackage = checkForRespPackage();
+        if (responsePackage) {
+            timeoutESC_IDs[ESCactivateID] = 0;
+            if (SwitchStatus == 0) {
+                if (responsePackage[0] == OW_RESPONSE_IN_FW) {
+                    SwitchStatus++;
+                    waitForResponseID = 0;
+                    if (DEBUG) console.log("ESC " + ESCactivateID + " is in firmware");
+                } else {
+                    if (switchProblem == 0) {
+                        if (DEBUG) console.log("ESC " + ESCactivateID + " send OW_BL_START_FW cmd");
+                        send_ESC_package(ESCactivateID, 0, [OW_BL_START_FW]);
+                        if (ConnectionType == VCP) {
+                            if (DEBUG) console.log("starting reconnect procedure 1");
+                            ReconnectOnSend(0);
+                        }
+                        switchProblem++;
+                        waitLoops = 20;
+                    } else if (switchProblem < 20) {
+                        if (DEBUG) console.log("ESC with id: " + ESCactivateID + " don't switches ->retry");
+                        send_ESC_package(ESCactivateID, 0, [SwitchCommand]);
+                        switchProblem++;
+                        waitLoops = 20;
+                    } else {
+                        if (DEBUG) console.log("ESC with id: " + ESCactivateID + " don't switches ->stop");
+                        throwSerialBadCommunicationError = 1;
+                        switchProblem = 0;
+                    }
+                }
+            } else if (SwitchStatus == 1) {
+                ESCs[ESCactivateID].activated = (responsePackage[5]);
+                if (DEBUG) console.log("ESC " + ESCactivateID + " response is " + ESCs[ESCactivateID].activated);
+                SwitchStatus++;
+            } else if (SwitchStatus == 2) {
+                console.dir(ESCs);
+                console.log(ESCactivateID);
+                if (ESCs[ESCactivateID].activated == 0) {
+                    if (DEBUG) console.log("Activating ESC " + ESCactivateID + " with key " + ESCs[ESCactivateID].activationkey);
+                    send_ESC_package(ESCactivateID, 0, [OW_SET_ACTIVATION, 0x01, 0x02, 0x03, 0x04]); // need to replace with proper key
+                    waitForResponseID = ESCactivateID;
+                    waitForResponseType = 0;
+                    waitForResponseLength = 7;
+                    SwitchStatus++;
+                } else {
+                    if (DEBUG) console.log("ESC " + ESCactivateID + " is already activated.");
+                    SwitchStatus = 0;
+                    ESCactivateID++;
+                }
+            } else if (SwitchStatus == 3) {
+                if (responsePackage[5] == OW_OK) {
+                    if (DEBUG) console.log("ESC " + ESCactivateID + " activated.");
+                } else {
+                    if (DEBUG) console.log("ESC " + ESCactivateID + " activation wrong response: " + responsePackage[5]);
+                }
+                SwitchStatus = 0;
+                ESCactivateID++;
+            }
+        } else if (++timeoutESC_IDs[ESCactivateID] == DEFAULT_TIMEOUT || timeoutESC_IDs[ESCactivateID] == DEFAULT_TIMEOUT * 2 || timeoutESC_IDs[ESCactivateID] == DEFAULT_TIMEOUT * 3) {
+            sendBytes(LastSentData);
+            if (DEBUG) console.log("no response, retrying");
+        } else if (timeoutESC_IDs[ESCactivateID] > DEFAULT_TIMEOUT * 3) {
+            if (DEBUG) console.log("no response from ESC with id: " + ESCactivateID + " ->stop");
+            throwSerialBadCommunicationError = 1;
+            waitForResponseID = 0;
+            ESCactivateID++;
+        }
+    }
+    if (DEBUG) console.log("Activation loop completed");
+
+}
+
+
 //===================================================================================== a slow loop to check com ports and stuff
 
 var sentTestPackage = 0;
@@ -790,15 +902,15 @@ function Internal_Loop() {
                     case KISS_PT:
                         var getPT = kissProtocol_preparePassthrough();
                         sendBytes(getPT);
-                        if (DEBUG) console.log(getPT);
-                        if (DEBUG) console.log("Requested KISS passthrough");
+                        if (DEBUG) console.log("Requested KISS passthrough via " + getPT);
+                        waitLoops = 25;                        
                         break;
                     case BF_PT:
                         SerialConnection.RX_tail = SerialConnection.RX_head;
                         var getPT = bfProtocol_preparePassthrough();
                         sendBytes(getPT);
                         if (DEBUG) console.log("Requested BF passthrough");
-                        waitLoops = 20;
+                        waitLoops = 25;
                         break
                     case USB_UART:
                         if (DEBUG) console.log("UART connected");
@@ -948,6 +1060,9 @@ function Internal_Loop() {
             if (selectedMenu == 1) {
                 ConfigLoop();
             }
+            if (activationActive == 1) {
+                activationLoop();
+            }
         }
     }
 }
@@ -968,11 +1083,11 @@ function change_ESCs_status(stat, enableButtonsIfDone = 0, refreshVersionIfDone 
     enableButtonsAfterSwitch = enableButtonsIfDone;
     refreshVersion = refreshVersionIfDone;
     if (stat == 0) {
-        expectedHeader = 0x02;
+        expectedHeader = OW_RESPONSE_IN_BL;
         SwitchCommand = OW_RESET_TO_BL;
         if (DEBUG) console.log("changing status to Bootloader");
     } else {
-        expectedHeader = 0x03;
+        expectedHeader = OW_RESPONSE_IN_FW;
         SwitchCommand = OW_BL_START_FW;
         if (DEBUG) console.log("changing status to Firmware");
     }
@@ -1028,12 +1143,12 @@ function check_ESCs_In_BL() {
             timeoutESC_IDs[SwitchESCsFW_ID] = 0;
             if (SwitchStatus == 0) {
                 if (responsePackage[0] == expectedHeader) {
-                    if (expectedHeader == 0x02) ESCs[SwitchESCsFW_ID].asBL = true;
+                    if (expectedHeader == OW_RESPONSE_IN_BL) ESCs[SwitchESCsFW_ID].asBL = true;
                     else ESCs[SwitchESCsFW_ID].asBL = false;
                     if (DEBUG) console.log("ESC with id: " + SwitchESCsFW_ID + " is ready");
                     SwitchStatus++;
                 } else {
-                    if (expectedHeader != 0x02) ESCs[SwitchESCsFW_ID].asBL = false;
+                    if (expectedHeader != OW_RESPONSE_IN_BL) ESCs[SwitchESCsFW_ID].asBL = false;
                     else ESCs[SwitchESCsFW_ID].asBL = true;
                     if (switchProblem == 0) {
                         if (DEBUG) console.log("switching ESC with id: " + SwitchESCsFW_ID);
@@ -1063,10 +1178,10 @@ function check_ESCs_In_BL() {
                 SwitchStatus = 0;
                 SwitchESCsFW_ID++;
             }
-        } else if (++timeoutESC_IDs[SwitchESCsFW_ID] == 150 || timeoutESC_IDs[SwitchESCsFW_ID] == 300 || timeoutESC_IDs[SwitchESCsFW_ID] == 450) {
+        } else if (++timeoutESC_IDs[SwitchESCsFW_ID] == DEFAULT_TIMEOUT || timeoutESC_IDs[SwitchESCsFW_ID] == DEFAULT_TIMEOUT * 2 || timeoutESC_IDs[SwitchESCsFW_ID] == DEFAULT_TIMEOUT * 3) {
             sendBytes(LastSentData);
             if (DEBUG) console.log("no response, retrying");
-        } else if (timeoutESC_IDs[SwitchESCsFW_ID] > 450) {
+        } else if (timeoutESC_IDs[SwitchESCsFW_ID] > DEFAULT_TIMEOUT * 3) {
             if (DEBUG) console.log("no response from ESC with id: " + SwitchESCsFW_ID + " ->stop");
             throwSerialBadCommunicationError = 1;
             waitForResponseID = 0;
@@ -1233,7 +1348,7 @@ function ScanForESCs() {
     $("#progressbar").progressbar({
         value: current_progress
     });
-    $(".progress-label").text("Scanning for ESC's " + current_progress + "%");
+    $(".progress-label").text("Scanning for devices " + current_progress + "%");
 
     if (!waitForResponseID) {
         if (scanStep == 0) { // look for ID
@@ -1273,14 +1388,14 @@ function ScanForESCs() {
                 if (scanStep == 0) {
                     ESCs[scanID] = new ESC();
                     ESCs[scanID].id = scanID;
-                    ESCs[scanID].asBL = (responsePackage[0] == 0x02);
+                    ESCs[scanID].asBL = (responsePackage[0] == OW_RESPONSE_IN_BL);
                     if (DEBUG) console.log("found ID: " + ESCs[scanID].id + ", is a bootloader: " + ESCs[scanID].asBL);
                     scanStep = 1;
                     ScanForESCs();
                 } else if (scanStep == 1) {
 
                     ESCs[scanID].type = responsePackage[5];
-                    if (ESCs[scanID].type > 127) {
+                    if (ESCs[scanID].type == 128) {
                         is_USB_only_bootloader = 1;
                         if (DEBUG) console.log("Board type is USB bootloader only!");
                     }
@@ -1612,6 +1727,7 @@ function displayESCs(ParentElement) {
                     case "readonly":
                         var ESC_setting = document.createElement('div');
                         ESC_setting.className = "setting_container";
+                        //ESC_settings.style.display = "none"; // hardcoded hidden
                         if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
                         ESC_setting_text = document.createElement('div')
                         ESC_setting_text.className = "setting_text";
@@ -1980,7 +2096,7 @@ function FlashProcessLoop() {
                 if (responsePackage[1] == FlashESC_ID) {
                     timeoutESC_IDs[FlashESC_ID] = 0;
                     if (act_ESC_flash_Stat == 1) {
-                        if (responsePackage[0] == 0x02) {
+                        if (responsePackage[0] == OW_RESPONSE_IN_BL) {
                             ESCs[FlashESC_ID].asBL = true;
                             if (DEBUG) console.log("ESC with ID: " + FlashESC_ID + " is in bootloader mode");
                             act_ESC_flash_Stat = 2;
@@ -2049,11 +2165,11 @@ function FlashProcessLoop() {
                         }
                     }
                 }
-            } else if (++timeoutESC_IDs[FlashESC_ID] == 100 || timeoutESC_IDs[FlashESC_ID] == 200 || timeoutESC_IDs[FlashESC_ID] == 300) {
+            } else if (++timeoutESC_IDs[FlashESC_ID] == DEFAULT_TIMEOUT || timeoutESC_IDs[FlashESC_ID] == DEFAULT_TIMEOUT * 2 || timeoutESC_IDs[FlashESC_ID] == DEFAULT_TIMEOUT * 3) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
 
-            } else if (timeoutESC_IDs[FlashESC_ID] > 550) {
+            } else if (timeoutESC_IDs[FlashESC_ID] > DEFAULT_TIMEOUT * 3) {
                 send_ESC_package(FlashESC_ID, 0xFFFF, [FlashESC_ID + 10, FlashESC_ID + 20]);
                 timeoutESC_IDs[FlashESC_ID] = 0;
                 act_ESC_flash_Stat = 2;
@@ -2125,7 +2241,7 @@ function parseHexFile(hexData) {
             if (DEBUG) console.log('hex start at: ' + dec2hex(address_Counter));
         }
         if (i == 3) {
-            if (((parseInt(lineArr[2]) == 1 && parseInt(lineArr[3])) == 8) || ((parseInt(lineArr[2]) == 3 && parseInt(lineArr[3])) == 8) || parseInt(lineArr[2]) == 4) {
+            if (((parseInt(lineArr[2]) == 1 && parseInt(lineArr[3])) == 0) || ((parseInt(lineArr[2]) == 1 && parseInt(lineArr[3])) == 8) || ((parseInt(lineArr[2]) == 3 && parseInt(lineArr[3])) == 8) || parseInt(lineArr[2]) == 4) {
                 if (DEBUG) console.log('loaded hex file is a valid FW file');
             } else {
                 if (DEBUG) console.log('loaded hex file is a invalid FW file');
@@ -2379,7 +2495,7 @@ function ToolProcessLoop() {
             if (responsePackage) {
                 timeoutESC_IDs[checkESCid] = 0;
                 if (checkESCsStat == 0) {
-                    if ((responsePackage[0] & 0x07) == 0x03) {
+                    if ((responsePackage[0] & 0x07) == OW_RESPONSE_IN_FW) {
                         ESCs[checkESCid].asBL = false;
                         checkESCsStat++;
                     } else {
@@ -2402,10 +2518,10 @@ function ToolProcessLoop() {
                         checkESCid++;
                     }
                 }
-            } else if (++timeoutESC_IDs[checkESCid] == 150 || timeoutESC_IDs[checkESCid] == 300 || timeoutESC_IDs[checkESCid] == 450) {
+            } else if (++timeoutESC_IDs[checkESCid] == DEFAULT_TIMEOUT || timeoutESC_IDs[checkESCid] == DEFAULT_TIMEOUT * 2 || timeoutESC_IDs[checkESCid] == DEFAULT_TIMEOUT * 3) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutESC_IDs[checkESCid] > 450) {
+            } else if (timeoutESC_IDs[checkESCid] > DEFAULT_TIMEOUT * 3) {
                 if (DEBUG) console.log("no response from ESC with id: " + checkESCid + " ->stop");
                 throwSerialBadCommunicationError = 1;
                 waitForResponseID = 0;
@@ -2564,7 +2680,7 @@ function ConfigLoop() {
             if (responsePackage) {
                 timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] = 0;
                 if (checkESCsStat == 0) {
-                    if ((responsePackage[0] & 0x07) == 0x03) {
+                    if ((responsePackage[0] & 0x07) == OW_RESPONSE_IN_FW) {
                         ESCs[read_ESC_ids[ESC_ID_Index]].asBL = false;
                         checkESCsStat++;
                     } else {
@@ -2592,10 +2708,10 @@ function ConfigLoop() {
                     if (DEBUG) console.log("Setting " + ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " from ESC with id: " + read_ESC_ids[ESC_ID_Index] + " is " + ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active + " bytecound: " + ESCs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount);
                     ESC_Setting_Index++;
                 }
-            } else if (++timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == 150 || timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == 300 || timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == 450) {
+            } else if (++timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == DEFAULT_TIMEOUT || timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == DEFAULT_TIMEOUT * 2 || timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == DEFAULT_TIMEOUT * 3) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] > 450) {
+            } else if (timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] > DEFAULT_TIMEOUT * 3) {
                 if (DEBUG) console.log("no response from ESC with id: " + read_ESC_ids[ESC_ID_Index] + " ->stop");
                 throwSerialBadCommunicationError = 1;
                 waitForResponseID = 0;
@@ -2687,10 +2803,10 @@ function ConfigLoop() {
                     }
                     waitForResponseID = 0;
                 }
-            } else if (++timeoutESC_IDs[saveNewSettingsToId] == 150 || timeoutESC_IDs[saveNewSettingsToId] == 300 || timeoutESC_IDs[saveNewSettingsToId] == 450) {
+            } else if (++timeoutESC_IDs[saveNewSettingsToId] == DEFAULT_TIMEOUT || timeoutESC_IDs[saveNewSettingsToId] == DEFAULT_TIMEOUT * 2 || timeoutESC_IDs[saveNewSettingsToId] == DEFAULT_TIMEOUT * 3) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutESC_IDs[saveNewSettingsToId] > 450) {
+            } else if (timeoutESC_IDs[saveNewSettingsToId] > DEFAULT_TIMEOUT * 3) {
                 if (DEBUG) console.log("no response from ESC with id: " + saveNewSettingsToId + " ->stop");
                 throwSerialBadCommunicationError = 1;
                 waitForResponseID = 0;
@@ -2767,4 +2883,5 @@ function saveSettingsOfId(ID) {
     if (changedSettings) {
         saveNewSettingsToId = ID; // make the loop save the settings
     }
+    //OW_activate();
 }
