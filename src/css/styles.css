@@ -67,9 +67,10 @@ img {
     margin-top: 10px;
     margin-left: 10px;
     margin-right: 10px;
-    height: 90px; /* height: 55px */
+    min-height: 50px; /* height: 55px */
     padding: 10px;
     border-radius: 3px;
+    overflow: auto;
 }
 
 [class*='esc_info_'] {
@@ -81,9 +82,9 @@ img {
 .esc_info_id {
     font-size: 18px;
     width: 10%;
-    line-height: 75px;
+    line-height: 50px;
     text-align: center;
-    height: 75px;
+    min-height: 50px;
     margin-top: -10px;
     margin-left: -10px;
     border-right: 1px solid #c0c0c0;
@@ -93,9 +94,9 @@ img {
 
 .esc_info_div {
     width: 90%;
-    line-height: 75px;
+    line-height: 50px;
     text-align: center;
-    height: 75px;
+    min-height: 50px;
     margin-top: -10px;
     margin-left: -10px;
     float: left;
@@ -310,11 +311,12 @@ img {
 
 .esc_settings_div {
     width: 80%;
-    height: 55px;
+    min-height: 50px;
     margin-left: 10px;
     margin-top: -6px;
     float: left;
     padding: auto;
+    overflow: auto;
 }
 
 .setting_container {

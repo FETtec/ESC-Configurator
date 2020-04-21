@@ -89,15 +89,15 @@ const OW_SET_ACTIVATION = 57;
 //
 
 const ESC_types = [
-    { id: 0, name: "none", filename: '' },
-    { id: 1, name: "FETtec ESC 35A", filename: 'FETTEC_35A_ESC_G0_' },
-    { id: 2, name: "FETtec ESC 50A", filename: 'FETTEC_50A_ESC_G0_' },
-    { id: 3, name: "FETtec ESC 7A", filename: 'FETTEC_7A_ESC_G0_' },
+    { id: 0, name: "none", filename: ''},
+    { id: 1, name: "FETtec ESC 35A", filename: 'FETTEC_35A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 2, name: "FETtec ESC 50A", filename: 'FETTEC_50A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 3, name: "FETtec ESC 7A", filename: 'FETTEC_7A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 4, name: "G4_ESC", filename: '' },
-    { id: 5, name: "ESCS32K", filename: '' },
-    { id: 6, name: "FETtec ESC 45A", filename: 'FETTEC_45A_ESC_G0_' },
-    { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_' },
-    { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_' },
+    { id: 5, name: "ESCS32K", filename: '', start_addr: 4000, blOnly: false },
+    { id: 6, name: "FETtec ESC 45A", filename: 'FETTEC_45A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 64, name: "ESC 15A", filename: 'ESC_DEF_GD_15A_ESC_G0_' },
     { id: 65, name: "ESC 15A", filename: 'ESC_ADV_GD_15A_ESC_G0_' },
     { id: 66, name: "ESC 15A", filename: '' },
@@ -148,8 +148,8 @@ const ESC_types = [
     { id: 105, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_' },
     { id: 106, name: "ESC 100A", filename: '' },
     { id: 107, name: "ESC 100A", filename: '' },
-    { id: 128, name: "G4 USB Bootloader", filename: '' },
-    { id: 129, name: "OSD", filename: '' }
+    { id: 128, name: "G4 USB Bootloader", filename: '', start_addr: 3800, blOnly: true },
+    { id: 129, name: "G0 OSD", filename: '', start_addr: 1000, blOnly: true }
 ];
 
 // helper to prevent single arrays in all settings
@@ -195,7 +195,7 @@ function ESC() {
         51: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, escTypes: onAllESCs },
         56: { getCommand: OW_GET_ACTIVATION, setCommand: null, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, escTypes: onAllESCs },
 
-        99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "ESC ID", feature: "advanced", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs } // must always be 99 and the last one
+        99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs } // must always be 99 and the last one
     };
 }
 
@@ -880,6 +880,7 @@ function Internal_Loop() {
 
     if (throwSerialBadCommunicationError && communicationErrorWarningDone == 0) {
         communicationErrorWarningDone = 1;
+        if (DEBUG) console.log("Many serial comm errors");
         $("#dialog").text("Many serial communication errors occurred! Proper functionality cannot be granted.");
         $("#dialog").dialog({
             modal: true,
@@ -1119,6 +1120,13 @@ function check_ESCs_In_BL() {
             }
             return;
         }
+
+        if ((ESC_types.find(x => x.id === ESCs[SwitchESCsFW_ID].type)).blOnly == true) {
+            SwitchStatus = 0;
+            SwitchESCsFW_ID++;
+            return;
+        }
+
         if (SwitchStatus == 0) {
             send_ESC_package(SwitchESCsFW_ID, 0, [OW_OK]);
             waitForResponseID = SwitchESCsFW_ID;
@@ -1151,6 +1159,8 @@ function check_ESCs_In_BL() {
                     if (expectedHeader != OW_RESPONSE_IN_BL) ESCs[SwitchESCsFW_ID].asBL = false;
                     else ESCs[SwitchESCsFW_ID].asBL = true;
                     if (switchProblem == 0) {
+                        if (ESCs[SwitchESCsFW_ID].type > 127) return // TODO make this nicer
+                        console.log("BLAPOINT")
                         if (DEBUG) console.log("switching ESC with id: " + SwitchESCsFW_ID);
                         send_ESC_package(SwitchESCsFW_ID, 0, [SwitchCommand]);
                         if (ConnectionType == VCP) {
@@ -1244,6 +1254,7 @@ function ChangeDisplay(displayType) {
                 maxID = i;
                 ID_count++;
             }
+            /*
             if ((maxID - minID) + 1 > ID_count) {
                 $("#dialog").text("ESC telemetry cannot be displayed because ID's have gaps. please change the ID's to be in a row.");
                 $("#dialog").dialog({
@@ -1257,6 +1268,7 @@ function ChangeDisplay(displayType) {
                 });
                 return;
             }
+            */
         }
         for (var i in ESCs) {
             ESCs[i].settingsActive[8] = 0;
@@ -1651,61 +1663,60 @@ function displayESCs(ParentElement) {
 
                         break
                     case "colorpick":
-                        //console.log(ESCs[i].ESC_settings[y].active)
-                        var colorpickarray = [];
-                        colorpickarray['Type'] = (ESCs[i].ESC_settings[y].active) & 0xFF       // 0=off, 1=RGB, 2=GRB
-                        if (colorpickarray['Type'] = 2) {
-                            colorpickarray['G'] = (ESCs[i].ESC_settings[y].active >> 24) & 0xFF
-                            colorpickarray['R'] = (ESCs[i].ESC_settings[y].active >> 16) & 0xFF
-                        } else {
-                            colorpickarray['R'] = (ESCs[i].ESC_settings[y].active >> 24) & 0xFF
-                            colorpickarray['G'] = (ESCs[i].ESC_settings[y].active >> 16) & 0xFF
-                        }
-                        colorpickarray['B'] = (ESCs[i].ESC_settings[y].active >> 8) & 0xFF
-                        console.dir(colorpickarray)
-                        var ESC_setting = document.createElement('div');
-                        ESC_setting.className = "setting_container";
-                        if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
-                        ESC_setting_text = document.createElement('div')
-                        ESC_setting_text.className = "setting_text";
-                        ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
-                        ESC_setting.appendChild(ESC_setting_text);
-                        ESC_info_div.appendChild(ESC_setting);
-                        settingNumber = document.createElement('input');
-                        settingNumber.type = "number";
-                        settingNumber.readOnly = true;
-                        settingNumber.style.width = ((ESCs[i].ESC_settings[y].max.toString(10).length * 12) + 5) + "px";
-                        settingNumber.className = "settings_numberBox"; //  ui-corner-all
-                        settingNumber.value = ESCs[i].ESC_settings[y].active;
-                        settingNumber.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
-                        settingNumber.onchange = function () {
-                            SettingsChanged(this.id);
-                        }
-                        ESC_setting.appendChild(settingNumber);
+                        /*
+                            //console.log(ESCs[i].ESC_settings[y].active)
+                            var colorpickarray = [];
+                            colorpickarray['Type'] = (ESCs[i].ESC_settings[y].active) & 0xFF       // 0=off, 1=RGB, 2=GRB
+                            if (colorpickarray['Type'] = 2) {
+                                colorpickarray['G'] = (ESCs[i].ESC_settings[y].active >> 24) & 0xFF
+                                colorpickarray['R'] = (ESCs[i].ESC_settings[y].active >> 16) & 0xFF
+                            } else {
+                                colorpickarray['R'] = (ESCs[i].ESC_settings[y].active >> 24) & 0xFF
+                                colorpickarray['G'] = (ESCs[i].ESC_settings[y].active >> 16) & 0xFF
+                            }
+                            colorpickarray['B'] = (ESCs[i].ESC_settings[y].active >> 8) & 0xFF
+                            console.dir(colorpickarray)
+                            var ESC_setting = document.createElement('div');
+                            ESC_setting.className = "setting_container";
+                            if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
+                            ESC_setting_text = document.createElement('div')
+                            ESC_setting_text.className = "setting_text";
+                            ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
+                            ESC_setting.appendChild(ESC_setting_text);
+                            ESC_info_div.appendChild(ESC_setting);
+                            settingNumber = document.createElement('input');
+                            settingNumber.type = "number";
+                            settingNumber.readOnly = true;
+                            settingNumber.style.width = ((ESCs[i].ESC_settings[y].max.toString(10).length * 12) + 5) + "px";
+                            settingNumber.className = "settings_numberBox"; //  ui-corner-all
+                            settingNumber.value = ESCs[i].ESC_settings[y].active;
+                            settingNumber.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
+                            settingNumber.onchange = function () {
+                                SettingsChanged(this.id);
+                            }
+                            ESC_setting.appendChild(settingNumber);
+    
+                            // OLD
+                            var ESC_setting = document.createElement('div');
+                            ESC_setting.className = "setting_container";
+                            if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
+                            ESC_setting_text = document.createElement('div')
+                            ESC_setting_text.className = "setting_text";
+                            ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
+                            ESC_setting.appendChild(ESC_setting_text);
+                            ESC_info_div.appendChild(ESC_setting);
+                            settingNumber = document.createElement('input');
+                            //settingNumber.type = "number";
+                            settingNumber.style.width = ((ESCs[i].ESC_settings[y].max.toString(10).length * 12) + 5) + "px";
+                            settingNumber.className = "jscolor"; //  ui-corner-all
+                            settingNumber.value = dec2hex(colorpickarray['R']) + dec2hex(colorpickarray['G']) + dec2hex(colorpickarray['B']);
+                            settingNumber.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
+                            settingNumber.onchange = function () {
+                                SettingsChanged(this.id);
+                            }
+                            ESC_setting.appendChild(settingNumber);
+                            */
                         break
-
-
-                    /*
-                                            var ESC_setting = document.createElement('div');
-                                            ESC_setting.className = "setting_container";
-                                            if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
-                                            ESC_setting_text = document.createElement('div')
-                                            ESC_setting_text.className = "setting_text";
-                                            ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
-                                            ESC_setting.appendChild(ESC_setting_text);
-                                            ESC_info_div.appendChild(ESC_setting);
-                                            settingNumber = document.createElement('input');
-                                            //settingNumber.type = "number";
-                                            settingNumber.style.width = ((ESCs[i].ESC_settings[y].max.toString(10).length * 12) + 5) + "px";
-                                            settingNumber.className = "jscolor"; //  ui-corner-all
-                                            settingNumber.value = dec2hex(colorpickarray['R']) + dec2hex(colorpickarray['G']) + dec2hex(colorpickarray['B']);
-                                            settingNumber.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
-                                            settingNumber.onchange = function () {
-                                                SettingsChanged(this.id);
-                                            }
-                                            ESC_setting.appendChild(settingNumber);
-                                            break
-                    */
                     case "value":
                         var ESC_setting = document.createElement('div');
                         ESC_setting.className = "setting_container";
@@ -1729,8 +1740,8 @@ function displayESCs(ParentElement) {
                     case "readonly":
                         var ESC_setting = document.createElement('div');
                         ESC_setting.className = "setting_container";
-                        //ESC_settings.style.display = "none"; // hardcoded hidden
-                        if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
+                        //if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
+                        ESC_setting.style.display = "none";
                         ESC_setting_text = document.createElement('div')
                         ESC_setting_text.className = "setting_text";
                         ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
@@ -1743,9 +1754,6 @@ function displayESCs(ParentElement) {
                         settingNumber.className = "settings_numberBox"; //  ui-corner-all
                         settingNumber.value = ESCs[i].ESC_settings[y].active;
                         settingNumber.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
-                        settingNumber.onchange = function () {
-                            SettingsChanged(this.id);
-                        }
                         ESC_setting.appendChild(settingNumber);
                         break;
                     default:
@@ -2009,6 +2017,7 @@ function initFWUpdater() {
 }
 
 function PrepareUpdate() {
+
     if ($('#FW_flash').length == 0) {
         $("#toolbar").append(
             $('<button/>')
@@ -2225,9 +2234,10 @@ function FlashProcessLoop() {
     }
 }
 
+var address_Counter = 0
 function parseHexFile(hexData) {
     var tempHexString = hexData.replace(/(?:\r\n|\r|\n)/g, '').split(':');
-    var address_Counter = 0
+
     var hexStartFound = 0;
     var lineArr = [];
     FW_update.hexString = [];
@@ -2239,8 +2249,8 @@ function parseHexFile(hexData) {
         var hex_Line_Address = parseInt('0x' + lineArr[2] + '' + lineArr[3] + '' + lineArr[4] + '' + lineArr[5]);
         if ((i == 2 && hexStartFound == 0) || (i == 1 && parseInt(lineArr[1]) != 2)) {
             hexStartFound = 1;
-            address_Counter = hex_Line_Address;
-            if (DEBUG) console.log('hex start at: ' + dec2hex(address_Counter));
+            address_Counter = parseInt(hex_Line_Address);
+            if (DEBUG) console.log('hex start at: ' + (address_Counter));
         }
         if (i == 3) {
             if (((parseInt(lineArr[2]) == 1 && parseInt(lineArr[3])) == 0) || ((parseInt(lineArr[2]) == 1 && parseInt(lineArr[3])) == 8) || ((parseInt(lineArr[2]) == 3 && parseInt(lineArr[3])) == 8) || parseInt(lineArr[2]) == 4) {
@@ -2310,7 +2320,7 @@ function initTools() {
     checkESCsStat = 0;
     checkESCid = 0;
 
-    // get max ESC ID
+    // get max OneWire ID
     MaxESCid = 0;
     MinESCid = 25;
     for (var i in ESCs) {
@@ -2318,11 +2328,14 @@ function initTools() {
         ESCs[i].commandedThrottle = 0;
         if (i > MaxESCid) MaxESCid = i;
         if (i < MinESCid) MinESCid = i;
-        ESCs[i].TLMCanvasCTX = ESCs[i].TLMCanvasElement.getContext("2d");
-        GraphArr[i] = [];
-        for (var j = 0; j < 8; j++) {
-            GraphArr[i][j] = [];
-            for (var k = 0; k < 121; k++) GraphArr[i][j][k] = 0;
+
+        if (ESC_types.find(x => x.id === ESCs[i].type).blOnly != true) { 
+            ESCs[i].TLMCanvasCTX = ESCs[i].TLMCanvasElement.getContext("2d");
+            GraphArr[i] = [];
+            for (var j = 0; j < 8; j++) {
+                GraphArr[i][j] = [];
+                for (var k = 0; k < 121; k++) GraphArr[i][j][k] = 0;
+            }
         }
     }
     change_ESCs_status(1);
@@ -2435,8 +2448,8 @@ function ToolProcessLoop() {
                                 message = "No motor detected or failure on HIGH side FETs/gatedriver"
                                 break;
                             case 3000:
-                                console.log(ESC_types.find(x => x.id === ESCs[i].TLMValues[5]).name)
-                                console.log(ESC_types.find(x => x.id === ESCs[i].TLMValues[6]).name)
+                                if (DEBUG) console.log(ESC_types.find(x => x.id === ESCs[i].TLMValues[5]).name)
+                                if (DEBUG) console.log(ESC_types.find(x => x.id === ESCs[i].TLMValues[6]).name)
                                 var detected_esc = (ESC_types.find(x => x.id === ESCs[i].TLMValues[5]).name)
                                 var expected_esc = (ESC_types.find(x => x.id === ESCs[i].TLMValues[6]).name)
                                 message = "Firmware mismatch to hardware.<br><br>Expected HW: " + expected_esc + "<br>Detected HW: " + detected_esc;
@@ -2449,7 +2462,7 @@ function ToolProcessLoop() {
                         }
 
                         $(".ui-notification-container").notification("create", {
-                            title: "Problem on ESC id " + i + " detected",
+                            title: "Problem on OneWire ID " + i + " detected",
                             content: message,
                         },
                             {
@@ -2475,10 +2488,16 @@ function ToolProcessLoop() {
     } else { // prepare ESC's for fast Command
         if (waitForResponseID == 0) {
             while ((!(checkESCid in ESCs)) && checkESCid < 25) checkESCid++;
+ 
             if (checkESCid == 25) {
                 ESCsReady = 1;
                 return;
             }
+            if (ESC_types.find(x => x.id === ESCs[checkESCid].type).blOnly == true) {
+                checkESCid++;
+                return;
+            }
+
             if (checkESCsStat == 0) {
                 send_ESC_package(checkESCid, 0, [OW_OK]);
                 waitForResponseID = checkESCid;
@@ -2636,16 +2655,12 @@ function initConfig() {
     checkESCsStat = 0;
     for (var ESC_IDs in ESCs) {
         if (ESCs[ESC_IDs].type < 127) {
-            console.log("BLABLA")
-            console.log(ESCs[ESC_IDs])
             read_ESC_ids.push(ESC_IDs);
             timeoutESC_IDs[ESC_IDs] = 0;
         }
     }
     for (var ESC_Settings in ESCs[read_ESC_ids[0]].ESC_settings) {
         read_ESC_settings.push(ESC_Settings);
-        console.log("BLUBBLUB");
-        console.log(ESC_Settings);
     }
 }
 
@@ -2755,7 +2770,7 @@ function ConfigLoop() {
                 } else if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 4) {
                     send_ESC_package(saveNewSettingsToId, 0, [(ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].setCommand), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 24), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 16) & 0xFF, (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 8) & 0xFF, (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] & 0xFF)]);
                 }
-                if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name == "ESC ID") {
+                if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand == OW_GET_ID) {
                     waitForResponseID = newSettingsValues[read_ESC_settings[ESC_Setting_Index]];
                 } else {
                     waitForResponseID = saveNewSettingsToId;
@@ -2793,7 +2808,7 @@ function ConfigLoop() {
                         ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active = newSettingsValues[read_ESC_settings[ESC_Setting_Index]];
                         checkESCsStat = 0;
                         if (ESCs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand == OW_GET_ID) {
-                            $("#dialog").text("A ESC id was changed. GUI must reset! please connect again.");
+                            $("#dialog").text("OneWire ID was changed. GUI must reset! please connect again.");
                             $("#dialog").dialog({
                                 modal: true,
                                 buttons: {
@@ -2876,7 +2891,7 @@ function saveSettingsOfId(ID) {
             if (newSettingsValues[99] == read_ESC_ids[i]) ID_is_free = 0;
         }
         if (ID_is_free == 0) {
-            $("#dialog").text("ESC ID:" + newSettingsValues[99] + " is already in use, please choose another one.");
+            $("#dialog").text("OneWire ID " + newSettingsValues[99] + " is already in use, please choose another one.");
             $("#dialog").dialog({
                 modal: true,
                 buttons: {
