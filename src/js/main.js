@@ -1,9 +1,9 @@
 "user strict";
 
-const DEBUG = 1;
+const DEBUG = 0;
 
 const MAX_TRY = 3;
-const DEFAULT_TIMEOUT = 200;
+const DEFAULT_TIMEOUT = 210;
 
 var toolbar = 0;
 var OneWire = 0;
@@ -89,7 +89,7 @@ const OW_SET_ACTIVATION = 57;
 //
 
 const ESC_types = [
-    { id: 0, name: "none", filename: ''},
+    { id: 0, name: "none", filename: '' },
     { id: 1, name: "FETtec ESC 35A", filename: 'FETTEC_35A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 2, name: "FETtec ESC 50A", filename: 'FETTEC_50A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 3, name: "FETtec ESC 7A", filename: 'FETTEC_7A_ESC_G0_', start_addr: 1800, blOnly: false },
@@ -904,14 +904,14 @@ function Internal_Loop() {
                         var getPT = kissProtocol_preparePassthrough();
                         sendBytes(getPT);
                         if (DEBUG) console.log("Requested KISS passthrough via " + getPT);
-                        waitLoops = 25;
+                        waitLoops = 30;
                         break;
                     case BF_PT:
                         SerialConnection.RX_tail = SerialConnection.RX_head;
                         var getPT = bfProtocol_preparePassthrough();
                         sendBytes(getPT);
                         if (DEBUG) console.log("Requested BF passthrough");
-                        waitLoops = 25;
+                        waitLoops = 30;
                         break
                     case USB_UART:
                         if (DEBUG) console.log("UART connected");
@@ -2047,6 +2047,7 @@ function StartFlashProcess() {
 var act_ESC_flash_Stat = 0;
 var act_ESC_sent_Page = 0;
 var afterFlashedDisplay = 0;
+var extraDelay = 1;
 
 function FlashProcessLoop() {
     while ((!(FlashESC_ID in ESCs) || !ESCs[FlashESC_ID].selected) && FlashESC_ID < 25) FlashESC_ID++;
@@ -2073,6 +2074,7 @@ function FlashProcessLoop() {
                 waitForResponseID = FlashESC_ID;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
+                extraDelay = 1;
                 if (DEBUG) console.log("sent to ESC with ID: " + FlashESC_ID + " the block count that need to be flashed & erase flash command. ");
             } else if (act_ESC_flash_Stat == 3) {
                 if (act_ESC_sent_Page > 0) {
@@ -2120,6 +2122,7 @@ function FlashProcessLoop() {
                         if (responsePackage[5] == 0) {
                             if (DEBUG) console.log("ESC with ID: " + FlashESC_ID + " confirmed flash erase");
                             act_ESC_flash_Stat = 3;
+                            extraDelay = is_USB_only_bootloader;
                         } else {
                             if (DEBUG) console.log("ESC with ID: " + FlashESC_ID + " reported error: " + responsePackage[5]);
                         }
@@ -2176,11 +2179,11 @@ function FlashProcessLoop() {
                         }
                     }
                 }
-            } else if (++timeoutESC_IDs[FlashESC_ID] == DEFAULT_TIMEOUT || timeoutESC_IDs[FlashESC_ID] == DEFAULT_TIMEOUT * 2 || timeoutESC_IDs[FlashESC_ID] == DEFAULT_TIMEOUT * 3) {
+            } else if (++timeoutESC_IDs[FlashESC_ID] == DEFAULT_TIMEOUT + (350 * extraDelay) || timeoutESC_IDs[FlashESC_ID] == (DEFAULT_TIMEOUT * 2) + (500 * extraDelay) || timeoutESC_IDs[FlashESC_ID] == (DEFAULT_TIMEOUT * 3) + (650 * extraDelay)) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
 
-            } else if (timeoutESC_IDs[FlashESC_ID] > DEFAULT_TIMEOUT * 3) {
+            } else if (timeoutESC_IDs[FlashESC_ID] > (DEFAULT_TIMEOUT * 3) + (800 * extraDelay)) {
                 send_ESC_package(FlashESC_ID, 0xFFFF, [FlashESC_ID + 10, FlashESC_ID + 20]);
                 timeoutESC_IDs[FlashESC_ID] = 0;
                 act_ESC_flash_Stat = 2;
@@ -2329,7 +2332,7 @@ function initTools() {
         if (i > MaxESCid) MaxESCid = i;
         if (i < MinESCid) MinESCid = i;
 
-        if (ESC_types.find(x => x.id === ESCs[i].type).blOnly != true) { 
+        if (ESC_types.find(x => x.id === ESCs[i].type).blOnly != true) {
             ESCs[i].TLMCanvasCTX = ESCs[i].TLMCanvasElement.getContext("2d");
             GraphArr[i] = [];
             for (var j = 0; j < 8; j++) {
@@ -2488,7 +2491,7 @@ function ToolProcessLoop() {
     } else { // prepare ESC's for fast Command
         if (waitForResponseID == 0) {
             while ((!(checkESCid in ESCs)) && checkESCid < 25) checkESCid++;
- 
+
             if (checkESCid == 25) {
                 ESCsReady = 1;
                 return;
