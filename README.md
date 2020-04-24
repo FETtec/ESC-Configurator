@@ -8,7 +8,7 @@ FETtec ESC Configurator is a crossplatform configuration tool for the FETtec ESC
 
 **This is the default installation method, and at some point in the future this will become the only way available for most platforms. Please use this method whenever possible.**
 
-Download the installer from [Releases.]()
+Download the installer from [Releases](https://github.com/FETtec/ESC-Configurator/releases).
 
 
 ## Native app build via NW.js
