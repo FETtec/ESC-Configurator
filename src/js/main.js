@@ -1158,7 +1158,7 @@ function check_ESCs_In_BL() {
                     if (expectedHeader != OW_RESPONSE_IN_BL) ESCs[SwitchESCsFW_ID].asBL = false;
                     else ESCs[SwitchESCsFW_ID].asBL = true;
                     if (switchProblem == 0) {
-                        if (ESCs[SwitchESCsFW_ID].type > 127) return // TODO make this nicer
+                        if (ESC_types.find(x => x.id === ESCs[SwitchESCsFW_ID].type).blOnly == true) return
                         if (DEBUG) console.log("switching ESC with id: " + SwitchESCsFW_ID);
                         send_ESC_package(SwitchESCsFW_ID, 0, [SwitchCommand]);
                         if (ConnectionType == VCP) {
@@ -1247,7 +1247,7 @@ function ChangeDisplay(displayType) {
             var maxID = 0;
             var ID_count = 0;
             for (var i in ESCs) {
-                if (ESCs[i].type > 127) break; //TODO make this smarter
+                if (ESC_types.find(x => x.id === ESCs[i].type).blOnly == true) break;
                 if (minID == 0) minID = i;
                 maxID = i;
                 ID_count++;
@@ -1563,7 +1563,7 @@ function displayESCs(ParentElement) {
         } else if (selectedMenu == 1) {
             // ---------------------------------------------------------------------------------------------------// settings
             // ESC_settings
-            if (ESCs[i].type > 127) break; //TODO make this smarter
+            if (ESC_types.find(x => x.id === ESCs[i].type).blOnly == true) break;
             ESC_div.id = "ESC_container_" + i;
 
             ESC_div.className = "settings_container";
@@ -1770,7 +1770,7 @@ function displayESCs(ParentElement) {
 
         } else if (selectedMenu == 2) {
             // ---------------------------------------------------------------------------------------------------// tools
-            if (ESCs[i].type > 127) break; //TODO make this smarter
+            if (ESC_types.find(x => x.id === ESCs[i].type).blOnly == true) break;
             ESC_div.id = "ESC_Canvas_Container_" + i;
 
             var ESC_ToolDiv = document.createElement('div');
@@ -2556,7 +2556,8 @@ function ToolProcessLoop() {
 
 function displayTLMValues(tlmVal) {
     for (var i in ESCs) {
-        if (ESCs[i].type > 127) break; //TODO make this smarter
+        
+        if (ESC_types.find(x => x.id === ESCs[i].type).blOnly == true) break;
         ESCs[i].TLMValueElements[tlmVal].innerHTML = ESCs[i].TLMValues[tlmVal] * TLM_scales[tlmVal];
 
 
@@ -2655,7 +2656,7 @@ function initConfig() {
     ESC_Setting_Index = 0;
     checkESCsStat = 0;
     for (var ESC_IDs in ESCs) {
-        if (ESCs[ESC_IDs].type < 127) {
+        if (ESC_types.find(x => x.id === ESCs[ESC_IDs].type).blOnly != true) {
             read_ESC_ids.push(ESC_IDs);
             timeoutESC_IDs[ESC_IDs] = 0;
         }
