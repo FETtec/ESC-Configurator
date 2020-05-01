@@ -1,6 +1,6 @@
 "user strict";
 
-const DEBUG = 1;
+const DEBUG = 0;
 
 const MAX_TRY = 3;
 const DEFAULT_TIMEOUT = 200;
@@ -10,7 +10,6 @@ var OneWire = 0;
 
 const canvas_width = 600;
 const canvas_height = 142;
-
 
 //communication defines
 
@@ -148,7 +147,7 @@ const ESC_types = [
     { id: 105, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_' },
     { id: 106, name: "ESC 100A", filename: '' },
     { id: 107, name: "ESC 100A", filename: '' },
-    { id: 128, name: "G4 USB Bootloader", filename: '', start_addr: 3800, blOnly: true },
+    { id: 128, name: "FETtec G4-FC", filename: 'FETTEC_FC_G4-', start_addr: 3800, blOnly: true },
     { id: 129, name: "G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true }
 ];
 
@@ -178,7 +177,6 @@ function ESC() {
     this.TLMCanvasElement;
     this.TLMCanvasCTX;
     // end ESC specific settings
-    this.CompatibleFW_filename = "";
     this.ESC_settings = {
         0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "readonly", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, escTypes: onAllESCs }, // must always be 0
         40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse rotation direction", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
@@ -276,7 +274,8 @@ var FW_update = {
     fileUploadInput: 0,
     startUpdateInput: 0,
     FlashProcessActive: 0,
-    loadedFileName: ""
+    loadedFileName: "",
+    startAddr: null
 }
 
 var scanDone = 0;
@@ -401,6 +400,8 @@ onload = function () {
             console.log('Version: ' + chrome.runtime.getManifest().version);
             console.log('Update details');
             console.dir(versionCheck);
+            console.log("DEBUG");
+            console.log(FW_update);
             return
         });
     }
@@ -624,6 +625,7 @@ function disconnect() {
     FW_update.binaryString = [];
     FW_update.preparedPages = [];
     FW_update.pagesCount = 0;
+    FW_update.startAddr = null;
 
     // recheck for port changes
     chrome.serial.getDevices(function (ports) {
@@ -1410,7 +1412,6 @@ function ScanForESCs() {
                         is_USB_only_bootloader = 1;
                         if (DEBUG) console.log("Board type is USB bootloader only!");
                     }
-                    ESCs[scanID].CompatibleFW_filename = ESC_types.find(x => x.id === ESCs[scanID].type).filename;
 
                     if (DEBUG) console.log("ESC with id: " + scanID + " is from type: " + ESCs[scanID].type);
                     scanStep = 2;
@@ -1953,8 +1954,9 @@ function initFWUpdater() {
             .button()
             .click(function () {
                 if (DEBUG) console.log("check for remote firmware");
-                // TODO FIX - require to change back to https://api.github.com/repos/FETtec/ESC-Firmware/releases
-                loadGithubReleases("https://api.github.com/repos/lichtl/test/releases", function (data) {
+                // TODO
+                //loadGithubReleases("https://api.github.com/repos/lichtl/test/releases", function (data) {
+                loadGithubReleases("https://api.github.com/repos/FETtec/ESC-Firmware/releases", function (data) {
                     if ($('#remoteFWSelect').length == 0) {
                         $("#toolbar").append($('<select/>').attr({ id: 'remoteFWSelect' }));
                     }
@@ -1997,7 +1999,7 @@ function initFWUpdater() {
                     // on change remote select menu
                     $('#remoteFWSelect').on('selectmenuchange', function () {
                         var fw_url = $(this).val();
-                        FW_update.loadedFileName = fw_url;
+                        FW_update.loadedFileName = fw_url.substring(fw_url.lastIndexOf('/') + 1);
                         if (fw_url.startsWith("https://")) {
                             $.ajax({
                                 url: fw_url,
@@ -2026,6 +2028,21 @@ function initFWUpdater() {
 }
 
 function PrepareUpdate() {
+    $.each(ESCs, function (index, device) {
+        if (device !== undefined) {
+            var tmpContainer = document.getElementById("ESC_container_" + device.id);
+            var tmpcheckBox = document.getElementById("esc_select_id_" +  device.id);
+            if ((FW_update.loadedFileName).startsWith(ESC_types.find(x => x.id === device.type).filename)) {
+                ESCs[device.id].selected = true
+                tmpContainer.className = "esc_active";
+                tmpcheckBox.checked = true
+            } else {
+                ESCs[device.id].selected = false
+                tmpContainer.className = "esc_inactive";
+                tmpcheckBox.checked = false
+            }
+        }
+    })
 
     if ($('#FW_flash').length == 0) {
         $("#toolbar").append(
@@ -2249,7 +2266,6 @@ function FlashProcessLoop() {
 var address_Counter = 0
 function parseHexFile(hexData) {
     var tempHexString = hexData.replace(/(?:\r\n|\r|\n)/g, '').split(':');
-
     var hexStartFound = 0;
     var lineArr = [];
     FW_update.hexString = [];
@@ -2262,6 +2278,7 @@ function parseHexFile(hexData) {
         if ((i == 2 && hexStartFound == 0) || (i == 1 && parseInt(lineArr[1]) != 2)) {
             hexStartFound = 1;
             address_Counter = parseInt(hex_Line_Address);
+            FW_update.startAddr = parseInt(hex_Line_Address)
             if (DEBUG) console.log('hex start at: ' + (address_Counter));
         }
         if (i == 3) {
