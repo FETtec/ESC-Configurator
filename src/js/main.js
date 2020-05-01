@@ -1,9 +1,9 @@
 "user strict";
 
-const DEBUG = 0;
+const DEBUG = 1;
 
 const MAX_TRY = 3;
-const DEFAULT_TIMEOUT = 210;
+const DEFAULT_TIMEOUT = 200;
 
 var toolbar = 0;
 var OneWire = 0;
@@ -149,7 +149,7 @@ const ESC_types = [
     { id: 106, name: "ESC 100A", filename: '' },
     { id: 107, name: "ESC 100A", filename: '' },
     { id: 128, name: "G4 USB Bootloader", filename: '', start_addr: 3800, blOnly: true },
-    { id: 129, name: "G0 OSD", filename: '', start_addr: 1000, blOnly: true }
+    { id: 129, name: "G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true }
 ];
 
 // helper to prevent single arrays in all settings
@@ -1919,7 +1919,7 @@ function initFWUpdater() {
 
     $("#toolbar").append(
         $('<div/>').attr({ id: 'localFW', class: 'fileContainer' }).button().click(function () {
-            if (DEBUG) console.log("LOCAL");
+            if (DEBUG) console.log("LOCAL File Selected");
         }
         ));
     $("#localFW").append().html("<span>Local Firmware</span>");
@@ -1953,7 +1953,8 @@ function initFWUpdater() {
             .button()
             .click(function () {
                 if (DEBUG) console.log("check for remote firmware");
-                loadGithubReleases("https://api.github.com/repos/FETtec/ESC-Firmware/releases", function (data) {
+                // TODO FIX - require to change back to https://api.github.com/repos/FETtec/ESC-Firmware/releases
+                loadGithubReleases("https://api.github.com/repos/lichtl/test/releases", function (data) {
                     if ($('#remoteFWSelect').length == 0) {
                         $("#toolbar").append($('<select/>').attr({ id: 'remoteFWSelect' }));
                     }
@@ -1964,19 +1965,29 @@ function initFWUpdater() {
                     }));
                     $.each(data, function (index, release) {
                         if (DEBUG) console.log("Processing releases: " + release.name);
-                        var release_name = ESC_types.find(x => x.id === ESCs[ESCs.length - 1].type).name + " " + release.tag_name;
-                        if (release.prerelease == true)
-                            release_name += " (BETA)"
                         $.each(release.assets, function (index2, asset) {
-                            if (asset.name.endsWith(".hex") && asset.name.startsWith(ESC_types.find(x => x.id === ESCs[ESCs.length - 1].type).filename)) {
-                                if (asset.name.includes("_BLUPDATE_"))
-                                    release_name += " BOOTLOADER"
-                                if (DEBUG) console.log("Processing firmware: " + asset.name);
-                                $('#remoteFWSelect').append($("<option/>", {
-                                    value: asset.browser_download_url,
-                                    text: release_name
-                                }));
-                            }
+                            if (DEBUG) console.log("Processing firmware: " + asset.name);
+                            var tmpTypes = []
+                            $.each(ESCs, function (index, device) {
+                                if (device !== undefined) {
+                                    if (tmpTypes.includes(device.type)) {
+                                    } else {
+                                        tmpTypes.push(device.type)
+                                        if (asset.name.endsWith(".hex") && asset.name.startsWith(ESC_types.find(x => x.id === device.type).filename)) { //  && asset.name.startsWith(ESC_types.find(x => x.id === ESCs[ESCs.length - 1].type).filename)
+                                            var release_name = ESC_types.find(x => x.id === device.type).name + " " + release.tag_name;
+                                            if (release.prerelease == true)
+                                                release_name += " (BETA)"
+                                            if (asset.name.includes("_BLUPDATE_"))
+                                                release_name += " BOOTLOADER"
+                                            $('#remoteFWSelect').append($("<option/>", {
+                                                value: asset.browser_download_url,
+                                                text: release_name
+                                            }));
+                                        }
+                                    }
+                                }
+                            })
+
                         });
 
                     });
@@ -1993,11 +2004,11 @@ function initFWUpdater() {
                                 type: 'GET',
                                 crossDomain: true,
                                 success: function (data) {
-                                    if (DEBUG) console.log("Loaded remote ESC hex file");
+                                    if (DEBUG) console.log("Loaded remote ESC hex file " + fw_url);
                                     self.pages = parseHexFile(data);
                                 },
                                 error: function (data) {
-                                    if (DEBUG) console.log("ERROR on download file")
+                                    if (DEBUG) console.log("ERROR on download file " + fw_url)
                                     $(".ui-notification-container").notification("create", {
                                         title: "Unable to download",
                                         content: "Unable to download remote firmware. Please check for connectivity.",
@@ -2556,7 +2567,7 @@ function ToolProcessLoop() {
 
 function displayTLMValues(tlmVal) {
     for (var i in ESCs) {
-        
+
         if (ESC_types.find(x => x.id === ESCs[i].type).blOnly == true) break;
         ESCs[i].TLMValueElements[tlmVal].innerHTML = ESCs[i].TLMValues[tlmVal] * TLM_scales[tlmVal];
 
