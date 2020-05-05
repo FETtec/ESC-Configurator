@@ -3,7 +3,7 @@
 const DEBUG = 0;
 
 const MAX_TRY = 3;
-const DEFAULT_TIMEOUT = 200;
+const DEFAULT_TIMEOUT = 215;
 
 var toolbar = 0;
 var OneWire = 0;
@@ -97,56 +97,56 @@ const ESC_types = [
     { id: 6, name: "FETtec ESC 45A", filename: 'FETTEC_45A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 64, name: "ESC 15A", filename: 'ESC_DEF_GD_15A_ESC_G0_' },
-    { id: 65, name: "ESC 15A", filename: 'ESC_ADV_GD_15A_ESC_G0_' },
-    { id: 66, name: "ESC 15A", filename: '' },
-    { id: 67, name: "ESC 15A", filename: '' },
-    { id: 68, name: "ESC 25A", filename: 'ESC_DEF_GD_25A_ESC_G0_' },
-    { id: 69, name: "ESC 25A", filename: 'ESC_ADV_GD_25A_ESC_G0_' },
-    { id: 70, name: "ESC 25A", filename: '' },
-    { id: 71, name: "ESC 25A", filename: '' },
-    { id: 72, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G0_' },
-    { id: 73, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G0_' },
-    { id: 74, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G4_' },
-    { id: 75, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G4_' },
-    { id: 76, name: "ESC 35A", filename: '' },
-    { id: 77, name: "ESC 35A", filename: '' },
-    { id: 78, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_' },
-    { id: 79, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_' },
-    { id: 80, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_' },
-    { id: 81, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_' },
-    { id: 82, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_' },
-    { id: 83, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_' },
-    { id: 84, name: "ESC 45A", filename: '' },
-    { id: 85, name: "ESC 45A", filename: '' },
-    { id: 86, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_' },
-    { id: 87, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_' },
-    { id: 88, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_' },
-    { id: 89, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_' },
-    { id: 90, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_' },
-    { id: 91, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_' },
-    { id: 92, name: "ESC 55A", filename: '' },
-    { id: 93, name: "ESC 55A", filename: '' },
-    { id: 94, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_' },
-    { id: 95, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_' },
-    { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_' },
-    { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_' },
-    { id: 98, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_' },
-    { id: 99, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_' },
-    { id: 100, name: "ESC 65A", filename: '' },
-    { id: 101, name: "ESC 65A", filename: '' },
-    { id: 102, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_' },
-    { id: 103, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_' },
-    { id: 104, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_' },
-    { id: 105, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_' },
-    { id: 106, name: "ESC 80A", filename: '' },
-    { id: 107, name: "ESC 80A", filename: '' },
-    { id: 102, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_' },
-    { id: 103, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_' },
-    { id: 104, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_' },
-    { id: 105, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_' },
-    { id: 106, name: "ESC 100A", filename: '' },
-    { id: 107, name: "ESC 100A", filename: '' },
+    { id: 64, name: "ESC 15A", filename: 'ESC_DEF_GD_15A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 65, name: "ESC 15A", filename: 'ESC_ADV_GD_15A_ESC_G0_', start_addr: 1800, blOnly: false },
+//    { id: 66, name: "ESC 15A", filename: '' },
+//    { id: 67, name: "ESC 15A", filename: '' },
+    { id: 68, name: "ESC 25A", filename: 'ESC_DEF_GD_25A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 69, name: "ESC 25A", filename: 'ESC_ADV_GD_25A_ESC_G0_', start_addr: 1800, blOnly: false },
+//    { id: 70, name: "ESC 25A", filename: '' },
+//    { id: 71, name: "ESC 25A", filename: '' },
+    { id: 72, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G0_', start_addr: 1800, blOnly: false  },
+    { id: 73, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G0_', start_addr: 1800, blOnly: false  },
+    { id: 74, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G4_', start_addr: 1800, blOnly: false  },
+    { id: 75, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G4_', start_addr: 1800, blOnly: false  },
+//    { id: 76, name: "ESC 35A", filename: '' },
+//    { id: 77, name: "ESC 35A", filename: '' },
+    { id: 78, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false  },
+    { id: 79, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false  },
+    { id: 80, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 1800, blOnly: false  },
+    { id: 81, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 1800, blOnly: false  },
+    { id: 82, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false },
+    { id: 83, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false },
+//    { id: 84, name: "ESC 45A", filename: '' },
+//    { id: 85, name: "ESC 45A", filename: '' },
+    { id: 86, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 87, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 88, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_', start_addr: 3800, blOnly: false },
+    { id: 89, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_', start_addr: 3800, blOnly: false },
+    { id: 90, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_', start_addr: 4000, blOnly: false },
+    { id: 91, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_', start_addr: 4000, blOnly: false },
+//    { id: 92, name: "ESC 55A", filename: '' },
+//    { id: 93, name: "ESC 55A", filename: '' },
+    { id: 94, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 95, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_', start_addr: 3800, blOnly: false },
+    { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_', start_addr: 3800, blOnly: false },
+    { id: 98, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_', start_addr: 4000, blOnly: false },
+    { id: 99, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_', start_addr: 4000, blOnly: false },
+//    { id: 100, name: "ESC 65A", filename: '' },
+//    { id: 101, name: "ESC 65A", filename: '' },
+    { id: 102, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_', start_addr: 3800, blOnly: false },
+    { id: 103, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_', start_addr: 3800, blOnly: false },
+    { id: 104, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_', start_addr: 4000, blOnly: false },
+    { id: 105, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_', start_addr: 4000, blOnly: false },
+//    { id: 106, name: "ESC 80A", filename: '' },
+//    { id: 107, name: "ESC 80A", filename: '' },
+    { id: 102, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, blOnly: false },
+    { id: 103, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, blOnly: false },
+    { id: 104, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false },
+    { id: 105, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false },
+//    { id: 106, name: "ESC 100A", filename: '' },
+//    { id: 107, name: "ESC 100A", filename: '' },
     { id: 128, name: "FETtec G4-FC", filename: 'FETTEC_FC_G4-', start_addr: 3800, blOnly: true },
     { id: 129, name: "G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true }
 ];
@@ -905,20 +905,23 @@ function Internal_Loop() {
                         var getPT = kissProtocol_preparePassthrough();
                         sendBytes(getPT);
                         if (DEBUG) console.log("Requested KISS passthrough via " + getPT);
-                        waitLoops = 30;
+                        waitLoops = 40;
                         break;
                     case BF_PT:
                         SerialConnection.RX_tail = SerialConnection.RX_head;
                         var getPT = bfProtocol_preparePassthrough();
                         sendBytes(getPT);
                         if (DEBUG) console.log("Requested BF passthrough");
-                        waitLoops = 30;
+                        waitLoops = 40;
                         break
                     case USB_UART:
                         if (DEBUG) console.log("UART connected");
                         break;
                     case VCP:
-                        if (DEBUG) console.log("VCP connected");
+                        //var getPT = usb_prepareReset();
+                        //sendBytes(getPT);
+                        if (DEBUG) console.log("VCP requested reset ");
+                        waitLoops = 40;
                         break;
                 }
                 do_not_Update_Progress_Bar = 0;
@@ -1211,8 +1214,8 @@ function refresh_displayed_version() {
 
 function ChangeDisplay(displayType) {
     if (menuEnabled == 0 || scanDone == 0) return;
-    if (is_USB_only_bootloader == 1 && displayType != 0) {
-        $("#dialog").text("USB Bootloaders are for update FW only");
+    if (is_USB_only_bootloader == 1 && displayType != 0 && SerialConnection.connected != false) {
+        $("#dialog").text("USB Bootloaders only support firmware flashing.");
         $("#dialog").dialog({
             modal: true,
             buttons: {
@@ -2031,7 +2034,7 @@ function PrepareUpdate() {
     $.each(ESCs, function (index, device) {
         if (device !== undefined) {
             var tmpContainer = document.getElementById("ESC_container_" + device.id);
-            var tmpcheckBox = document.getElementById("esc_select_id_" +  device.id);
+            var tmpcheckBox = document.getElementById("esc_select_id_" + device.id);
             if ((FW_update.loadedFileName).startsWith(ESC_types.find(x => x.id === device.type).filename)) {
                 ESCs[device.id].selected = true
                 tmpContainer.className = "esc_active";
