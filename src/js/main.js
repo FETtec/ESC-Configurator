@@ -155,7 +155,7 @@ const DEVICE_types = [
 var onAllESCs = [];
 for (var i in DEVICE_types) onAllESCs.push(DEVICE_types[i].id);
 
-function ESC() {
+function DEVICE() {
     this.id = 0;
     this.asBL = false;
     this.type = 0;
@@ -1413,7 +1413,7 @@ function ScanForESCs() {
             if (responsePackage[1] == scanID) {
                 timeoutESC_IDs[scanID] = 0;
                 if (scanStep == 0) {
-                    ESCs[scanID] = new ESC();
+                    ESCs[scanID] = new DEVICE();
                     ESCs[scanID].id = scanID;
                     ESCs[scanID].asBL = (responsePackage[0] == OW_RESPONSE_IN_BL);
                     if (DEBUG) console.log("found ID: " + ESCs[scanID].id + ", is a bootloader: " + ESCs[scanID].asBL);
