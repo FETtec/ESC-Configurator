@@ -87,7 +87,7 @@ const OW_GET_ACTIVATION = 56;
 const OW_SET_ACTIVATION = 57;
 //
 
-const ESC_types = [
+const DEVICE_types = [
     { id: 0, name: "none", filename: '' },
     { id: 1, name: "FETtec ESC 35A", filename: 'FETTEC_35A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 2, name: "FETtec ESC 50A", filename: 'FETTEC_50A_ESC_G0_', start_addr: 1800, blOnly: false },
@@ -148,12 +148,12 @@ const ESC_types = [
 //    { id: 106, name: "ESC 100A", filename: '' },
 //    { id: 107, name: "ESC 100A", filename: '' },
     { id: 128, name: "FETtec G4-FC", filename: 'FETTEC_FC_G4-', start_addr: 3800, blOnly: true },
-    { id: 129, name: "G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true }
+    { id: 129, name: "FETtec G0-OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true }
 ];
 
 // helper to prevent single arrays in all settings
 var onAllESCs = [];
-for (var i in ESC_types) onAllESCs.push(ESC_types[i].id);
+for (var i in DEVICE_types) onAllESCs.push(DEVICE_types[i].id);
 
 function ESC() {
     this.id = 0;
@@ -292,10 +292,10 @@ var menuEnabled = 1;
 var ESC_package = [];
 
 
-var KISS_PT = 0;
-var BF_PT = 1;
-var USB_UART = 2;
-var VCP = 3;
+const KISS_PT = 0;
+const BF_PT = 1;
+const USB_UART = 2;
+const VCP = 3;
 
 var is_USB_only_bootloader = 0
 
@@ -604,6 +604,32 @@ function Reconnect() {
 
 
 function disconnect() {
+    selectedMenu = 0;
+    activationActive = 0;
+    bytesCount = 1;
+    connection_attempts = 0;
+
+    sentTestPackage = 0;
+    SerialConnection.pass_through = 0;
+    SerialConnection.pass_through_fails = 0;
+    SerialConnection.connected = false;
+    interval_Speedup_Done = 0;
+    PT_status = 0;
+    waitLoops = 0;
+
+    scanDone = 0;
+    ESCsDisplayed = 0;
+
+    ESCs = [];
+    timeoutESC_IDs = [];
+
+    FW_updater_Init_Done = 0;
+    FW_update.hexString = [];
+    FW_update.binaryString = [];
+    FW_update.preparedPages = [];
+    FW_update.pagesCount = 0;
+    FW_update.startAddr = null;
+
     if (typeof SerialConnection.connection.connectionId !== 'undefined')
         chrome.serial.disconnect(SerialConnection.connection.connectionId, function () { });
 
@@ -611,21 +637,9 @@ function disconnect() {
         ChangeDisplay(99);
 
     clearInterval(loopInterval);
-    interval_Speedup_Done = 0;
 
-    scanDone = 0;
-    timeoutESC_IDs = [];
-    ESCsDisplayed = 0;
-    FW_updater_Init_Done = 0;
     $('#overview').empty();
     $('#toolbar').empty();
-    ESCs = [];
-
-    FW_update.hexString = [];
-    FW_update.binaryString = [];
-    FW_update.preparedPages = [];
-    FW_update.pagesCount = 0;
-    FW_update.startAddr = null;
 
     // recheck for port changes
     chrome.serial.getDevices(function (ports) {
@@ -635,11 +649,7 @@ function disconnect() {
     interval_Speedup_Done = 0;
     clearInterval(loopInterval);
     loopInterval = setInterval(function () { Internal_Loop(); }, 50);
-    selectedMenu = 0;
-    activationActive = 0;
-    SerialConnection.pass_through = 0;
-    SerialConnection.pass_through_fails = 0;
-    SerialConnection.connected = false;
+
     UpdateSerialSection("disconnect");
 
     // cleanup
@@ -1008,12 +1018,6 @@ function Internal_Loop() {
                         },
                         Cancel: function () {
                             $(this).dialog("close");
-                            // reset variables
-                            PT_status = 0;
-                            sentTestPackage = 0;
-                            bytesCount = 1;
-                            waitLoops = 0;
-                            connection_attempts = 0;
                             // disconnect + cleanup
                             disconnect();
                             noLoop = 0;
@@ -1125,7 +1129,7 @@ function check_ESCs_In_BL() {
             return;
         }
 
-        if ((ESC_types.find(x => x.id === ESCs[SwitchESCsFW_ID].type)).blOnly == true) {
+        if ((DEVICE_types.find(x => x.id === ESCs[SwitchESCsFW_ID].type)).blOnly == true) {
             SwitchStatus = 0;
             SwitchESCsFW_ID++;
             return;
@@ -1163,7 +1167,7 @@ function check_ESCs_In_BL() {
                     if (expectedHeader != OW_RESPONSE_IN_BL) ESCs[SwitchESCsFW_ID].asBL = false;
                     else ESCs[SwitchESCsFW_ID].asBL = true;
                     if (switchProblem == 0) {
-                        if (ESC_types.find(x => x.id === ESCs[SwitchESCsFW_ID].type).blOnly == true) return
+                        if (DEVICE_types.find(x => x.id === ESCs[SwitchESCsFW_ID].type).blOnly == true) return
                         if (DEBUG) console.log("switching ESC with id: " + SwitchESCsFW_ID);
                         send_ESC_package(SwitchESCsFW_ID, 0, [SwitchCommand]);
                         if (ConnectionType == VCP) {
@@ -1214,8 +1218,17 @@ function refresh_displayed_version() {
 
 function ChangeDisplay(displayType) {
     if (menuEnabled == 0 || scanDone == 0) return;
-    if (is_USB_only_bootloader == 1 && displayType != 0 && SerialConnection.connected != false) {
-        $("#dialog").text("USB Bootloaders only support firmware flashing.");
+
+    var only_flash = 1;
+    $.each(ESCs, function (index, device) {
+        if (device !== undefined) {
+            if (DEVICE_types.find(x => x.id === device.type).blOnly != true)
+                only_flash = 0
+        }
+    })
+
+    if (only_flash == 1 && displayType != 0 && SerialConnection.connected != false) {
+        $("#dialog").text("Connected devices only support firmware flashing.");
         $("#dialog").dialog({
             modal: true,
             buttons: {
@@ -1252,12 +1265,11 @@ function ChangeDisplay(displayType) {
             var maxID = 0;
             var ID_count = 0;
             for (var i in ESCs) {
-                if (ESC_types.find(x => x.id === ESCs[i].type).blOnly == true) break;
+                if (DEVICE_types.find(x => x.id === ESCs[i].type).blOnly == true) break;
                 if (minID == 0) minID = i;
                 maxID = i;
                 ID_count++;
             }
-            /*
             if ((maxID - minID) + 1 > ID_count) {
                 $("#dialog").text("ESC telemetry cannot be displayed because ID's have gaps. please change the ID's to be in a row.");
                 $("#dialog").dialog({
@@ -1271,7 +1283,6 @@ function ChangeDisplay(displayType) {
                 });
                 return;
             }
-            */
         }
         for (var i in ESCs) {
             ESCs[i].settingsActive[8] = 0;
@@ -1412,12 +1423,12 @@ function ScanForESCs() {
 
                     ESCs[scanID].type = responsePackage[5];
                     if (ESCs[scanID].type == 128) {
-                        is_USB_only_bootloader = 1;
+                        is_USB_only_bootloader = 1;                 
                         if (DEBUG) console.log("Board type is USB bootloader only!");
                     }
 
                     if (DEBUG) console.log("ESC with id: " + scanID + " is from type: " + ESCs[scanID].type);
-                    scanStep = 2;
+                     scanStep = 2;
                     ScanForESCs();
                 } else if (scanStep == 2) {
 
@@ -1501,7 +1512,7 @@ function displayESCs(ParentElement) {
 
             var ESC_TypeDiv = document.createElement('div');
             ESC_TypeDiv.className = "esc_info_type";
-            ESC_TypeDiv.innerHTML = ESC_types.find(x => x.id === ESCs[i].type).name;
+            ESC_TypeDiv.innerHTML = DEVICE_types.find(x => x.id === ESCs[i].type).name;
             ESC_info_div.appendChild(ESC_TypeDiv);
 
             var ESC_versionDiv = document.createElement('div');
@@ -1567,7 +1578,7 @@ function displayESCs(ParentElement) {
         } else if (selectedMenu == 1) {
             // ---------------------------------------------------------------------------------------------------// settings
             // ESC_settings
-            if (ESC_types.find(x => x.id === ESCs[i].type).blOnly == true) break;
+            if (DEVICE_types.find(x => x.id === ESCs[i].type).blOnly == true) break;
             ESC_div.id = "ESC_container_" + i;
 
             ESC_div.className = "settings_container";
@@ -1774,7 +1785,7 @@ function displayESCs(ParentElement) {
 
         } else if (selectedMenu == 2) {
             // ---------------------------------------------------------------------------------------------------// tools
-            if (ESC_types.find(x => x.id === ESCs[i].type).blOnly == true) break;
+            if (DEVICE_types.find(x => x.id === ESCs[i].type).blOnly == true) break;
             ESC_div.id = "ESC_Canvas_Container_" + i;
 
             var ESC_ToolDiv = document.createElement('div');
@@ -1850,6 +1861,7 @@ function displayESCs(ParentElement) {
             var Throttle_word_div = document.createElement('div');
             Throttle_word_div.className = "throttle_word_div";
             Throttle_word_div.innerHTML = "Throttle: ";
+            Throttle_word_div.id = "ESC_Thr_Text_" + i;
             throttleContainerDiv.appendChild(Throttle_word_div);
 
             var ESC_ThrottleDiv = document.createElement('div');
@@ -1875,6 +1887,8 @@ function displayESCs(ParentElement) {
                     } else {
                         // update throttle value
                         ESCs[tmpESCid].commandedThrottle = tmpESCval;
+//                        thrTextfield = document.getElementById("ESC_Thr_Text_" + i);
+//                        thrTextfield.innerHTML = "Throttle: " + tmpESCval + "%";
                     }
                 } else {
                     // ESC not enabled
@@ -1936,7 +1950,7 @@ function initFWUpdater() {
     FW_update.fileUploadInput.addEventListener('change', function (evt) {
         var fileLoaded = this.value.split('\\');
         FW_update.hexString = null;
-        FW_update.loadedFileName = fileLoaded[fileLoaded.length - 1];
+        FW_update.loadedFileName = fileLoaded[fileLoaded.length - 1].replace(/^.*[\\\/]/,'');
         if (DEBUG) console.log('reading file: ' + FW_update.loadedFileName);
         var reader = new FileReader();
         reader.onload = (function (theFile) {
@@ -1978,8 +1992,8 @@ function initFWUpdater() {
                                     if (tmpTypes.includes(device.type)) {
                                     } else {
                                         tmpTypes.push(device.type)
-                                        if (asset.name.endsWith(".hex") && asset.name.startsWith(ESC_types.find(x => x.id === device.type).filename)) { //  && asset.name.startsWith(ESC_types.find(x => x.id === ESCs[ESCs.length - 1].type).filename)
-                                            var release_name = ESC_types.find(x => x.id === device.type).name + " " + release.tag_name;
+                                        if (asset.name.endsWith(".hex") && asset.name.startsWith(DEVICE_types.find(x => x.id === device.type).filename)) { 
+                                            var release_name = DEVICE_types.find(x => x.id === device.type).name + " " + release.tag_name;
                                             if (release.prerelease == true)
                                                 release_name += " (BETA)"
                                             if (asset.name.includes("_BLUPDATE_"))
@@ -2003,13 +2017,14 @@ function initFWUpdater() {
                     $('#remoteFWSelect').on('selectmenuchange', function () {
                         var fw_url = $(this).val();
                         FW_update.loadedFileName = fw_url.substring(fw_url.lastIndexOf('/') + 1);
+                        
                         if (fw_url.startsWith("https://")) {
                             $.ajax({
                                 url: fw_url,
                                 type: 'GET',
                                 crossDomain: true,
                                 success: function (data) {
-                                    if (DEBUG) console.log("Loaded remote ESC hex file " + fw_url);
+                                    if (DEBUG) console.log("Loaded remote ESC hex file " + fw_url + " Filename:" + FW_update.loadedFileName);
                                     self.pages = parseHexFile(data);
                                 },
                                 error: function (data) {
@@ -2035,7 +2050,8 @@ function PrepareUpdate() {
         if (device !== undefined) {
             var tmpContainer = document.getElementById("ESC_container_" + device.id);
             var tmpcheckBox = document.getElementById("esc_select_id_" + device.id);
-            if ((FW_update.loadedFileName).startsWith(ESC_types.find(x => x.id === device.type).filename)) {
+            console.log (FW_update.loadedFileName + " - ")
+            if ((FW_update.loadedFileName).startsWith(DEVICE_types.find(x => x.id === device.type).filename)) {
                 ESCs[device.id].selected = true
                 tmpContainer.className = "esc_active";
                 tmpcheckBox.checked = true
@@ -2361,7 +2377,7 @@ function initTools() {
         if (i > MaxESCid) MaxESCid = i;
         if (i < MinESCid) MinESCid = i;
 
-        if (ESC_types.find(x => x.id === ESCs[i].type).blOnly != true) {
+        if (DEVICE_types.find(x => x.id === ESCs[i].type).blOnly != true) {
             ESCs[i].TLMCanvasCTX = ESCs[i].TLMCanvasElement.getContext("2d");
             GraphArr[i] = [];
             for (var j = 0; j < 8; j++) {
@@ -2480,10 +2496,8 @@ function ToolProcessLoop() {
                                 message = "No motor detected or failure on HIGH side FETs/gatedriver"
                                 break;
                             case 3000:
-                                if (DEBUG) console.log(ESC_types.find(x => x.id === ESCs[i].TLMValues[5]).name)
-                                if (DEBUG) console.log(ESC_types.find(x => x.id === ESCs[i].TLMValues[6]).name)
-                                var detected_esc = (ESC_types.find(x => x.id === ESCs[i].TLMValues[5]).name)
-                                var expected_esc = (ESC_types.find(x => x.id === ESCs[i].TLMValues[6]).name)
+                                var detected_esc = (DEVICE_types.find(x => x.id === ESCs[i].TLMValues[5]).name)
+                                var expected_esc = (DEVICE_types.find(x => x.id === ESCs[i].TLMValues[6]).name)
                                 message = "Firmware mismatch to hardware.<br><br>Expected HW: " + expected_esc + "<br>Detected HW: " + detected_esc;
                                 break;
 
@@ -2525,7 +2539,7 @@ function ToolProcessLoop() {
                 ESCsReady = 1;
                 return;
             }
-            if (ESC_types.find(x => x.id === ESCs[checkESCid].type).blOnly == true) {
+            if (DEVICE_types.find(x => x.id === ESCs[checkESCid].type).blOnly == true) {
                 checkESCid++;
                 return;
             }
@@ -2588,7 +2602,7 @@ function ToolProcessLoop() {
 function displayTLMValues(tlmVal) {
     for (var i in ESCs) {
 
-        if (ESC_types.find(x => x.id === ESCs[i].type).blOnly == true) break;
+        if (DEVICE_types.find(x => x.id === ESCs[i].type).blOnly == true) break;
         ESCs[i].TLMValueElements[tlmVal].innerHTML = ESCs[i].TLMValues[tlmVal] * TLM_scales[tlmVal];
 
 
@@ -2687,7 +2701,7 @@ function initConfig() {
     ESC_Setting_Index = 0;
     checkESCsStat = 0;
     for (var ESC_IDs in ESCs) {
-        if (ESC_types.find(x => x.id === ESCs[ESC_IDs].type).blOnly != true) {
+        if (DEVICE_types.find(x => x.id === ESCs[ESC_IDs].type).blOnly != true) {
             read_ESC_ids.push(ESC_IDs);
             timeoutESC_IDs[ESC_IDs] = 0;
         }
