@@ -99,54 +99,54 @@ const DEVICE_types = [
     { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 64, name: "ESC 15A", filename: 'ESC_DEF_GD_15A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 65, name: "ESC 15A", filename: 'ESC_ADV_GD_15A_ESC_G0_', start_addr: 1800, blOnly: false },
-//    { id: 66, name: "ESC 15A", filename: '' },
-//    { id: 67, name: "ESC 15A", filename: '' },
+    //    { id: 66, name: "ESC 15A", filename: '' },
+    //    { id: 67, name: "ESC 15A", filename: '' },
     { id: 68, name: "ESC 25A", filename: 'ESC_DEF_GD_25A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 69, name: "ESC 25A", filename: 'ESC_ADV_GD_25A_ESC_G0_', start_addr: 1800, blOnly: false },
-//    { id: 70, name: "ESC 25A", filename: '' },
-//    { id: 71, name: "ESC 25A", filename: '' },
-    { id: 72, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G0_', start_addr: 1800, blOnly: false  },
-    { id: 73, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G0_', start_addr: 1800, blOnly: false  },
-    { id: 74, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G4_', start_addr: 1800, blOnly: false  },
-    { id: 75, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G4_', start_addr: 1800, blOnly: false  },
-//    { id: 76, name: "ESC 35A", filename: '' },
-//    { id: 77, name: "ESC 35A", filename: '' },
-    { id: 78, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false  },
-    { id: 79, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false  },
-    { id: 80, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 1800, blOnly: false  },
-    { id: 81, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 1800, blOnly: false  },
+    //    { id: 70, name: "ESC 25A", filename: '' },
+    //    { id: 71, name: "ESC 25A", filename: '' },
+    { id: 72, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 73, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 74, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G4_', start_addr: 1800, blOnly: false },
+    { id: 75, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G4_', start_addr: 1800, blOnly: false },
+    //    { id: 76, name: "ESC 35A", filename: '' },
+    //    { id: 77, name: "ESC 35A", filename: '' },
+    { id: 78, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 79, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 80, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 1800, blOnly: false },
+    { id: 81, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 1800, blOnly: false },
     { id: 82, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false },
     { id: 83, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false },
-//    { id: 84, name: "ESC 45A", filename: '' },
-//    { id: 85, name: "ESC 45A", filename: '' },
+    //    { id: 84, name: "ESC 45A", filename: '' },
+    //    { id: 85, name: "ESC 45A", filename: '' },
     { id: 86, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 87, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 88, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_', start_addr: 3800, blOnly: false },
     { id: 89, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_', start_addr: 3800, blOnly: false },
     { id: 90, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_', start_addr: 4000, blOnly: false },
     { id: 91, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_', start_addr: 4000, blOnly: false },
-//    { id: 92, name: "ESC 55A", filename: '' },
-//    { id: 93, name: "ESC 55A", filename: '' },
+    //    { id: 92, name: "ESC 55A", filename: '' },
+    //    { id: 93, name: "ESC 55A", filename: '' },
     { id: 94, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 95, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_', start_addr: 3800, blOnly: false },
     { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_', start_addr: 3800, blOnly: false },
     { id: 98, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_', start_addr: 4000, blOnly: false },
     { id: 99, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_', start_addr: 4000, blOnly: false },
-//    { id: 100, name: "ESC 65A", filename: '' },
-//    { id: 101, name: "ESC 65A", filename: '' },
+    //    { id: 100, name: "ESC 65A", filename: '' },
+    //    { id: 101, name: "ESC 65A", filename: '' },
     { id: 102, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_', start_addr: 3800, blOnly: false },
     { id: 103, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_', start_addr: 3800, blOnly: false },
     { id: 104, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_', start_addr: 4000, blOnly: false },
     { id: 105, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_', start_addr: 4000, blOnly: false },
-//    { id: 106, name: "ESC 80A", filename: '' },
-//    { id: 107, name: "ESC 80A", filename: '' },
+    //    { id: 106, name: "ESC 80A", filename: '' },
+    //    { id: 107, name: "ESC 80A", filename: '' },
     { id: 102, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, blOnly: false },
     { id: 103, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, blOnly: false },
     { id: 104, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false },
     { id: 105, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false },
-//    { id: 106, name: "ESC 100A", filename: '' },
-//    { id: 107, name: "ESC 100A", filename: '' },
+    //    { id: 106, name: "ESC 100A", filename: '' },
+    //    { id: 107, name: "ESC 100A", filename: '' },
     { id: 128, name: "FETtec G4-FC", filename: 'FETTEC_FC_G4-', start_addr: 3800, blOnly: true },
     { id: 129, name: "FETtec G0-OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true }
 ];
@@ -1423,12 +1423,12 @@ function ScanForESCs() {
 
                     ESCs[scanID].type = responsePackage[5];
                     if (ESCs[scanID].type == 128) {
-                        is_USB_only_bootloader = 1;                 
+                        is_USB_only_bootloader = 1;
                         if (DEBUG) console.log("Board type is USB bootloader only!");
                     }
 
                     if (DEBUG) console.log("ESC with id: " + scanID + " is from type: " + ESCs[scanID].type);
-                     scanStep = 2;
+                    scanStep = 2;
                     ScanForESCs();
                 } else if (scanStep == 2) {
 
@@ -1643,7 +1643,6 @@ function displayESCs(ParentElement) {
                         var ESC_setting = document.createElement('div');
                         ESC_setting.className = "setting_container";
                         if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
-
                         ESC_setting_text = document.createElement('div')
                         ESC_setting_text.className = "setting_text";
                         ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
@@ -1663,12 +1662,9 @@ function displayESCs(ParentElement) {
                             var tmpid = this.id.replace(/setting_id_/, "setting_id_value_")
                             document.getElementById(tmpid).value = document.getElementById(this.id).value
                         }
-
                         ESC_setting.appendChild(settingSlider);
-
                         settingNumber = document.createElement('output');
                         settingNumber.className = "setting_value";
-                        //settingNumber.style = "width: 50px"
                         settingNumber.type = "hidden"
                         settingNumber.value = ESCs[i].ESC_settings[y].active;
                         settingNumber.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_value_" + i;
@@ -1676,59 +1672,6 @@ function displayESCs(ParentElement) {
 
                         break
                     case "colorpick":
-                        /*
-                            //console.log(ESCs[i].ESC_settings[y].active)
-                            var colorpickarray = [];
-                            colorpickarray['Type'] = (ESCs[i].ESC_settings[y].active) & 0xFF       // 0=off, 1=RGB, 2=GRB
-                            if (colorpickarray['Type'] = 2) {
-                                colorpickarray['G'] = (ESCs[i].ESC_settings[y].active >> 24) & 0xFF
-                                colorpickarray['R'] = (ESCs[i].ESC_settings[y].active >> 16) & 0xFF
-                            } else {
-                                colorpickarray['R'] = (ESCs[i].ESC_settings[y].active >> 24) & 0xFF
-                                colorpickarray['G'] = (ESCs[i].ESC_settings[y].active >> 16) & 0xFF
-                            }
-                            colorpickarray['B'] = (ESCs[i].ESC_settings[y].active >> 8) & 0xFF
-                            console.dir(colorpickarray)
-                            var ESC_setting = document.createElement('div');
-                            ESC_setting.className = "setting_container";
-                            if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
-                            ESC_setting_text = document.createElement('div')
-                            ESC_setting_text.className = "setting_text";
-                            ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
-                            ESC_setting.appendChild(ESC_setting_text);
-                            ESC_info_div.appendChild(ESC_setting);
-                            settingNumber = document.createElement('input');
-                            settingNumber.type = "number";
-                            settingNumber.readOnly = true;
-                            settingNumber.style.width = ((ESCs[i].ESC_settings[y].max.toString(10).length * 12) + 5) + "px";
-                            settingNumber.className = "settings_numberBox"; //  ui-corner-all
-                            settingNumber.value = ESCs[i].ESC_settings[y].active;
-                            settingNumber.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
-                            settingNumber.onchange = function () {
-                                SettingsChanged(this.id);
-                            }
-                            ESC_setting.appendChild(settingNumber);
-    
-                            // OLD
-                            var ESC_setting = document.createElement('div');
-                            ESC_setting.className = "setting_container";
-                            if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
-                            ESC_setting_text = document.createElement('div')
-                            ESC_setting_text.className = "setting_text";
-                            ESC_setting_text.innerHTML = ESCs[i].ESC_settings[y].name + " ";
-                            ESC_setting.appendChild(ESC_setting_text);
-                            ESC_info_div.appendChild(ESC_setting);
-                            settingNumber = document.createElement('input');
-                            //settingNumber.type = "number";
-                            settingNumber.style.width = ((ESCs[i].ESC_settings[y].max.toString(10).length * 12) + 5) + "px";
-                            settingNumber.className = "jscolor"; //  ui-corner-all
-                            settingNumber.value = dec2hex(colorpickarray['R']) + dec2hex(colorpickarray['G']) + dec2hex(colorpickarray['B']);
-                            settingNumber.id = ESCs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
-                            settingNumber.onchange = function () {
-                                SettingsChanged(this.id);
-                            }
-                            ESC_setting.appendChild(settingNumber);
-                            */
                         break
                     case "value":
                         var ESC_setting = document.createElement('div');
@@ -1860,8 +1803,14 @@ function displayESCs(ParentElement) {
 
             var Throttle_word_div = document.createElement('div');
             Throttle_word_div.className = "throttle_word_div";
-            Throttle_word_div.innerHTML = "Throttle: ";
-            Throttle_word_div.id = "ESC_Thr_Text_" + i;
+            Throttle_word_div.innerHTML = "Throttle :";
+
+            ThrottleValueNumber = document.createElement('output');
+            ThrottleValueNumber.className = "setting_value";
+            ThrottleValueNumber.id = "throttle_id_value_text_" + i;
+            ThrottleValueNumber.value = 0 + "%";
+            Throttle_word_div.appendChild(ThrottleValueNumber);
+
             throttleContainerDiv.appendChild(Throttle_word_div);
 
             var ESC_ThrottleDiv = document.createElement('div');
@@ -1887,23 +1836,23 @@ function displayESCs(ParentElement) {
                     } else {
                         // update throttle value
                         ESCs[tmpESCid].commandedThrottle = tmpESCval;
-//                        thrTextfield = document.getElementById("ESC_Thr_Text_" + i);
-//                        thrTextfield.innerHTML = "Throttle: " + tmpESCval + "%";
                     }
                 } else {
                     // ESC not enabled
                     ESCs[tmpESCid].ThrottleValue.value = 0
                     flash_button("SE_" + tmpESCid + "_8");
                 }
+                document.getElementById("throttle_id_value_text_" + tmpESCid).value = ESCs[tmpESCid].ThrottleValue.value + "%";
+
             })
             ESCs[i].ThrottleValue.addEventListener('dblclick', function (evt) {
                 var tmpESCid = parseInt(this.id.replace(/ESC_Thr_Value_/, ''))
                 ESCs[tmpESCid].ThrottleValue.value = 0
                 ESCs[tmpESCid].commandedThrottle = 0
+                document.getElementById("throttle_id_value_text_" + tmpESCid).value = ESCs[tmpESCid].ThrottleValue.value + "%";
             })
 
             ESC_ThrottleDiv.appendChild(ESCs[i].ThrottleValue);
-
         }
         ParentElement.appendChild(ESC_div);
     }
@@ -1950,7 +1899,7 @@ function initFWUpdater() {
     FW_update.fileUploadInput.addEventListener('change', function (evt) {
         var fileLoaded = this.value.split('\\');
         FW_update.hexString = null;
-        FW_update.loadedFileName = fileLoaded[fileLoaded.length - 1].replace(/^.*[\\\/]/,'');
+        FW_update.loadedFileName = fileLoaded[fileLoaded.length - 1].replace(/^.*[\\\/]/, '');
         if (DEBUG) console.log('reading file: ' + FW_update.loadedFileName);
         var reader = new FileReader();
         reader.onload = (function (theFile) {
@@ -1992,7 +1941,7 @@ function initFWUpdater() {
                                     if (tmpTypes.includes(device.type)) {
                                     } else {
                                         tmpTypes.push(device.type)
-                                        if (asset.name.endsWith(".hex") && asset.name.startsWith(DEVICE_types.find(x => x.id === device.type).filename)) { 
+                                        if (asset.name.endsWith(".hex") && asset.name.startsWith(DEVICE_types.find(x => x.id === device.type).filename)) {
                                             var release_name = DEVICE_types.find(x => x.id === device.type).name + " " + release.tag_name;
                                             if (release.prerelease == true)
                                                 release_name += " (BETA)"
@@ -2017,7 +1966,7 @@ function initFWUpdater() {
                     $('#remoteFWSelect').on('selectmenuchange', function () {
                         var fw_url = $(this).val();
                         FW_update.loadedFileName = fw_url.substring(fw_url.lastIndexOf('/') + 1);
-                        
+
                         if (fw_url.startsWith("https://")) {
                             $.ajax({
                                 url: fw_url,
@@ -2050,7 +1999,6 @@ function PrepareUpdate() {
         if (device !== undefined) {
             var tmpContainer = document.getElementById("ESC_container_" + device.id);
             var tmpcheckBox = document.getElementById("esc_select_id_" + device.id);
-            console.log (FW_update.loadedFileName + " - ")
             if ((FW_update.loadedFileName).startsWith(DEVICE_types.find(x => x.id === device.type).filename)) {
                 ESCs[device.id].selected = true
                 tmpContainer.className = "esc_active";
