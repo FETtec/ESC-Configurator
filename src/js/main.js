@@ -1,6 +1,6 @@
 "user strict";
 
-const DEBUG = 0;
+const DEBUG = 1;
 
 const MAX_TRY = 3;
 const DEFAULT_TIMEOUT = 215;
@@ -192,7 +192,7 @@ function DEVICE() {
         50: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, escTypes: onAllESCs },
         51: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, escTypes: onAllESCs },
 
-        56: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, escTypes: onAllESCs },
+        56: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "value", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, escTypes: onAllESCs },
 
         99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs } // must always be 99 and the last one
     };
@@ -402,6 +402,7 @@ onload = function () {
             console.dir(versionCheck);
             console.log("DEBUG");
             console.log(FW_update);
+            OW_activate();
             return
         });
     }
@@ -780,22 +781,25 @@ function OW_activate() {
 }
 
 function activationLoop() {
-    if (DEBUG) console.log("Activation loop starting");
     if (waitForResponseID == 0) {
         while ((!(ESCactivateID in DEVICEs)) && ESCactivateID < 25) ESCactivateID++;
+        if (DEVICE_types.find(x => x.id === DEVICEs[ESCactivateID].type).blOnly == true) {
+            if (DEBUG) console.log("Device " + ESCactivateID + " is blOnly next.");
+            ESCactivateID++;
+        }
         if (ESCactivateID == 25) {
             activationActive = 0;
             return;
         }
         if (SwitchStatus == 0) {
             // request
-            if (DEBUG) console.log("ESC " + ESCactivateID + " send OK_OK cmd");
+            if (DEBUG) console.log("DEVICE " + ESCactivateID + " send OK_OK cmd");
             send_ESC_package(ESCactivateID, 0, [OW_OK]);
             waitForResponseID = ESCactivateID;
             waitForResponseType = 0;
             waitForResponseLength = 7;
         } else {
-            if (DEBUG) console.log("ESC " + ESCactivateID + " send OW_GET_ACTIVATION cmd");
+            if (DEBUG) console.log("DEVICE " + ESCactivateID + " send OW_GET_ACTIVATION cmd");
             send_ESC_package(ESCactivateID, 0, [OW_GET_ACTIVATION]);
             waitForResponseID = ESCactivateID;
             waitForResponseType = 0;
@@ -809,10 +813,10 @@ function activationLoop() {
                 if (responsePackage[0] == OW_RESPONSE_IN_FW) {
                     SwitchStatus++;
                     waitForResponseID = 0;
-                    if (DEBUG) console.log("ESC " + ESCactivateID + " is in firmware");
+                    if (DEBUG) console.log("DEVICE " + ESCactivateID + " is in firmware");
                 } else {
                     if (switchProblem == 0) {
-                        if (DEBUG) console.log("ESC " + ESCactivateID + " send OW_BL_START_FW cmd");
+                        if (DEBUG) console.log("DEVICE " + ESCactivateID + " send OW_BL_START_FW cmd");
                         send_ESC_package(ESCactivateID, 0, [OW_BL_START_FW]);
                         if (ConnectionType == VCP) {
                             if (DEBUG) console.log("starting reconnect procedure 1");
@@ -826,33 +830,33 @@ function activationLoop() {
                         switchProblem++;
                         waitLoops = 20;
                     } else {
-                        if (DEBUG) console.log("ESC with id: " + ESCactivateID + " don't switches ->stop");
+                        if (DEBUG) console.log("DEVICE with id: " + ESCactivateID + " don't switches ->stop");
                         throwSerialBadCommunicationError = 1;
                         switchProblem = 0;
                     }
                 }
             } else if (SwitchStatus == 1) {
                 DEVICEs[ESCactivateID].activated = (responsePackage[5]);
-                if (DEBUG) console.log("ESC " + ESCactivateID + " response is " + DEVICEs[ESCactivateID].activated);
+                if (DEBUG) console.log("DEVICE " + ESCactivateID + " response is " + DEVICEs[ESCactivateID].activated);
                 SwitchStatus++;
             } else if (SwitchStatus == 2) {
                 if (DEVICEs[ESCactivateID].activated == 0) {
-                    if (DEBUG) console.log("Activating ESC " + ESCactivateID + " with key " + DEVICEs[ESCactivateID].activationkey);
+                    if (DEBUG) console.log("Activating DEVICE " + ESCactivateID + " with key " + DEVICEs[ESCactivateID].activationkey);
                     send_ESC_package(ESCactivateID, 0, [OW_SET_ACTIVATION, 0x01, 0x02, 0x03, 0x04]); // need to replace with proper key
                     waitForResponseID = ESCactivateID;
                     waitForResponseType = 0;
                     waitForResponseLength = 7;
                     SwitchStatus++;
                 } else {
-                    if (DEBUG) console.log("ESC " + ESCactivateID + " is already activated.");
+                    if (DEBUG) console.log("DEVICE " + ESCactivateID + " is already activated.");
                     SwitchStatus = 0;
                     ESCactivateID++;
                 }
             } else if (SwitchStatus == 3) {
                 if (responsePackage[5] == OW_OK) {
-                    if (DEBUG) console.log("ESC " + ESCactivateID + " activated.");
+                    if (DEBUG) console.log("DEVICE " + ESCactivateID + " activated.");
                 } else {
-                    if (DEBUG) console.log("ESC " + ESCactivateID + " activation wrong response: " + responsePackage[5]);
+                    if (DEBUG) console.log("DEVICE " + ESCactivateID + " activation wrong response: " + responsePackage[5]);
                 }
                 SwitchStatus = 0;
                 ESCactivateID++;
@@ -861,14 +865,12 @@ function activationLoop() {
             sendBytes(LastSentData);
             if (DEBUG) console.log("no response, retrying");
         } else if (timeoutESC_IDs[ESCactivateID] > DEFAULT_TIMEOUT * 3) {
-            if (DEBUG) console.log("no response from ESC with id: " + ESCactivateID + " ->stop");
+            if (DEBUG) console.log("no response from DEVICE with id: " + ESCactivateID + " ->stop");
             throwSerialBadCommunicationError = 1;
             waitForResponseID = 0;
             ESCactivateID++;
         }
     }
-    if (DEBUG) console.log("Activation loop completed");
-
 }
 
 
@@ -1161,14 +1163,14 @@ function check_ESCs_In_BL() {
                 if (responsePackage[0] == expectedHeader) {
                     if (expectedHeader == OW_RESPONSE_IN_BL) DEVICEs[SwitchESCsFW_ID].asBL = true;
                     else DEVICEs[SwitchESCsFW_ID].asBL = false;
-                    if (DEBUG) console.log("ESC with id: " + SwitchESCsFW_ID + " is ready");
+                    if (DEBUG) console.log("DEVICE with id: " + SwitchESCsFW_ID + " is ready");
                     SwitchStatus++;
                 } else {
                     if (expectedHeader != OW_RESPONSE_IN_BL) DEVICEs[SwitchESCsFW_ID].asBL = false;
                     else DEVICEs[SwitchESCsFW_ID].asBL = true;
                     if (switchProblem == 0) {
                         if (DEVICE_types.find(x => x.id === DEVICEs[SwitchESCsFW_ID].type).blOnly == true) return
-                        if (DEBUG) console.log("switching ESC with id: " + SwitchESCsFW_ID);
+                        if (DEBUG) console.log("switching DEVICE with id: " + SwitchESCsFW_ID);
                         send_ESC_package(SwitchESCsFW_ID, 0, [SwitchCommand]);
                         if (ConnectionType == VCP) {
                             if (DEBUG) console.log("starting reconnect procedure 1");
@@ -1177,12 +1179,12 @@ function check_ESCs_In_BL() {
                         switchProblem++;
                         waitLoops = 20;
                     } else if (switchProblem < 20) {
-                        if (DEBUG) console.log("ESC with id: " + SwitchESCsFW_ID + " don't switches ->retry");
+                        if (DEBUG) console.log("DEVICE with id: " + SwitchESCsFW_ID + " don't switches ->retry");
                         send_ESC_package(SwitchESCsFW_ID, 0, [SwitchCommand]);
                         switchProblem++;
                         waitLoops = 20;
                     } else {
-                        if (DEBUG) console.log("ESC with id: " + SwitchESCsFW_ID + " don't switches ->stop");
+                        if (DEBUG) console.log("DEVICE with id: " + SwitchESCsFW_ID + " don't switches ->stop");
                         throwSerialBadCommunicationError = 1;
                         SwitchESCsFW_ID++;
                         switchProblem = 0;
@@ -1191,7 +1193,7 @@ function check_ESCs_In_BL() {
             } else {
                 DEVICEs[SwitchESCsFW_ID].version = (responsePackage[5] / 10);
                 DEVICEs[SwitchESCsFW_ID].subversion = (responsePackage[6] / 100);
-                if (DEBUG) console.log("ESC with id: " + SwitchESCsFW_ID + " software version is: " + DEVICEs[SwitchESCsFW_ID].version + "." + DEVICEs[SwitchESCsFW_ID].subversion);
+                if (DEBUG) console.log("DEVICE with id: " + SwitchESCsFW_ID + " software version is: " + DEVICEs[SwitchESCsFW_ID].version + "." + DEVICEs[SwitchESCsFW_ID].subversion);
                 SwitchStatus = 0;
                 SwitchESCsFW_ID++;
             }
@@ -1199,7 +1201,7 @@ function check_ESCs_In_BL() {
             sendBytes(LastSentData);
             if (DEBUG) console.log("no response, retrying");
         } else if (timeoutESC_IDs[SwitchESCsFW_ID] > DEFAULT_TIMEOUT * 3) {
-            if (DEBUG) console.log("no response from ESC with id: " + SwitchESCsFW_ID + " ->stop");
+            if (DEBUG) console.log("no response from DEVICE with id: " + SwitchESCsFW_ID + " ->stop");
             throwSerialBadCommunicationError = 1;
             waitForResponseID = 0;
             SwitchESCsFW_ID++;
@@ -1271,7 +1273,7 @@ function ChangeDisplay(displayType) {
                 ID_count++;
             }
             if ((maxID - minID) + 1 > ID_count) {
-                $("#dialog").text("ESC telemetry cannot be displayed because ID's have gaps. please change the ID's to be in a row.");
+                $("#dialog").text("DEVICE telemetry cannot be displayed because ID's have gaps. please change the ID's to be in a row.");
                 $("#dialog").dialog({
                     modal: true,
                     buttons: {
@@ -1316,7 +1318,7 @@ function ChangeDisplay(displayType) {
     }
 }
 
-//===================================================================================== ESC communication
+//===================================================================================== DEVICE communication
 
 function send_ESC_package(id, type, bytes) {
     var B_length = bytes.length + 6;
@@ -1391,21 +1393,21 @@ function ScanForESCs() {
             waitForResponseID = scanID;
             waitForResponseType = 0;
             waitForResponseLength = 7;
-            if (DEBUG) console.log("request version of ESC with ID: " + scanID);
+            if (DEBUG) console.log("request version of DEVICE with ID: " + scanID);
         } else if (scanStep == 2) { //get version
             timeoutESC_IDs[scanID] = 0;
             send_ESC_package(scanID, 0, [OW_REQ_SW_VER]);
             waitForResponseID = scanID;
             waitForResponseType = 0;
             waitForResponseLength = 8;
-            if (DEBUG) console.log("request type of ESC with ID: " + scanID);
+            if (DEBUG) console.log("request type of DEVICE with ID: " + scanID);
         } else if (scanStep == 3) { //get SN
             timeoutESC_IDs[scanID] = 0;
             send_ESC_package(scanID, 0, [OW_REQ_SN]);
             waitForResponseID = scanID;
             waitForResponseType = 0;
             waitForResponseLength = 18;
-            if (DEBUG) console.log("request Serialnumber of ESC with ID: " + scanID);
+            if (DEBUG) console.log("request Serialnumber of DEVICE with ID: " + scanID);
         }
     } else {
         var responsePackage = checkForRespPackage();
@@ -1427,7 +1429,7 @@ function ScanForESCs() {
                         if (DEBUG) console.log("Board type is USB bootloader only!");
                     }
 
-                    if (DEBUG) console.log("ESC with id: " + scanID + " is from type: " + DEVICEs[scanID].type);
+                    if (DEBUG) console.log("DEVICE with id: " + scanID + " is from type: " + DEVICEs[scanID].type);
                     scanStep = 2;
                     ScanForESCs();
                 } else if (scanStep == 2) {
@@ -1435,7 +1437,7 @@ function ScanForESCs() {
                     DEVICEs[scanID].version = (responsePackage[5] / 10);
                     DEVICEs[scanID].subversion = (responsePackage[6] / 100);
 
-                    if (DEBUG) console.log("ESC with id: " + scanID + " software version is: " + DEVICEs[scanID].version + "." + DEVICEs[scanID].subversion);
+                    if (DEBUG) console.log("DEVICE with id: " + scanID + " software version is: " + DEVICEs[scanID].version + "." + DEVICEs[scanID].subversion);
                     scanStep = 3;
                     ScanForESCs();
                 } else if (scanStep == 3) {
@@ -1443,7 +1445,7 @@ function ScanForESCs() {
                     for (var i = 0; i < 12; i++) DEVICEs[scanID].SN[i] = responsePackage[i + 5];
 
                     if (DEBUG) {
-                        console.log("ESC with id: " + scanID + " serialnumber is: ");
+                        console.log("DEVICE with id: " + scanID + " serialnumber is: ");
                         console.log(DEVICEs[scanID].SN);
                     }
                     scanStep = 0;
@@ -1460,10 +1462,10 @@ function ScanForESCs() {
         } else if (++timeoutESC_IDs[scanID] > 0) {
             if (timeoutESC_IDs[scanID] == 5 || timeoutESC_IDs[scanID] == 10) {
                 sendBytes(LastSentData);
-                if (DEBUG) console.log("no response from ESC with id: " + scanID + " ->retry");
+                if (DEBUG) console.log("no response from DEVICE with id: " + scanID + " ->retry");
             } else if (timeoutESC_IDs[scanID] > 15) {
                 timeoutESC_IDs[scanID] = 0;
-                if (DEBUG) console.log("no response from ESC with id: " + scanID + " ->stop");
+                if (DEBUG) console.log("no response from DEVICE with id: " + scanID + " ->stop");
                 waitForResponseID = 0;
                 scanStep = 0;
                 if (++scanID == 25) {
@@ -1838,7 +1840,7 @@ function displayESCs(ParentElement) {
                         DEVICEs[tmpESCid].commandedThrottle = tmpESCval;
                     }
                 } else {
-                    // ESC not enabled
+                    // DEVICE not enabled
                     DEVICEs[tmpESCid].ThrottleValue.value = 0
                     flash_button("SE_" + tmpESCid + "_8");
                 }
@@ -1973,7 +1975,7 @@ function initFWUpdater() {
                                 type: 'GET',
                                 crossDomain: true,
                                 success: function (data) {
-                                    if (DEBUG) console.log("Loaded remote ESC hex file " + fw_url + " Filename:" + FW_update.loadedFileName);
+                                    if (DEBUG) console.log("Loaded remote DEVICE hex file " + fw_url + " Filename:" + FW_update.loadedFileName);
                                     self.pages = parseHexFile(data);
                                 },
                                 error: function (data) {
@@ -2048,10 +2050,10 @@ function FlashProcessLoop() {
         if (waitForResponseID == 0) {
             if (act_ESC_flash_Stat < 2) {
                 if (act_ESC_flash_Stat == 0) {
-                    if (DEBUG) console.log("Starting to flash ESC with ID: " + FlashESC_ID + "...");
+                    if (DEBUG) console.log("Starting to flash DEVICE with ID: " + FlashESC_ID + "...");
                     if (!DEVICEs[FlashESC_ID].asBL) {
                         send_ESC_package(FlashESC_ID, 0, [OW_RESET_TO_BL]);
-                        if (DEBUG) console.log("reset ESC with ID: " + FlashESC_ID + " to bootloader");
+                        if (DEBUG) console.log("reset DEVICE with ID: " + FlashESC_ID + " to bootloader");
                     }
                     act_ESC_flash_Stat = 1;
                 } else {
@@ -2059,7 +2061,7 @@ function FlashProcessLoop() {
                     waitForResponseID = FlashESC_ID;
                     waitForResponseType = 0;
                     waitForResponseLength = 7;
-                    if (DEBUG) console.log("check if ESC with ID: " + FlashESC_ID + " is in bootloader mode");
+                    if (DEBUG) console.log("check if DEVICE with ID: " + FlashESC_ID + " is in bootloader mode");
                 }
             } else if (act_ESC_flash_Stat == 2) {
                 send_ESC_package(FlashESC_ID, 0, [OW_BL_PAGES_TO_FLASH, (FW_update.pagesCount & 0xFF), (FW_update.pagesCount >> 8)]);
@@ -2068,11 +2070,11 @@ function FlashProcessLoop() {
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
                 extraDelay = 1;
-                if (DEBUG) console.log("sent to ESC with ID: " + FlashESC_ID + " the block count that need to be flashed & erase flash command. ");
+                if (DEBUG) console.log("sent to DEVICE with ID: " + FlashESC_ID + " the block count that need to be flashed & erase flash command. ");
             } else if (act_ESC_flash_Stat == 3) {
                 if (act_ESC_sent_Page > 0) {
                     send_ESC_package(FlashESC_ID, act_ESC_sent_Page, FW_update.preparedPages[act_ESC_sent_Page - 1]);
-                    if (DEBUG) console.log("sent to ESC with ID: " + FlashESC_ID + " flash block number: " + act_ESC_sent_Page);
+                    if (DEBUG) console.log("sent to DEVICE with ID: " + FlashESC_ID + " flash block number: " + act_ESC_sent_Page);
                     waitForResponseID = FlashESC_ID;
                     waitForResponseType = act_ESC_sent_Page;
                     waitForResponseLength = 134;
@@ -2083,7 +2085,7 @@ function FlashProcessLoop() {
                     $("#esc_info_progress_bar_" + FlashESC_ID).progressbar({
                         value: 100
                     });
-                    if (DEBUG) console.log("ESC with ID: " + FlashESC_ID + " update done");
+                    if (DEBUG) console.log("DEVICE with ID: " + FlashESC_ID + " update done");
                     act_ESC_flash_Stat = 0;
                     act_ESC_sent_Page = 0;
                     DEVICEs[FlashESC_ID].asBL = false;
@@ -2104,23 +2106,23 @@ function FlashProcessLoop() {
                     if (act_ESC_flash_Stat == 1) {
                         if (responsePackage[0] == OW_RESPONSE_IN_BL) {
                             DEVICEs[FlashESC_ID].asBL = true;
-                            if (DEBUG) console.log("ESC with ID: " + FlashESC_ID + " is in bootloader mode");
+                            if (DEBUG) console.log("DEVICE with ID: " + FlashESC_ID + " is in bootloader mode");
                             act_ESC_flash_Stat = 2;
                         } else {
-                            if (DEBUG) console.log("ESC with ID: " + FlashESC_ID + " don't moves to bootloader!");
+                            if (DEBUG) console.log("DEVICE with ID: " + FlashESC_ID + " don't moves to bootloader!");
                             send_ESC_package(FlashESC_ID, 0, [OW_RESET_TO_BL]);
-                            if (DEBUG) console.log("reset ESC with ID: " + FlashESC_ID + " to bootloader");
+                            if (DEBUG) console.log("reset DEVICE with ID: " + FlashESC_ID + " to bootloader");
                         }
                     } else if (act_ESC_flash_Stat == 2) {
                         if (responsePackage[5] == 0) {
-                            if (DEBUG) console.log("ESC with ID: " + FlashESC_ID + " confirmed flash erase");
+                            if (DEBUG) console.log("DEVICE with ID: " + FlashESC_ID + " confirmed flash erase");
                             act_ESC_flash_Stat = 3;
                             extraDelay = is_USB_only_bootloader;
                         } else {
-                            if (DEBUG) console.log("ESC with ID: " + FlashESC_ID + " reported error: " + responsePackage[5]);
+                            if (DEBUG) console.log("DEVICE with ID: " + FlashESC_ID + " reported error: " + responsePackage[5]);
                         }
                     } else if (act_ESC_flash_Stat == 3) {
-                        if (DEBUG) console.log("received from ESC with ID: " + FlashESC_ID + " block number: " + act_ESC_sent_Page + " for verification.");
+                        if (DEBUG) console.log("received from DEVICE with ID: " + FlashESC_ID + " block number: " + act_ESC_sent_Page + " for verification.");
                         var verifyFailed = 0;
                         for (i = 0; i < 128; i++) {
                             if (FW_update.preparedPages[act_ESC_sent_Page - 1][i] != responsePackage[i + 5]) {
@@ -2145,7 +2147,7 @@ function FlashProcessLoop() {
                             // unable to write block 255 (require BL Update)
                             if (act_ESC_sent_Page == 255 && responsePackage[5] == 2) {
                                 if (DEBUG) console.log("Bootloader not supporting more than 255 pages ");
-                                $("#dialog").text("This ESC doesn't have the latest bootloader and can't support this firmware. Please flash the available bootloader update. Once completed please flash again this version.");
+                                $("#dialog").text("This DEVICE doesn't have the latest bootloader and can't support this firmware. Please flash the available bootloader update. Once completed please flash again this version.");
                                 FlashESC_ID = 0;
                                 FW_update.FlashProcessActive = 0;
                                 $("#dialog").dialog({
@@ -2168,7 +2170,7 @@ function FlashProcessLoop() {
                             timeoutESC_IDs[FlashESC_ID] = 0;
                             act_ESC_flash_Stat = 2;
                             waitForResponseID = 0;
-                            if (DEBUG) console.log("restarting flash process for ESC with ID :" + FlashESC_ID);
+                            if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + FlashESC_ID);
                         }
                     }
                 }
@@ -2181,7 +2183,7 @@ function FlashProcessLoop() {
                 timeoutESC_IDs[FlashESC_ID] = 0;
                 act_ESC_flash_Stat = 2;
                 waitForResponseID = 0;
-                if (DEBUG) console.log("restarting flash process for ESC with ID :" + FlashESC_ID);
+                if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + FlashESC_ID);
 
             }
         }
@@ -2429,7 +2431,7 @@ function ToolProcessLoop() {
             }
         }
         if (start_check > 20) {
-            // check for ESC error but wait some time
+            // check for DEVICE error but wait some time
             for (var i in DEVICEs) {
                 if (DEVICEs[i].warning == false) {
 
@@ -2503,7 +2505,7 @@ function ToolProcessLoop() {
                 waitForResponseID = checkESCid;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("set fast throttle for ESC with id: " + checkESCid + " ");
+                if (DEBUG) console.log("set fast throttle for DEVICE with id: " + checkESCid + " ");
             }
         } else {
             var responsePackage = checkForRespPackage();
@@ -2516,11 +2518,11 @@ function ToolProcessLoop() {
                     } else {
                         DEVICEs[checkESCid].asBL = true;
                         if (blProblem == 0) {
-                            if (DEBUG) console.log("ESC with id: " + checkESCid + " remains in bootloader mode ->retry");
+                            if (DEBUG) console.log("DEVICE with id: " + checkESCid + " remains in bootloader mode ->retry");
                             send_ESC_package(checkESCid, 0, [OW_BL_START_FW]);
                             blProblem = 1;
                         } else {
-                            if (DEBUG) console.log("ESC with id: " + checkESCid + " remains in bootloader mode ->stop");
+                            if (DEBUG) console.log("DEVICE with id: " + checkESCid + " remains in bootloader mode ->stop");
                             throwSerialBadCommunicationError = 1;
                             checkESCid++;
                             blProblem = 0;
@@ -2537,7 +2539,7 @@ function ToolProcessLoop() {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
             } else if (timeoutESC_IDs[checkESCid] > DEFAULT_TIMEOUT * 3) {
-                if (DEBUG) console.log("no response from ESC with id: " + checkESCid + " ->stop");
+                if (DEBUG) console.log("no response from DEVICE with id: " + checkESCid + " ->stop");
                 throwSerialBadCommunicationError = 1;
                 waitForResponseID = 0;
                 checkESCsStat = 0;
@@ -2694,7 +2696,7 @@ function ConfigLoop() {
                 waitForResponseID = read_ESC_ids[ESC_ID_Index];
                 waitForResponseType = 0;
                 waitForResponseLength = 6 + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount;
-                if (DEBUG) console.log("requesting Setting " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand + " from ESC with id: " + read_ESC_ids[ESC_ID_Index] + " ");
+                if (DEBUG) console.log("requesting Setting " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand + " from DEVICE with id: " + read_ESC_ids[ESC_ID_Index] + " ");
             }
         } else {
             var responsePackage = checkForRespPackage();
@@ -2707,11 +2709,11 @@ function ConfigLoop() {
                     } else {
                         DEVICEs[read_ESC_ids[ESC_ID_Index]].asBL = true;
                         if (blProblem == 0) {
-                            if (DEBUG) console.log("ESC with id: " + read_ESC_ids[ESC_ID_Index] + " remains in bootloader mode ->retry");
+                            if (DEBUG) console.log("DEVICE with id: " + read_ESC_ids[ESC_ID_Index] + " remains in bootloader mode ->retry");
                             send_ESC_package(read_ESC_ids[ESC_ID_Index], 0, [OW_BL_START_FW]);
                             blProblem = 1;
                         } else {
-                            if (DEBUG) console.log("ESC with id: " + read_ESC_ids[ESC_ID_Index] + " remains in bootloader mode ->stop");
+                            if (DEBUG) console.log("DEVICE with id: " + read_ESC_ids[ESC_ID_Index] + " remains in bootloader mode ->stop");
                             throwSerialBadCommunicationError = 1;
                             checkESCid++;
                             blProblem = 0;
@@ -2726,14 +2728,14 @@ function ConfigLoop() {
                         DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
                     }
                     checkESCsStat = 0;
-                    if (DEBUG) console.log("Setting " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " from ESC with id: " + read_ESC_ids[ESC_ID_Index] + " is " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active + " bytecound: " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount);
+                    if (DEBUG) console.log("Setting " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " from DEVICE with id: " + read_ESC_ids[ESC_ID_Index] + " is " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active + " bytecound: " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount);
                     ESC_Setting_Index++;
                 }
             } else if (++timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == DEFAULT_TIMEOUT || timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == DEFAULT_TIMEOUT * 2 || timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == DEFAULT_TIMEOUT * 3) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
             } else if (timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] > DEFAULT_TIMEOUT * 3) {
-                if (DEBUG) console.log("no response from ESC with id: " + read_ESC_ids[ESC_ID_Index] + " ->stop");
+                if (DEBUG) console.log("no response from DEVICE with id: " + read_ESC_ids[ESC_ID_Index] + " ->stop");
                 throwSerialBadCommunicationError = 1;
                 waitForResponseID = 0;
                 checkESCsStat = 0;
@@ -2756,7 +2758,7 @@ function ConfigLoop() {
                 waitForResponseID = saveNewSettingsToId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("GET Setting " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand + " from ESC with id: " + saveNewSettingsToId + " ");
+                if (DEBUG) console.log("GET Setting " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand + " from DEVICE with id: " + saveNewSettingsToId + " ");
             } else {
                 if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 1) {
                     send_ESC_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].setCommand), newSettingsValues[read_ESC_settings[ESC_Setting_Index]]]);
@@ -2772,7 +2774,7 @@ function ConfigLoop() {
                 }
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("SET Setting " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand + 1) + " to:" + newSettingsValues[read_ESC_settings[ESC_Setting_Index]] + " at ESC with id: " + saveNewSettingsToId + " ");
+                if (DEBUG) console.log("SET Setting " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand + 1) + " to:" + newSettingsValues[read_ESC_settings[ESC_Setting_Index]] + " at DEVICE with id: " + saveNewSettingsToId + " ");
             }
         } else {
             var responsePackage = checkForRespPackage();
@@ -2828,7 +2830,7 @@ function ConfigLoop() {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
             } else if (timeoutESC_IDs[saveNewSettingsToId] > DEFAULT_TIMEOUT * 3) {
-                if (DEBUG) console.log("no response from ESC with id: " + saveNewSettingsToId + " ->stop");
+                if (DEBUG) console.log("no response from DEVICE with id: " + saveNewSettingsToId + " ->stop");
                 throwSerialBadCommunicationError = 1;
                 waitForResponseID = 0;
                 checkESCsStat = 0;
