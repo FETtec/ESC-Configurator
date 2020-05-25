@@ -1,6 +1,7 @@
 "user strict";
 
-const DEBUG = 1;
+const DEBUG = 0;
+const RAWDEBUG = 0; // show send/receive
 
 const MAX_TRY = 3;
 const DEFAULT_TIMEOUT = 215;
@@ -791,6 +792,27 @@ function activationLoop() {
             activationActive = 0;
             return;
         }
+        // collect activationkey //  DEVICEs[ESCactivateID].activationkey
+        // 66007e000d50363146353920
+        /*
+                $.ajax({
+                    url: "",
+                    type: 'GET',
+                    crossDomain: true,
+                    success: function (data) {
+                        if (DEBUG) console.log("Collect key from ");
+                        //DEVICEs[ESCactivateID].activationkey = data;
+                    },
+                    error: function (data) {
+                        if (DEBUG) console.log("ERROR on collect key")
+                        $(".ui-notification-container").notification("create", {
+                            title: "Unable to activate",
+                            content: "Activation require internet connection.",
+                        });
+        
+                    }
+                }); 
+                */
         if (SwitchStatus == 0) {
             // request
             if (DEBUG) console.log("DEVICE " + ESCactivateID + " send OK_OK cmd");
@@ -842,7 +864,8 @@ function activationLoop() {
             } else if (SwitchStatus == 2) {
                 if (DEVICEs[ESCactivateID].activated == 0) {
                     if (DEBUG) console.log("Activating DEVICE " + ESCactivateID + " with key " + DEVICEs[ESCactivateID].activationkey);
-                    send_ESC_package(ESCactivateID, 0, [OW_SET_ACTIVATION, 0x01, 0x02, 0x03, 0x04]); // need to replace with proper key
+                    // -6F0A6E67
+                    send_ESC_package(ESCactivateID, 0, [OW_SET_ACTIVATION, -0x6F, 0x0A, 0x6E, 0x67]); // need to replace with proper key
                     waitForResponseID = ESCactivateID;
                     waitForResponseType = 0;
                     waitForResponseLength = 7;
@@ -854,10 +877,20 @@ function activationLoop() {
                 }
             } else if (SwitchStatus == 3) {
                 if (responsePackage[5] == OW_OK) {
-                    if (DEBUG) console.log("DEVICE " + ESCactivateID + " activated.");
+                    if (DEBUG) console.log("DEVICE " + ESCactivateID + " response OK.");
+                    if (DEBUG) console.log("DEVICE " + ESCactivateID + " send OW_GET_ACTIVATION cmd");
+                    send_ESC_package(ESCactivateID, 0, [OW_GET_ACTIVATION]);
+                    waitForResponseID = ESCactivateID;
+                    waitForResponseType = 0;
+                    waitForResponseLength = 7;
+                    SwitchStatus++;
                 } else {
                     if (DEBUG) console.log("DEVICE " + ESCactivateID + " activation wrong response: " + responsePackage[5]);
                 }
+                SwitchStatus = 0;
+                ESCactivateID++;
+            } else if (SwitchStatus == 4) {
+                console.log(responsePackage);
                 SwitchStatus = 0;
                 ESCactivateID++;
             }
@@ -1326,6 +1359,7 @@ function send_ESC_package(id, type, bytes) {
     for (var i = 0; i < bytes.length; i++) ESC_package.push(bytes[i]);
     ESC_package.push(getCRC(ESC_package, B_length - 1));
     sendBytes(ESC_package);
+    if (RAWDEBUG) console.log("SND: " + ESC_package)
 }
 
 var waitForResponseID = 0;
@@ -1365,7 +1399,10 @@ function checkForRespPackage() {
             waitForResponseLength = 0;
         }
     }
-    if (responsePackage.length > 1) return responsePackage;
+    if (responsePackage.length > 1) {
+        if (RAWDEBUG) console.log ("RCV: " + responsePackage)
+        return responsePackage;
+    }
     else return false;
 }
 
