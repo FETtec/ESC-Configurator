@@ -12,6 +12,11 @@ var OneWire = 0;
 const canvas_width = 600;
 const canvas_height = 142;
 
+// logo consts
+const pilotlogoheight = 66;
+const pilotlogowidth = 130;
+const pilotlogorowbyte = 17;
+
 //communication defines
 
 const ALL_ID = 0x1F;
@@ -276,7 +281,11 @@ var FW_update = {
     startUpdateInput: 0,
     FlashProcessActive: 0,
     loadedFileName: "",
-    startAddr: null
+    startAddr: null,
+    WhiteLogoPos: null,
+    BlackLogoPos: null,
+    WhiteLogoArr: [],
+    BlackLogoArr: []
 }
 
 var scanDone = 0;
@@ -403,7 +412,8 @@ onload = function () {
             console.dir(versionCheck);
             console.log("DEBUG");
             console.log(FW_update);
-            OW_activate();
+            //OW_activate();
+            //showLogoEditor();
             return
         });
     }
@@ -448,7 +458,6 @@ function GenSerialDropdown(ports) {
     }
     // selecting last entry
     $('#con_port').val($('#con_port option:last-child').val());
-
     $("#con_port").selectmenu();
     $('#con_port').selectmenu("refresh");
 
@@ -618,6 +627,7 @@ function disconnect() {
     interval_Speedup_Done = 0;
     PT_status = 0;
     waitLoops = 0;
+    is_USB_only_bootloader = 0;
 
     scanDone = 0;
     ESCsDisplayed = 0;
@@ -631,6 +641,10 @@ function disconnect() {
     FW_update.preparedPages = [];
     FW_update.pagesCount = 0;
     FW_update.startAddr = null;
+    FW_update.WhiteLogoPos = null;
+    FW_update.BlackLogoPos = null;
+    FW_update.WhiteLogoArr = [];
+    FW_update.BlackLogoArr = [];
 
     if (typeof SerialConnection.connection.connectionId !== 'undefined')
         chrome.serial.disconnect(SerialConnection.connection.connectionId, function () { });
@@ -1400,7 +1414,7 @@ function checkForRespPackage() {
         }
     }
     if (responsePackage.length > 1) {
-        if (RAWDEBUG) console.log ("RCV: " + responsePackage)
+        if (RAWDEBUG) console.log("RCV: " + responsePackage)
         return responsePackage;
     }
     else return false;
@@ -1920,9 +1934,6 @@ function enableButtons() {
 //===================================================================================== FW update / hex file handling
 
 function initFWUpdater() {
-    buttonAdded = 0;
-
-
     $("#toolbar").append(
         $('<div/>').attr({ id: 'localFW', class: 'fileContainer' }).button().click(function () {
             if (DEBUG) console.log("LOCAL File Selected");
@@ -1945,6 +1956,7 @@ function initFWUpdater() {
             return function (e) {
                 FW_update.hexString = e.target.result;
                 parseHexFile(FW_update.hexString);
+                $("#remoteFWSelect").remove()
             };
         })(evt.target.files[0]);
 
@@ -2033,7 +2045,7 @@ function initFWUpdater() {
     $("#remoteFW").append().html("Remote Firmware");
 }
 
-function PrepareUpdate() {
+function PrepareUpdate(attr) {
     $.each(DEVICEs, function (index, device) {
         if (device !== undefined) {
             var tmpContainer = document.getElementById("ESC_container_" + device.id);
@@ -2049,6 +2061,8 @@ function PrepareUpdate() {
             }
         }
     })
+    $('#FW_flash').remove();
+    $("#FW_chlogo").remove();
 
     if ($('#FW_flash').length == 0) {
         $("#toolbar").append(
@@ -2061,7 +2075,232 @@ function PrepareUpdate() {
             ;
         $("#FW_flash").append().html("Flash selected!");
     }
+    if (attr == 1) { // Logo
+        $("#toolbar").append(
+            $('<button/>')
+                .attr({ id: 'FW_chlogo' })
+                .button()
+                .click(function () {
+                    if (DEBUG) console.log("Show logo editor")
+                    showLogoEditor()
+                }))
+            ;
+        $("#FW_chlogo").append().html("Logo-Editor");
+    }
 }
+
+// BEGIN Logoeditor
+
+function showLogoEditor() {
+    $("#logoeditor").css("visibility", "visible");
+
+    // Canvas for logo
+    var LogoCanvas = $('<canvas/>', {
+        'class': 'logocanvas',
+        id: 'canvasHex'
+    }).prop({
+        width: pilotlogowidth,
+        height: pilotlogoheight
+    });
+    $('#logoeditor').append(LogoCanvas);
+
+    // init canvas
+    initializeCanvas("canvasHex")
+
+    // draw logo from hex
+    drawLogo("canvasHex", FW_update.WhiteLogoArr, FW_update.BlackLogoArr)
+
+    // BEGIN load file
+    $("#logoeditor").append(
+        $('<div/>').attr({ id: 'localIMG', class: 'fileContainer' }).button().click(function () {
+            if (DEBUG) console.log("LOCAL Logo File Selected");
+        }
+        ));
+    $("#localIMG").append().html("<span>Load..</span>");
+
+    toolbar = document.getElementById("localIMG");
+    document.getElementById('toolbar').style.display = "block";
+    var fileUploadInput = document.createElement('input');
+    fileUploadInput.type = "file";
+    fileUploadInput.id = "logo_upload";
+    fileUploadInput.addEventListener('change', function (evt) {
+        var fileLoaded = this.value.split('\\');
+        var loadedFileName = fileLoaded[fileLoaded.length - 1].replace(/^.*[\\\/]/, '');
+        if (DEBUG) console.log('reading Image : ' + loadedFileName);
+        var file = evt.target.files[0]
+        var reader = new FileReader();
+        reader.onloadend = function () {
+            img_data = reader.result;
+            loadCanvas("canvasHex");
+        };
+        reader.readAsDataURL(file);
+
+    }, false);
+    toolbar.appendChild(fileUploadInput);
+    // end load file
+
+    $("#logoeditor").append(
+        $('<button/>')
+            .attr({ id: 'updateLogo' })
+            .button()
+            .click(function () {
+
+                convertImgCanvas("canvasHex");
+                Array.prototype.splice.apply(
+                    FW_update.binaryString,
+                    [FW_update.BlackLogoPos, FW_update.BlackLogoArr.length].concat(FW_update.BlackLogoArr)
+                );
+                Array.prototype.splice.apply(
+                    FW_update.binaryString,
+                    [FW_update.WhiteLogoPos, FW_update.WhiteLogoArr.length].concat(FW_update.WhiteLogoArr)
+                );
+
+                var page_counter = 0;
+                var page_Byte_counter = 0;
+                for (var i = 0; i < FW_update.binaryString.length; i++) {
+                    if (page_Byte_counter == 0) FW_update.preparedPages[page_counter] = [];
+                    FW_update.preparedPages[page_counter].push(FW_update.binaryString[i]);
+                    page_Byte_counter++;
+                    if (page_Byte_counter == 128) {
+                        page_Byte_counter = 0;
+                        page_counter++;
+                    }
+                }               
+                $("#logoeditor").css("visibility", "hidden");
+                $("#logoeditor").empty()
+            }))
+        ;
+    $("#updateLogo").append().html("Update");
+
+    $("#logoeditor").append(
+        $('<button/>')
+            .attr({ id: 'cancelLogo' })
+            .button()
+            .click(function () {
+                $("#logoeditor").css("visibility", "hidden");
+                $("#logoeditor").empty()
+            }))
+        ;
+    $("#cancelLogo").append().html("Cancel");
+}
+
+function drawLogo(canvasId, whitelogo, blacklogo) {
+    var canvas = document.getElementById(canvasId);
+    canvas.width = pilotlogowidth;
+    canvas.height = pilotlogoheight;
+
+    var ctx = canvas.getContext("2d");
+    // set background to green
+    ctx.fillStyle = "#00ff00";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // reset pos
+    var pos_x = 0;
+    var pos_y = 0;
+    ctx.fillStyle = "#ffffff"; // white
+    for (var i = 0; i < whitelogo.length; i++) {
+        var tmpbyte = byte2Bit(whitelogo[i]);
+        for (var i2 = 7; i2 > -1; i2--) {
+            if (tmpbyte[i2] == 1) {
+                ctx.fillRect(pos_x, pos_y, 1, 1);
+            }
+            pos_x++;
+        }
+        if (pos_x > pilotlogowidth) {
+            pos_x = 0;
+            pos_y++;
+        }
+    }
+
+    var pos_x = 0;
+    var pos_y = 0;
+    ctx.fillStyle = "#000000"; // black
+    for (var i = 0; i < blacklogo.length; i++) {
+        var tmpbyte = byte2Bit(blacklogo[i]);
+        for (var i2 = 7; i2 > -1; i2--) {
+            if (tmpbyte[i2] == 1) {
+                ctx.fillRect(pos_x, pos_y, 1, 1);
+            }
+            pos_x++;
+        }
+        if (pos_x > pilotlogowidth) {
+            pos_x = 0;
+            pos_y++;
+        }
+    }
+
+    if (DEBUG) console.log("HEX Whitelogo size: " + whitelogo.length);
+    if (DEBUG) console.log("HEX Blacklogo size: " + blacklogo.length);
+}
+
+function convertImgCanvas(obj) {
+    // clear some variables
+    FW_update.BlackLogoArr.length = 0;
+    FW_update.WhiteLogoArr.length = 0;
+
+    // init canvas
+    var canvas = document.getElementById(obj);
+    var ctx = canvas.getContext("2d");
+
+    for (y = 0; y < canvas.height; y++) {
+        var x_count = 0;
+        var tmp_value_blk = 0;
+        var tmp_value_white = 0;
+        for (x = 0; x < canvas.width; x++) {
+            // read Pixel
+            var p = ctx.getImageData(x, y, 1, 1).data;
+            if (p[0] == 0 && p[1] == 0 && p[2] == 0) {
+                // is black
+                tmp_value_blk += 1 << x_count;
+            } else if (p[0] == 255 && p[1] == 255 && p[2] == 255) {
+                // is white
+                tmp_value_white += 1 << x_count;
+            } else {
+                // all other colors
+            }
+
+            if (x_count >= 7 || x == canvas.width - 1) {
+                x_count = 0;
+                FW_update.BlackLogoArr.push(tmp_value_blk);
+                FW_update.WhiteLogoArr.push(tmp_value_white);
+                tmp_value_blk = 0;
+                tmp_value_white = 0;
+            } else {
+                x_count++;
+            }
+        }
+    }
+    if (DEBUG) console.log("Canvas Whitelogo size: " + FW_update.WhiteLogoArr.length);
+    if (DEBUG) console.log("Canvas Blacklogo size: " + FW_update.BlackLogoArr.length);
+}
+
+
+function initializeCanvas(obj) {
+    var canvas = document.getElementById(obj);
+    canvas.width = pilotlogowidth;
+    canvas.height = pilotlogoheight;
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#00ff00";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function loadCanvas(obj) {
+    var canvas = document.getElementById(obj);
+    canvas.width = pilotlogowidth;
+    canvas.height = pilotlogoheight;
+    var ctx = canvas.getContext("2d");
+    var image = new Image();
+    image.onload = function () {
+        ctx.fillStyle = "#00ff00";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(image, 0, 0); //TODO
+    };
+    image.src = img_data;
+}
+
+
+// END Logo Editor
+
 var FlashESC_ID = 0;
 
 function StartFlashProcess() {
@@ -2336,7 +2575,76 @@ function parseHexFile(hexData) {
             page_counter++;
         }
     }
-    PrepareUpdate();
+
+    PrepareUpdate(searchLogo(FW_update.binaryString));
+}
+
+
+function searchLogo(ByteArr) {
+    FW_update.WhiteLogoPos = null;
+    FW_update.BlackLogoPos = null;
+
+    for (i = 0; i < ByteArr.length; i++) {
+        // Logo Black
+        if (getA2sign(ByteArr[i]) == "P") {
+            if (
+                getA2sign(ByteArr[i + 1]) == "I" &&
+                getA2sign(ByteArr[i + 2]) == "L" &&
+                getA2sign(ByteArr[i + 3]) == "O" &&
+                getA2sign(ByteArr[i + 4]) == "T" &&
+                getA2sign(ByteArr[i + 5]) == "_" &&
+                getA2sign(ByteArr[i + 6]) == "L" &&
+                getA2sign(ByteArr[i + 7]) == "O" &&
+                getA2sign(ByteArr[i + 8]) == "G" &&
+                getA2sign(ByteArr[i + 9]) == "O" &&
+                getA2sign(ByteArr[i + 10]) == "_" &&
+                getA2sign(ByteArr[i + 11]) == "B" &&
+                getA2sign(ByteArr[i + 12]) == "L" &&
+                getA2sign(ByteArr[i + 13]) == "A" &&
+                getA2sign(ByteArr[i + 14]) == "C" &&
+                getA2sign(ByteArr[i + 15]) == "K" &&
+                getA2sign(ByteArr[i + 16]) == ">"
+            ) {
+                FW_update.BlackLogoPos = i;
+                for (i2 = 0; i2 < (pilotlogorowbyte * pilotlogoheight); i2++) {
+                    FW_update.BlackLogoArr.push(ByteArr[i + i2 + 17]);
+                }
+                if (DEBUG) console.log("Black Pilot Logo found at position " + FW_update.BlackLogoPos);
+            }
+        }
+        // Logo White
+        if (getA2sign(ByteArr[i]) == "P") {
+            if (
+                getA2sign(ByteArr[i + 1]) == "I" &&
+                getA2sign(ByteArr[i + 2]) == "L" &&
+                getA2sign(ByteArr[i + 3]) == "O" &&
+                getA2sign(ByteArr[i + 4]) == "T" &&
+                getA2sign(ByteArr[i + 5]) == "_" &&
+                getA2sign(ByteArr[i + 6]) == "L" &&
+                getA2sign(ByteArr[i + 7]) == "O" &&
+                getA2sign(ByteArr[i + 8]) == "G" &&
+                getA2sign(ByteArr[i + 9]) == "O" &&
+                getA2sign(ByteArr[i + 10]) == "_" &&
+                getA2sign(ByteArr[i + 11]) == "W" &&
+                getA2sign(ByteArr[i + 12]) == "H" &&
+                getA2sign(ByteArr[i + 13]) == "I" &&
+                getA2sign(ByteArr[i + 14]) == "T" &&
+                getA2sign(ByteArr[i + 15]) == "E" &&
+                getA2sign(ByteArr[i + 16]) == ">"
+            ) {
+                FW_update.WhiteLogoPos = i;
+                for (i2 = 0; i2 < (pilotlogorowbyte * pilotlogoheight); i2++) {
+                    FW_update.WhiteLogoArr.push(ByteArr[i + i2 + 17]);
+                }
+                if (DEBUG) console.log("White Pilot Logo found at position " + FW_update.WhiteLogoPos);
+            }
+        }
+    }
+    if ((FW_update.BlackLogoPos != null) && (FW_update.WhiteLogoPos != null)) {
+        return 1
+    } else {
+        return 0
+    }
 }
 
 //===================================================================================== Tools

@@ -47,6 +47,29 @@ img {
     height: 10px;
     display: none;
 }
+#logoeditor {
+    visibility: hidden;
+    position: absolute;
+    width: 600px;
+    height: 250px;
+    top: 20%;
+    border: 1px solid #6180A3;
+    left: 20%;
+    background-color: #B4C0D8;
+    padding: 10px;
+}
+
+.logocanvas {
+    outline: black 3px solid;
+    background: #FFFFFF;
+    margin: 4px;
+}
+.logospan {
+    display: inline-block;
+    width: 60px;
+    margin: 3px;
+    vertical-align: top;
+}
 
 [id*='SE_'] {
     height: 20px;

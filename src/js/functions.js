@@ -30,3 +30,52 @@ function getCRC(ByteArray, count) {
     for (var i = 0; i < count; i++) crc = update_crc8(ByteArray[i], crc);
     return crc;
 }
+
+function getA2sign(numb) {
+    return String.fromCharCode(numb);
+}
+
+function arr_diff(a1, a2) {
+    var a = [],
+        diff = [];
+
+    for (var i = 0; i < a1.length; i++) {
+        a[a1[i]] = true;
+    }
+
+    for (var i = 0; i < a2.length; i++) {
+        if (a[a2[i]]) {
+            delete a[a2[i]];
+        } else {
+            a[a2[i]] = true;
+        }
+    }
+
+    for (var k in a) {
+        diff.push(k);
+    }
+
+    return diff;
+}
+
+function byte2Bit(byte) {
+    var bit = [];
+    for (var i = 0; i < 8; i++) {
+        bit[i] = (byte >> (7 - i)) & 0x01;
+    }
+    return bit;
+}
+
+function decimalToPlainHex(d, padding) {
+    var hex = Number(d).toString(16);
+    padding =
+        typeof padding === "undefined" || padding === null
+            ? (padding = 2)
+            : padding;
+
+    while (hex.length < padding) {
+        hex = "0" + hex;
+    }
+
+    return hex.toUpperCase();
+}
