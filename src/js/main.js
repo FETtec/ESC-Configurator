@@ -3,7 +3,7 @@
 const DEBUG = 0;
 const RAWDEBUG = 0; // show send/receive
 
-const MAX_TRY = 3;
+const MAX_TRY = 2;
 const DEFAULT_TIMEOUT = 215;
 
 var toolbar = 0;
@@ -1937,6 +1937,7 @@ function initFWUpdater() {
     $("#toolbar").append(
         $('<div/>').attr({ id: 'localFW', class: 'fileContainer' }).button().click(function () {
             if (DEBUG) console.log("LOCAL File Selected");
+            $("#firmware_file_upload").val(null);
         }
         ));
     $("#localFW").append().html("<span>Local Firmware</span>");
@@ -1945,7 +1946,7 @@ function initFWUpdater() {
     document.getElementById('toolbar').style.display = "block";
     FW_update.fileUploadInput = document.createElement('input');
     FW_update.fileUploadInput.type = "file";
-    FW_update.fileUploadInput.id = "file_upload";
+    FW_update.fileUploadInput.id = "firmware_file_upload";
     FW_update.fileUploadInput.addEventListener('change', function (evt) {
         var fileLoaded = this.value.split('\\');
         FW_update.hexString = null;
@@ -2062,7 +2063,19 @@ function PrepareUpdate(attr) {
         }
     })
     $('#FW_flash').remove();
-    $("#FW_chlogo").remove();
+    $("#FW_chPlogo").remove();
+
+    if (attr == 1) { // Logo
+        $("#toolbar").append(
+            $('<button/>')
+                .attr({ id: 'FW_chPlogo' })
+                .button()
+                .click(function () {
+                    showLogoEditor()
+                }))
+            ;
+        $("#FW_chPlogo").append().html("Pilot Logo");
+    }
 
     if ($('#FW_flash').length == 0) {
         $("#toolbar").append(
@@ -2070,23 +2083,13 @@ function PrepareUpdate(attr) {
                 .attr({ id: 'FW_flash' })
                 .button()
                 .click(function () {
+                    PrepareHex2Pages();
                     StartFlashProcess();
                 }))
             ;
         $("#FW_flash").append().html("Flash selected!");
     }
-    if (attr == 1) { // Logo
-        $("#toolbar").append(
-            $('<button/>')
-                .attr({ id: 'FW_chlogo' })
-                .button()
-                .click(function () {
-                    if (DEBUG) console.log("Show logo editor")
-                    showLogoEditor()
-                }))
-            ;
-        $("#FW_chlogo").append().html("Logo-Editor");
-    }
+
 }
 
 // BEGIN Logoeditor
@@ -2110,19 +2113,21 @@ function showLogoEditor() {
     // draw logo from hex
     drawLogo("canvasHex", FW_update.WhiteLogoArr, FW_update.BlackLogoArr)
 
+    $("#logoeditor").append($('<div/>').text("The logo size is 130x66px and the only available colors are black and white"))
     // BEGIN load file
     $("#logoeditor").append(
-        $('<div/>').attr({ id: 'localIMG', class: 'fileContainer' }).button().click(function () {
+        $('<div/>').attr({ id: 'localPilotImage', class: 'fileContainer' }).button().click(function () {
             if (DEBUG) console.log("LOCAL Logo File Selected");
+            $("#pilot_logo_upload").val(null);
         }
         ));
-    $("#localIMG").append().html("<span>Load..</span>");
+    $("#localPilotImage").append().html("<span>Load Image</span>");
 
-    toolbar = document.getElementById("localIMG");
+    toolbar = document.getElementById("localPilotImage");
     document.getElementById('toolbar').style.display = "block";
     var fileUploadInput = document.createElement('input');
     fileUploadInput.type = "file";
-    fileUploadInput.id = "logo_upload";
+    fileUploadInput.id = "pilot_logo_upload";
     fileUploadInput.addEventListener('change', function (evt) {
         var fileLoaded = this.value.split('\\');
         var loadedFileName = fileLoaded[fileLoaded.length - 1].replace(/^.*[\\\/]/, '');
@@ -2141,7 +2146,7 @@ function showLogoEditor() {
 
     $("#logoeditor").append(
         $('<button/>')
-            .attr({ id: 'updateLogo' })
+            .attr({ id: 'updatePilotLogo' })
             .button()
             .click(function () {
 
@@ -2154,34 +2159,23 @@ function showLogoEditor() {
                     FW_update.binaryString,
                     [FW_update.WhiteLogoPos, FW_update.WhiteLogoArr.length].concat(FW_update.WhiteLogoArr)
                 );
-
-                var page_counter = 0;
-                var page_Byte_counter = 0;
-                for (var i = 0; i < FW_update.binaryString.length; i++) {
-                    if (page_Byte_counter == 0) FW_update.preparedPages[page_counter] = [];
-                    FW_update.preparedPages[page_counter].push(FW_update.binaryString[i]);
-                    page_Byte_counter++;
-                    if (page_Byte_counter == 128) {
-                        page_Byte_counter = 0;
-                        page_counter++;
-                    }
-                }               
+              
                 $("#logoeditor").css("visibility", "hidden");
                 $("#logoeditor").empty()
             }))
         ;
-    $("#updateLogo").append().html("Update");
+    $("#updatePilotLogo").append().html("Update");
 
     $("#logoeditor").append(
         $('<button/>')
-            .attr({ id: 'cancelLogo' })
+            .attr({ id: 'cancelPilotLogo' })
             .button()
             .click(function () {
                 $("#logoeditor").css("visibility", "hidden");
                 $("#logoeditor").empty()
             }))
         ;
-    $("#cancelLogo").append().html("Cancel");
+    $("#cancelPilotLogo").append().html("Cancel");
 }
 
 function drawLogo(canvasId, whitelogo, blacklogo) {
@@ -2551,6 +2545,12 @@ function parseHexFile(hexData) {
             }
         }
     }
+
+
+    PrepareUpdate(searchLogo(FW_update.binaryString));
+}
+
+function PrepareHex2Pages() {
     //prepare block that need to be flashed
     var page_counter = 0;
     var page_Byte_counter = 0;
@@ -2575,8 +2575,6 @@ function parseHexFile(hexData) {
             page_counter++;
         }
     }
-
-    PrepareUpdate(searchLogo(FW_update.binaryString));
 }
 
 
