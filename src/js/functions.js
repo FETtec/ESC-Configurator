@@ -1,3 +1,8 @@
+"user strict";
+// Begin const and local var
+
+// Begin functions
+
 function dec2hex(d, padding) {
     var hex = Number(d).toString(16);
     padding = typeof (padding) === "undefined" || padding === null ? padding = 2 : padding;
@@ -64,18 +69,4 @@ function byte2Bit(byte) {
         bit[i] = (byte >> (7 - i)) & 0x01;
     }
     return bit;
-}
-
-function decimalToPlainHex(d, padding) {
-    var hex = Number(d).toString(16);
-    padding =
-        typeof padding === "undefined" || padding === null
-            ? (padding = 2)
-            : padding;
-
-    while (hex.length < padding) {
-        hex = "0" + hex;
-    }
-
-    return hex.toUpperCase();
 }

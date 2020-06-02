@@ -1,97 +1,18 @@
 "user strict";
 
 const DEBUG = 0;
-const RAWDEBUG = 0; // show send/receive
+const SERIALDEBUG = 0; // show send/receive
 
 const MAX_TRY = 2;
 const DEFAULT_TIMEOUT = 215;
 
-var toolbar = 0;
-var OneWire = 0;
+const TLMcanvasWidth = 600;
+const TLMcanvasHeight = 142;
 
-const canvas_width = 600;
-const canvas_height = 142;
-
-// logo consts
-const pilotlogoheight = 66;
-const pilotlogowidth = 130;
-const pilotlogorowbyte = 17;
-
-//communication defines
-
-const ALL_ID = 0x1F;
-
-
-const OW_OK = 0;
-const OW_BL_PAGE_CORRECT = 1; // BL only
-const OW_NOT_OK = 2;
-const OW_BL_START_FW = 3; // BL only
-const OW_BL_PAGES_TO_FLASH = 4; // BL only
-const OW_REQ_TYPE = 5;
-const OW_REQ_SN = 6;
-const OW_REQ_SW_VER = 7;
-//
-
-const OW_RESPONSE_IN_BL = 0x02;
-const OW_RESPONSE_IN_FW = 0x03;
-
-//OW_ESC
-const OW_RESET_TO_BL = 10;
-const OW_THROTTLE = 11;
-const OW_REQ_TLM = 12;
-const OW_BEEP = 13;
-const OW_SET_FAST_COM_LENGTH = 26;
-
-
-// all OW_GET_XXX are always readable.
-// all OW_SET_XXX will only work ig the same OW_GET_XXX was requested again, just before SET. to make sure there will be no faulty change
-// SET is always GET+1
-const OW_GET_ROTATION_DIRECTION = 28;
-const OW_SET_ROTATION_DIRECTION = 29;
-
-const OW_GET_USE_SIN_START = 30;
-const OW_SET_USE_SIN_START = 31;
-
-const OW_GET_3D_MODE = 32;
-const OW_SET_3D_MODE = 33;
-
-const OW_GET_ID = 34;
-const OW_SET_ID = 35;
-
-const OW_GET_LINEAR_THRUST = 36;
-const OW_SET_LINEAR_THRUST = 37;
-
-const OW_GET_EEVER = 38;
-
-const OW_GET_PWM_MIN = 39;
-const OW_SET_PWM_MIN = 40;
-
-const OW_GET_PWM_MAX = 41;
-const OW_SET_PWM_MAX = 42;
-
-const OW_GET_ESC_BEEP = 43;
-const OW_SET_ESC_BEEP = 44;
-
-const OW_GET_CURRENT_CALIB = 45;
-const OW_SET_CURRENT_CALIB = 46;
-
-const OW_GET_LOW_RAMP = 47;
-const OW_SET_LOW_RAMP = 48;
-
-const OW_GET_HIGH_RAMP = 49;
-const OW_SET_HIGH_RAMP = 50;
-
-const OW_SET_LED_TMP_COLOR = 51;
-
-const OW_GET_LED_COLOR = 52;
-const OW_SET_LED_COLOR = 53;
-
-const OW_GET_SOFT_BRAKE = 54;
-const OW_SET_SOFT_BRAKE = 55;
-
-const OW_GET_ACTIVATION = 56;
-const OW_SET_ACTIVATION = 57;
-//
+const KISS_PT = 0;
+const BF_PT = 1;
+const USB_UART = 2;
+const VCP = 3;
 
 const DEVICE_types = [
     { id: 0, name: "none", filename: '' },
@@ -157,53 +78,6 @@ const DEVICE_types = [
     { id: 129, name: "FETtec G0-OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true }
 ];
 
-// helper to prevent single arrays in all settings
-var onAllESCs = [];
-for (var i in DEVICE_types) onAllESCs.push(DEVICE_types[i].id);
-
-function DEVICE() {
-    this.id = 0;
-    this.asBL = false;
-    this.type = 0;
-    this.SN = [];
-    this.version = 0;
-    this.subversion = 0;
-    this.activated = 0;
-    this.activationkey = 0;
-    this.ESC_select_Input = 0;
-    this.selected = true;
-    this.loadingBar = 0;
-    this.warning = false;
-    // begin ESC specific settings
-    this.settingsActive = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]; // TLM buttons
-    this.commandedThrottle = 0;
-    this.readyForFastCommand = false;
-    this.TLMValues = [0, 0, 0, 0, 0, 0, 0, 0];
-    this.TLMValueElements = [];
-    this.TLMCanvasElement;
-    this.TLMCanvasCTX;
-    // end ESC specific settings
-    this.ESC_settings = {
-        0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "readonly", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, escTypes: onAllESCs }, // must always be 0
-        40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse rotation direction", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
-        41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
-        42: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, escTypes: onAllESCs },
-        43: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
-        44: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min. Signal", type: "slider", feature: "advanced", min: 1000, max: 1400, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
-        45: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max. Signal", type: "slider", feature: "advanced", min: 1600, max: 2000, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
-        46: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
-        47: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
-        48: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
-        49: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
-        50: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, escTypes: onAllESCs },
-        51: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, escTypes: onAllESCs },
-
-        56: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "value", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, escTypes: onAllESCs },
-
-        99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs } // must always be 99 and the last one
-    };
-}
-
 const serial_options = [
     { id: 0, name: 'KISS FC Passthrough', connect_bitrate: 115200, disabled: false },
     { id: 1, name: 'Betaflight Passthrough', connect_bitrate: 115200, disabled: false },
@@ -252,7 +126,108 @@ const TLM_scales = [
     1
 ];
 
+function DEVICE() {
+    this.id = 0;
+    this.asBL = false;
+    this.type = 0;
+    this.SN = [];
+    this.version = 0;
+    this.subversion = 0;
+    this.activated = 0;
+    this.activationkey = 0;
+    this.ESC_select_Input = 0;
+    this.selected = true;
+    this.loadingBar = 0;
+    this.warning = false;
+    // begin ESC specific settings
+    this.settingsActive = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]; // TLM buttons
+    this.commandedThrottle = 0;
+    this.readyForFastCommand = false;
+    this.TLMValues = [0, 0, 0, 0, 0, 0, 0, 0];
+    this.TLMValueElements = [];
+    this.TLMCanvasElement;
+    this.TLMCanvasCTX;
+    // end ESC specific settings
+    this.ESC_settings = {
+        0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "readonly", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, escTypes: onAllESCs }, // must always be 0
+        40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse rotation direction", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
+        41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
+        42: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, escTypes: onAllESCs },
+        43: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
+        44: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min. Signal", type: "slider", feature: "advanced", min: 1000, max: 1400, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
+        45: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max. Signal", type: "slider", feature: "advanced", min: 1600, max: 2000, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
+        46: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
+        47: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
+        48: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
+        49: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
+        50: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, escTypes: onAllESCs },
+        51: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, escTypes: onAllESCs },
+
+        56: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, escTypes: onAllESCs },
+
+        99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs } // must always be 99 and the last one
+    };
+}
+
+// helper to prevent single arrays in all settings
+var onAllESCs = [];
+for (var i in DEVICE_types) onAllESCs.push(DEVICE_types[i].id);
+
+
+
+var toolbar = 0;
+var OneWire = 0;
+
+var address_Counter = 0
+var throttleWarningDone = 0;
+var MaxDeviceId = 0;
+var MinDeviceId = 0;
+var DEVICEsReady = 0;
+var DeviceActivateId = 0;
+var FlashDeviceId = 0;
+
+var ActDeviceFlashStat = 0;
+var ActDeviceFlashPage = 0;
+var afterFlashedDisplay = 0;
+var extraDelay = 1;
+var scanDone = 0;
+var DEVICEsDisplayed = 0;
+var FW_updater_Init_Done = 0;
+
+var loopInterval = 0;
+var interval_Speedup_Done = 0;
+var selectedMenu = 0;
+var activationActive = 0;
+var DEVICEsToBL = 0;
+var menuEnabled = 1;
+
+var SettingsRead = 0;
+var readSetting = 0;
+
+var DeviceIdIndex = 0;
+var DeviceSettingIndex = 0;
+var settings_index_max = 0;
+var saveNewSettingsToId = 0;
+
+var is_USB_only_bootloader = 0
+
+var buttonsDisabled = 0;
+var ConnectionType = KISS_PT;
+var PT_status = 0;
+
+var checkESCsStat = 0;
+var checkESCid = 0;
+var throwSerialBadCommunicationError = 0;
+
+var newSettingsValues = {};
+
 var DEVICEs = [];
+var read_ESC_ids = [];
+var read_ESC_settings = [];
+var DevicePackage = [];
+var GraphArr = [];
+var timeoutDeviceIDs = [];
+var LastSentData = [];
 
 var SerialConnection = {
     connection: [],
@@ -287,35 +262,6 @@ var FW_update = {
     WhiteLogoArr: [],
     BlackLogoArr: []
 }
-
-var scanDone = 0;
-var ESCsDisplayed = 0;
-var FW_updater_Init_Done = 0;
-var timeoutESC_IDs = [];
-var LastSentData = [];
-var loopInterval = 0;
-var interval_Speedup_Done = 0;
-var selectedMenu = 0;
-var activationActive = 0;
-var ESCsToBL = 0;
-var menuEnabled = 1;
-var ESC_package = [];
-
-
-const KISS_PT = 0;
-const BF_PT = 1;
-const USB_UART = 2;
-const VCP = 3;
-
-var is_USB_only_bootloader = 0
-
-var buttonsDisabled = 0;
-var ConnectionType = KISS_PT;
-var PT_status = 0;
-
-var checkESCsStat = 0;
-var checkESCid = 0;
-var throwSerialBadCommunicationError = 0;
 
 //===================================================================================== init
 onload = function () {
@@ -630,10 +576,10 @@ function disconnect() {
     is_USB_only_bootloader = 0;
 
     scanDone = 0;
-    ESCsDisplayed = 0;
+    DEVICEsDisplayed = 0;
 
     DEVICEs = [];
-    timeoutESC_IDs = [];
+    timeoutDeviceIDs = [];
 
     FW_updater_Init_Done = 0;
     FW_update.hexString = [];
@@ -676,137 +622,28 @@ function disconnect() {
 
 }
 
-//===================================================================================== data transfer
-var ignoreOwnBytesIndex = 0;
-var TX_busy = 0;
-
-function SerialAvailable() {
-    var B_length = (SerialConnection.RX_head - SerialConnection.RX_tail);
-    if (B_length < 0) B_length = B_length * -1;
-    return B_length;
-}
-
-function readByte() {
-    var returnByte = 0;
-    if (SerialConnection.RX_tail != SerialConnection.RX_head) {
-        returnByte = SerialConnection.RXBuffer[SerialConnection.RX_tail++];
-    }
-    return returnByte;
-}
-
-function readBytes(count) {
-    var returnArr = [];
-    while (SerialConnection.RX_tail != SerialConnection.RX_head && count > 0) {
-        returnArr.push(SerialConnection.RXBuffer[SerialConnection.RX_tail++]);
-    }
-    return returnArr;
-}
-
-
-function TX() {
-    if (SerialConnection.TX_tail != SerialConnection.TX_head) {
-        TX_busy = 1;
-    } else {
-        TX_busy = 0;
-        return;
-    }
-    var sendBuf = [];
-    var tmpHead = SerialConnection.TX_head;
-    while (SerialConnection.TX_tail != tmpHead) {
-        sendBuf.push(SerialConnection.TXBuffer[SerialConnection.TX_tail++]);
-    }
-
-    chrome.serial.send(SerialConnection.connection.connectionId, str2ab(sendBuf), TX_done);
-}
-
-var oldPortPath;
-function ReconnectOnSend(reconnectState) {
-    if (ConnectionType == VCP) {
-        if (reconnectState == 0) { // wait for data to be sent
-            if (DEBUG) console.log("reconnect, wait for data to be sent");
-            reconnectOnTxDone = 1;
-        } else if (reconnectState == 2) { // close com port
-            if (DEBUG) console.log("reconnect, closing old port");
-            oldPortPath = SerialConnection.Port;
-            if (typeof SerialConnection.connection.connectionId !== 'undefined')
-                chrome.serial.disconnect(SerialConnection.connection.connectionId, function () { ReconnectOnSend(3); });
-            reconnectOnTxDone = 3;
-        } else if (reconnectState == 3) { // port Closed, reconnect
-            chrome.serial.getDevices(function (ports) {
-                ReconnectToOldPort(ports);
-            });
-        }
-    }
-}
-
-function ReconnectToOldPort(ports) {
-    if (DEBUG) console.log("reconnect, search new port");
-    var foundPort;
-    if (DEBUG) console.log("reconnect, oldPortPath = " + oldPortPath);
-    for (var i in ports) {
-        if (ports[i].path == oldPortPath) {
-            if (DEBUG) console.log("reconnect, connect to new port");
-            if (DEBUG) console.log("reconnect, foundPortPath = " + ports[i].path);
-            chrome.serial.connect(ports[i].path, { bitrate: use_bit_rate, bufferSize: 200000, persistent: true }, onPortOpen);
-            return;
-        }
-    }
-    if (DEBUG) console.log("reconnect, port not found");
-    ReconnectOnSend(3);
-}
-
-function TX_done() {
-    if (SerialConnection.TX_tail != SerialConnection.TX_head) TX();
-    else {
-        TX_busy = 0;
-        if (reconnectOnTxDone == 1) {
-            reconnectOnTxDone = 2;
-            if (DEBUG) console.log("reconnect, data sent...");
-            setTimeout(function () { ReconnectOnSend(reconnectOnTxDone); }, 500);
-        }
-    }
-}
-
-function sendBytes(bytes, do_not_Ignore_Last_Byte = 0) {
-    LastSentData = [];
-    if (OneWire) ignoreOwnBytesIndex = bytes.length - do_not_Ignore_Last_Byte;
-    for (var i = 0; i < bytes.length; i++) {
-        LastSentData[i] = bytes[i];
-        SerialConnection.TXBuffer[SerialConnection.TX_head++] = bytes[i];
-    }
-    if (!TX_busy) TX();
-}
-
-var str2ab = function (arr) {
-    var buf = new ArrayBuffer(arr.length);
-    var bufView = new Uint8Array(buf);
-    for (var i = 0; i < arr.length; i++) {
-        bufView[i] = arr[i];
-    }
-    return buf;
-};
 
 
 // New functions
-var ESCactivateID = 0;
+
 
 function OW_activate() {
     activationActive = 1;
-    ESCactivateID = 0;
+    DeviceActivateId = 0;
 }
 
 function activationLoop() {
     if (waitForResponseID == 0) {
-        while ((!(ESCactivateID in DEVICEs)) && ESCactivateID < 25) ESCactivateID++;
-        if (DEVICE_types.find(x => x.id === DEVICEs[ESCactivateID].type).blOnly == true) {
-            if (DEBUG) console.log("Device " + ESCactivateID + " is blOnly next.");
-            ESCactivateID++;
+        while ((!(DeviceActivateId in DEVICEs)) && DeviceActivateId < 25) DeviceActivateId++;
+        if (DEVICE_types.find(x => x.id === DEVICEs[DeviceActivateId].type).blOnly == true) {
+            if (DEBUG) console.log("Device " + DeviceActivateId + " is blOnly next.");
+            DeviceActivateId++;
         }
-        if (ESCactivateID == 25) {
+        if (DeviceActivateId == 25) {
             activationActive = 0;
             return;
         }
-        // collect activationkey //  DEVICEs[ESCactivateID].activationkey
+        // collect activationkey //  DEVICEs[DEVICE_activate_ID].activationkey
         // 66007e000d50363146353920
         /*
                 $.ajax({
@@ -829,31 +666,31 @@ function activationLoop() {
                 */
         if (SwitchStatus == 0) {
             // request
-            if (DEBUG) console.log("DEVICE " + ESCactivateID + " send OK_OK cmd");
-            send_ESC_package(ESCactivateID, 0, [OW_OK]);
-            waitForResponseID = ESCactivateID;
+            if (DEBUG) console.log("DEVICE " + DeviceActivateId + " send OK_OK cmd");
+            send_ESC_package(DeviceActivateId, 0, [OW_OK]);
+            waitForResponseID = DeviceActivateId;
             waitForResponseType = 0;
             waitForResponseLength = 7;
         } else {
-            if (DEBUG) console.log("DEVICE " + ESCactivateID + " send OW_GET_ACTIVATION cmd");
-            send_ESC_package(ESCactivateID, 0, [OW_GET_ACTIVATION]);
-            waitForResponseID = ESCactivateID;
+            if (DEBUG) console.log("DEVICE " + DeviceActivateId + " send OW_GET_ACTIVATION cmd");
+            send_ESC_package(DeviceActivateId, 0, [OW_GET_ACTIVATION]);
+            waitForResponseID = DeviceActivateId;
             waitForResponseType = 0;
             waitForResponseLength = 7;
         }
     } else {
         var responsePackage = checkForRespPackage();
         if (responsePackage) {
-            timeoutESC_IDs[ESCactivateID] = 0;
+            timeoutDeviceIDs[DeviceActivateId] = 0;
             if (SwitchStatus == 0) {
                 if (responsePackage[0] == OW_RESPONSE_IN_FW) {
                     SwitchStatus++;
                     waitForResponseID = 0;
-                    if (DEBUG) console.log("DEVICE " + ESCactivateID + " is in firmware");
+                    if (DEBUG) console.log("DEVICE " + DeviceActivateId + " is in firmware");
                 } else {
                     if (switchProblem == 0) {
-                        if (DEBUG) console.log("DEVICE " + ESCactivateID + " send OW_BL_START_FW cmd");
-                        send_ESC_package(ESCactivateID, 0, [OW_BL_START_FW]);
+                        if (DEBUG) console.log("DEVICE " + DeviceActivateId + " send OW_BL_START_FW cmd");
+                        send_ESC_package(DeviceActivateId, 0, [OW_BL_START_FW]);
                         if (ConnectionType == VCP) {
                             if (DEBUG) console.log("starting reconnect procedure 1");
                             ReconnectOnSend(0);
@@ -861,61 +698,61 @@ function activationLoop() {
                         switchProblem++;
                         waitLoops = 20;
                     } else if (switchProblem < 20) {
-                        if (DEBUG) console.log("ESC with id: " + ESCactivateID + " don't switches ->retry");
-                        send_ESC_package(ESCactivateID, 0, [SwitchCommand]);
+                        if (DEBUG) console.log("ESC with id: " + DeviceActivateId + " don't switches ->retry");
+                        send_ESC_package(DeviceActivateId, 0, [SwitchCommand]);
                         switchProblem++;
                         waitLoops = 20;
                     } else {
-                        if (DEBUG) console.log("DEVICE with id: " + ESCactivateID + " don't switches ->stop");
+                        if (DEBUG) console.log("DEVICE with id: " + DeviceActivateId + " don't switches ->stop");
                         throwSerialBadCommunicationError = 1;
                         switchProblem = 0;
                     }
                 }
             } else if (SwitchStatus == 1) {
-                DEVICEs[ESCactivateID].activated = (responsePackage[5]);
-                if (DEBUG) console.log("DEVICE " + ESCactivateID + " response is " + DEVICEs[ESCactivateID].activated);
+                DEVICEs[DeviceActivateId].activated = (responsePackage[5]);
+                if (DEBUG) console.log("DEVICE " + DeviceActivateId + " response is " + DEVICEs[DeviceActivateId].activated);
                 SwitchStatus++;
             } else if (SwitchStatus == 2) {
-                if (DEVICEs[ESCactivateID].activated == 0) {
-                    if (DEBUG) console.log("Activating DEVICE " + ESCactivateID + " with key " + DEVICEs[ESCactivateID].activationkey);
+                if (DEVICEs[DeviceActivateId].activated == 0) {
+                    if (DEBUG) console.log("Activating DEVICE " + DeviceActivateId + " with key " + DEVICEs[DeviceActivateId].activationkey);
                     // -6F0A6E67
-                    send_ESC_package(ESCactivateID, 0, [OW_SET_ACTIVATION, -0x6F, 0x0A, 0x6E, 0x67]); // need to replace with proper key
-                    waitForResponseID = ESCactivateID;
+                    send_ESC_package(DeviceActivateId, 0, [OW_SET_ACTIVATION, -0x6F, 0x0A, 0x6E, 0x67]); // need to replace with proper key
+                    waitForResponseID = DeviceActivateId;
                     waitForResponseType = 0;
                     waitForResponseLength = 7;
                     SwitchStatus++;
                 } else {
-                    if (DEBUG) console.log("DEVICE " + ESCactivateID + " is already activated.");
+                    if (DEBUG) console.log("DEVICE " + DeviceActivateId + " is already activated.");
                     SwitchStatus = 0;
-                    ESCactivateID++;
+                    DeviceActivateId++;
                 }
             } else if (SwitchStatus == 3) {
                 if (responsePackage[5] == OW_OK) {
-                    if (DEBUG) console.log("DEVICE " + ESCactivateID + " response OK.");
-                    if (DEBUG) console.log("DEVICE " + ESCactivateID + " send OW_GET_ACTIVATION cmd");
-                    send_ESC_package(ESCactivateID, 0, [OW_GET_ACTIVATION]);
-                    waitForResponseID = ESCactivateID;
+                    if (DEBUG) console.log("DEVICE " + DeviceActivateId + " response OK.");
+                    if (DEBUG) console.log("DEVICE " + DeviceActivateId + " send OW_GET_ACTIVATION cmd");
+                    send_ESC_package(DeviceActivateId, 0, [OW_GET_ACTIVATION]);
+                    waitForResponseID = DeviceActivateId;
                     waitForResponseType = 0;
                     waitForResponseLength = 7;
                     SwitchStatus++;
                 } else {
-                    if (DEBUG) console.log("DEVICE " + ESCactivateID + " activation wrong response: " + responsePackage[5]);
+                    if (DEBUG) console.log("DEVICE " + DeviceActivateId + " activation wrong response: " + responsePackage[5]);
                 }
                 SwitchStatus = 0;
-                ESCactivateID++;
+                DeviceActivateId++;
             } else if (SwitchStatus == 4) {
                 console.log(responsePackage);
                 SwitchStatus = 0;
-                ESCactivateID++;
+                DeviceActivateId++;
             }
-        } else if (++timeoutESC_IDs[ESCactivateID] == DEFAULT_TIMEOUT || timeoutESC_IDs[ESCactivateID] == DEFAULT_TIMEOUT * 2 || timeoutESC_IDs[ESCactivateID] == DEFAULT_TIMEOUT * 3) {
+        } else if (++timeoutDeviceIDs[DeviceActivateId] == DEFAULT_TIMEOUT || timeoutDeviceIDs[DeviceActivateId] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[DeviceActivateId] == DEFAULT_TIMEOUT * 3) {
             sendBytes(LastSentData);
             if (DEBUG) console.log("no response, retrying");
-        } else if (timeoutESC_IDs[ESCactivateID] > DEFAULT_TIMEOUT * 3) {
-            if (DEBUG) console.log("no response from DEVICE with id: " + ESCactivateID + " ->stop");
+        } else if (timeoutDeviceIDs[DeviceActivateId] > DEFAULT_TIMEOUT * 3) {
+            if (DEBUG) console.log("no response from DEVICE with id: " + DeviceActivateId + " ->stop");
             throwSerialBadCommunicationError = 1;
             waitForResponseID = 0;
-            ESCactivateID++;
+            DeviceActivateId++;
         }
     }
 }
@@ -1094,9 +931,9 @@ function Internal_Loop() {
             // Disable Disconnect
             Gen_Menu_Buttons(selectedMenu, true);
             ScanForESCs();
-        } else if (!ESCsDisplayed) {
+        } else if (!DEVICEsDisplayed) {
             displayESCs(document.getElementById("overview"));
-            ESCsDisplayed = 1;
+            DEVICEsDisplayed = 1;
             // Enable Disconnect
             Gen_Menu_Buttons(selectedMenu, false);
         } else if (!FW_updater_Init_Done) {
@@ -1106,7 +943,7 @@ function Internal_Loop() {
         }
     }
     if (SerialConnection.connected == 1) {
-        if (ESCsToBL) {
+        if (DEVICEsToBL) {
             check_ESCs_In_BL();
         } else {
             if (FW_update.FlashProcessActive == 1) {
@@ -1150,7 +987,7 @@ function change_ESCs_status(stat, enableButtonsIfDone = 0, refreshVersionIfDone 
         if (DEBUG) console.log("changing status to Firmware");
     }
     SwitchStatus = 0;
-    ESCsToBL = 1;
+    DEVICEsToBL = 1;
 
 }
 var waitLoops = 0;
@@ -1165,7 +1002,7 @@ function check_ESCs_In_BL() {
     if (waitForResponseID == 0) {
         while ((!(SwitchESCsFW_ID in DEVICEs)) && SwitchESCsFW_ID < 25) SwitchESCsFW_ID++;
         if (SwitchESCsFW_ID == 25) {
-            ESCsToBL = 0;
+            DEVICEsToBL = 0;
             if (refreshVersion) {
                 refreshVersion = 0;
                 document.getElementById("overview").innerHTML = "";
@@ -1205,7 +1042,7 @@ function check_ESCs_In_BL() {
     } else {
         var responsePackage = checkForRespPackage();
         if (responsePackage) {
-            timeoutESC_IDs[SwitchESCsFW_ID] = 0;
+            timeoutDeviceIDs[SwitchESCsFW_ID] = 0;
             if (SwitchStatus == 0) {
                 if (responsePackage[0] == expectedHeader) {
                     if (expectedHeader == OW_RESPONSE_IN_BL) DEVICEs[SwitchESCsFW_ID].asBL = true;
@@ -1244,10 +1081,10 @@ function check_ESCs_In_BL() {
                 SwitchStatus = 0;
                 SwitchESCsFW_ID++;
             }
-        } else if (++timeoutESC_IDs[SwitchESCsFW_ID] == DEFAULT_TIMEOUT || timeoutESC_IDs[SwitchESCsFW_ID] == DEFAULT_TIMEOUT * 2 || timeoutESC_IDs[SwitchESCsFW_ID] == DEFAULT_TIMEOUT * 3) {
+        } else if (++timeoutDeviceIDs[SwitchESCsFW_ID] == DEFAULT_TIMEOUT || timeoutDeviceIDs[SwitchESCsFW_ID] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[SwitchESCsFW_ID] == DEFAULT_TIMEOUT * 3) {
             sendBytes(LastSentData);
             if (DEBUG) console.log("no response, retrying");
-        } else if (timeoutESC_IDs[SwitchESCsFW_ID] > DEFAULT_TIMEOUT * 3) {
+        } else if (timeoutDeviceIDs[SwitchESCsFW_ID] > DEFAULT_TIMEOUT * 3) {
             if (DEBUG) console.log("no response from DEVICE with id: " + SwitchESCsFW_ID + " ->stop");
             throwSerialBadCommunicationError = 1;
             waitForResponseID = 0;
@@ -1369,11 +1206,11 @@ function ChangeDisplay(displayType) {
 
 function send_ESC_package(id, type, bytes) {
     var B_length = bytes.length + 6;
-    ESC_package = [0x01, id, type, ((type >> 8) & 0xFF), B_length];
-    for (var i = 0; i < bytes.length; i++) ESC_package.push(bytes[i]);
-    ESC_package.push(getCRC(ESC_package, B_length - 1));
-    sendBytes(ESC_package);
-    if (RAWDEBUG) console.log("SND: " + ESC_package)
+    DevicePackage = [0x01, id, type, ((type >> 8) & 0xFF), B_length];
+    for (var i = 0; i < bytes.length; i++) DevicePackage.push(bytes[i]);
+    DevicePackage.push(getCRC(DevicePackage, B_length - 1));
+    sendBytes(DevicePackage);
+    if (SERIALDEBUG) console.log("SND: " + DevicePackage)
 }
 
 var waitForResponseID = 0;
@@ -1414,7 +1251,7 @@ function checkForRespPackage() {
         }
     }
     if (responsePackage.length > 1) {
-        if (RAWDEBUG) console.log("RCV: " + responsePackage)
+        if (SERIALDEBUG) console.log("RCV: " + responsePackage)
         return responsePackage;
     }
     else return false;
@@ -1432,28 +1269,28 @@ function ScanForESCs() {
 
     if (!waitForResponseID) {
         if (scanStep == 0) { // look for ID
-            timeoutESC_IDs[scanID] = 0;
+            timeoutDeviceIDs[scanID] = 0;
             send_ESC_package(scanID, 0, [OW_OK]);
             waitForResponseID = scanID;
             waitForResponseType = 0;
             waitForResponseLength = 7;
             if (DEBUG) console.log("scan for ID: " + scanID);
         } else if (scanStep == 1) { //get Type
-            timeoutESC_IDs[scanID] = 0;
+            timeoutDeviceIDs[scanID] = 0;
             send_ESC_package(scanID, 0, [OW_REQ_TYPE]);
             waitForResponseID = scanID;
             waitForResponseType = 0;
             waitForResponseLength = 7;
             if (DEBUG) console.log("request version of DEVICE with ID: " + scanID);
         } else if (scanStep == 2) { //get version
-            timeoutESC_IDs[scanID] = 0;
+            timeoutDeviceIDs[scanID] = 0;
             send_ESC_package(scanID, 0, [OW_REQ_SW_VER]);
             waitForResponseID = scanID;
             waitForResponseType = 0;
             waitForResponseLength = 8;
             if (DEBUG) console.log("request type of DEVICE with ID: " + scanID);
         } else if (scanStep == 3) { //get SN
-            timeoutESC_IDs[scanID] = 0;
+            timeoutDeviceIDs[scanID] = 0;
             send_ESC_package(scanID, 0, [OW_REQ_SN]);
             waitForResponseID = scanID;
             waitForResponseType = 0;
@@ -1464,7 +1301,7 @@ function ScanForESCs() {
         var responsePackage = checkForRespPackage();
         if (responsePackage) {
             if (responsePackage[1] == scanID) {
-                timeoutESC_IDs[scanID] = 0;
+                timeoutDeviceIDs[scanID] = 0;
                 if (scanStep == 0) {
                     DEVICEs[scanID] = new DEVICE();
                     DEVICEs[scanID].id = scanID;
@@ -1510,12 +1347,12 @@ function ScanForESCs() {
                     ScanForESCs();
                 }
             }
-        } else if (++timeoutESC_IDs[scanID] > 0) {
-            if (timeoutESC_IDs[scanID] == 5 || timeoutESC_IDs[scanID] == 10) {
+        } else if (++timeoutDeviceIDs[scanID] > 0) {
+            if (timeoutDeviceIDs[scanID] == 5 || timeoutDeviceIDs[scanID] == 10) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response from DEVICE with id: " + scanID + " ->retry");
-            } else if (timeoutESC_IDs[scanID] > 15) {
-                timeoutESC_IDs[scanID] = 0;
+            } else if (timeoutDeviceIDs[scanID] > 15) {
+                timeoutDeviceIDs[scanID] = 0;
                 if (DEBUG) console.log("no response from DEVICE with id: " + scanID + " ->stop");
                 waitForResponseID = 0;
                 scanStep = 0;
@@ -1957,6 +1794,7 @@ function initFWUpdater() {
             return function (e) {
                 FW_update.hexString = e.target.result;
                 parseHexFile(FW_update.hexString);
+                PrepareUpdate(searchPilotLogo(FW_update.binaryString));
                 $("#remoteFWSelect").remove()
             };
         })(evt.target.files[0]);
@@ -2027,6 +1865,7 @@ function initFWUpdater() {
                                 success: function (data) {
                                     if (DEBUG) console.log("Loaded remote DEVICE hex file " + fw_url + " Filename:" + FW_update.loadedFileName);
                                     self.pages = parseHexFile(data);
+                                    PrepareUpdate(searchPilotLogo(FW_update.binaryString));
                                 },
                                 error: function (data) {
                                     if (DEBUG) console.log("ERROR on download file " + fw_url)
@@ -2083,7 +1922,7 @@ function PrepareUpdate(attr) {
                 .attr({ id: 'FW_flash' })
                 .button()
                 .click(function () {
-                    PrepareHex2Pages();
+                    PrepareHex2Pages(FW_update.binaryString);
                     StartFlashProcess();
                 }))
             ;
@@ -2092,278 +1931,70 @@ function PrepareUpdate(attr) {
 
 }
 
-// BEGIN Logoeditor
 
-function showLogoEditor() {
-    $("#logoeditor").css("visibility", "visible");
-
-    // Canvas for logo
-    var LogoCanvas = $('<canvas/>', {
-        'class': 'logocanvas',
-        id: 'canvasHex'
-    }).prop({
-        width: pilotlogowidth,
-        height: pilotlogoheight
-    });
-    $('#logoeditor').append(LogoCanvas);
-
-    // init canvas
-    initializeCanvas("canvasHex")
-
-    // draw logo from hex
-    drawLogo("canvasHex", FW_update.WhiteLogoArr, FW_update.BlackLogoArr)
-
-    $("#logoeditor").append($('<div/>').text("The logo size is 130x66px and the only available colors are black and white"))
-    // BEGIN load file
-    $("#logoeditor").append(
-        $('<div/>').attr({ id: 'localPilotImage', class: 'fileContainer' }).button().click(function () {
-            if (DEBUG) console.log("LOCAL Logo File Selected");
-            $("#pilot_logo_upload").val(null);
-        }
-        ));
-    $("#localPilotImage").append().html("<span>Load Image</span>");
-
-    toolbar = document.getElementById("localPilotImage");
-    document.getElementById('toolbar').style.display = "block";
-    var fileUploadInput = document.createElement('input');
-    fileUploadInput.type = "file";
-    fileUploadInput.id = "pilot_logo_upload";
-    fileUploadInput.addEventListener('change', function (evt) {
-        var fileLoaded = this.value.split('\\');
-        var loadedFileName = fileLoaded[fileLoaded.length - 1].replace(/^.*[\\\/]/, '');
-        if (DEBUG) console.log('reading Image : ' + loadedFileName);
-        var file = evt.target.files[0]
-        var reader = new FileReader();
-        reader.onloadend = function () {
-            img_data = reader.result;
-            loadCanvas("canvasHex");
-        };
-        reader.readAsDataURL(file);
-
-    }, false);
-    toolbar.appendChild(fileUploadInput);
-    // end load file
-
-    $("#logoeditor").append(
-        $('<button/>')
-            .attr({ id: 'updatePilotLogo' })
-            .button()
-            .click(function () {
-
-                convertImgCanvas("canvasHex");
-                Array.prototype.splice.apply(
-                    FW_update.binaryString,
-                    [FW_update.BlackLogoPos, FW_update.BlackLogoArr.length].concat(FW_update.BlackLogoArr)
-                );
-                Array.prototype.splice.apply(
-                    FW_update.binaryString,
-                    [FW_update.WhiteLogoPos, FW_update.WhiteLogoArr.length].concat(FW_update.WhiteLogoArr)
-                );
-              
-                $("#logoeditor").css("visibility", "hidden");
-                $("#logoeditor").empty()
-            }))
-        ;
-    $("#updatePilotLogo").append().html("Update");
-
-    $("#logoeditor").append(
-        $('<button/>')
-            .attr({ id: 'cancelPilotLogo' })
-            .button()
-            .click(function () {
-                $("#logoeditor").css("visibility", "hidden");
-                $("#logoeditor").empty()
-            }))
-        ;
-    $("#cancelPilotLogo").append().html("Cancel");
-}
-
-function drawLogo(canvasId, whitelogo, blacklogo) {
-    var canvas = document.getElementById(canvasId);
-    canvas.width = pilotlogowidth;
-    canvas.height = pilotlogoheight;
-
-    var ctx = canvas.getContext("2d");
-    // set background to green
-    ctx.fillStyle = "#00ff00";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // reset pos
-    var pos_x = 0;
-    var pos_y = 0;
-    ctx.fillStyle = "#ffffff"; // white
-    for (var i = 0; i < whitelogo.length; i++) {
-        var tmpbyte = byte2Bit(whitelogo[i]);
-        for (var i2 = 7; i2 > -1; i2--) {
-            if (tmpbyte[i2] == 1) {
-                ctx.fillRect(pos_x, pos_y, 1, 1);
-            }
-            pos_x++;
-        }
-        if (pos_x > pilotlogowidth) {
-            pos_x = 0;
-            pos_y++;
-        }
-    }
-
-    var pos_x = 0;
-    var pos_y = 0;
-    ctx.fillStyle = "#000000"; // black
-    for (var i = 0; i < blacklogo.length; i++) {
-        var tmpbyte = byte2Bit(blacklogo[i]);
-        for (var i2 = 7; i2 > -1; i2--) {
-            if (tmpbyte[i2] == 1) {
-                ctx.fillRect(pos_x, pos_y, 1, 1);
-            }
-            pos_x++;
-        }
-        if (pos_x > pilotlogowidth) {
-            pos_x = 0;
-            pos_y++;
-        }
-    }
-
-    if (DEBUG) console.log("HEX Whitelogo size: " + whitelogo.length);
-    if (DEBUG) console.log("HEX Blacklogo size: " + blacklogo.length);
-}
-
-function convertImgCanvas(obj) {
-    // clear some variables
-    FW_update.BlackLogoArr.length = 0;
-    FW_update.WhiteLogoArr.length = 0;
-
-    // init canvas
-    var canvas = document.getElementById(obj);
-    var ctx = canvas.getContext("2d");
-
-    for (y = 0; y < canvas.height; y++) {
-        var x_count = 0;
-        var tmp_value_blk = 0;
-        var tmp_value_white = 0;
-        for (x = 0; x < canvas.width; x++) {
-            // read Pixel
-            var p = ctx.getImageData(x, y, 1, 1).data;
-            if (p[0] == 0 && p[1] == 0 && p[2] == 0) {
-                // is black
-                tmp_value_blk += 1 << x_count;
-            } else if (p[0] == 255 && p[1] == 255 && p[2] == 255) {
-                // is white
-                tmp_value_white += 1 << x_count;
-            } else {
-                // all other colors
-            }
-
-            if (x_count >= 7 || x == canvas.width - 1) {
-                x_count = 0;
-                FW_update.BlackLogoArr.push(tmp_value_blk);
-                FW_update.WhiteLogoArr.push(tmp_value_white);
-                tmp_value_blk = 0;
-                tmp_value_white = 0;
-            } else {
-                x_count++;
-            }
-        }
-    }
-    if (DEBUG) console.log("Canvas Whitelogo size: " + FW_update.WhiteLogoArr.length);
-    if (DEBUG) console.log("Canvas Blacklogo size: " + FW_update.BlackLogoArr.length);
-}
-
-
-function initializeCanvas(obj) {
-    var canvas = document.getElementById(obj);
-    canvas.width = pilotlogowidth;
-    canvas.height = pilotlogoheight;
-    var ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#00ff00";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-function loadCanvas(obj) {
-    var canvas = document.getElementById(obj);
-    canvas.width = pilotlogowidth;
-    canvas.height = pilotlogoheight;
-    var ctx = canvas.getContext("2d");
-    var image = new Image();
-    image.onload = function () {
-        ctx.fillStyle = "#00ff00";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(image, 0, 0); //TODO
-    };
-    image.src = img_data;
-}
-
-
-// END Logo Editor
-
-var FlashESC_ID = 0;
 
 function StartFlashProcess() {
     if (FW_update.FlashProcessActive == 0) {
         FW_update.fileUploadInput.disabled = true;
         FW_update.startUpdateInput.disabled = true;
         // Disable disconnect
-        FlashESC_ID = 0;
+        FlashDeviceId = 0;
         FW_update.FlashProcessActive = 1;
         afterFlashedDisplay = 0;
         disableButtons();
     }
 }
 
-var act_ESC_flash_Stat = 0;
-var act_ESC_sent_Page = 0;
-var afterFlashedDisplay = 0;
-var extraDelay = 1;
-
 function FlashProcessLoop() {
-    while ((!(FlashESC_ID in DEVICEs) || !DEVICEs[FlashESC_ID].selected) && FlashESC_ID < 25) FlashESC_ID++;
-    if (FlashESC_ID != 25) {
+    while ((!(FlashDeviceId in DEVICEs) || !DEVICEs[FlashDeviceId].selected) && FlashDeviceId < 25) FlashDeviceId++;
+    if (FlashDeviceId != 25) {
         if (waitForResponseID == 0) {
-            if (act_ESC_flash_Stat < 2) {
-                if (act_ESC_flash_Stat == 0) {
-                    if (DEBUG) console.log("Starting to flash DEVICE with ID: " + FlashESC_ID + "...");
-                    if (!DEVICEs[FlashESC_ID].asBL) {
-                        send_ESC_package(FlashESC_ID, 0, [OW_RESET_TO_BL]);
-                        if (DEBUG) console.log("reset DEVICE with ID: " + FlashESC_ID + " to bootloader");
+            if (ActDeviceFlashStat < 2) {
+                if (ActDeviceFlashStat == 0) {
+                    if (DEBUG) console.log("Starting to flash DEVICE with ID: " + FlashDeviceId + "...");
+                    if (!DEVICEs[FlashDeviceId].asBL) {
+                        send_ESC_package(FlashDeviceId, 0, [OW_RESET_TO_BL]);
+                        if (DEBUG) console.log("reset DEVICE with ID: " + FlashDeviceId + " to bootloader");
                     }
-                    act_ESC_flash_Stat = 1;
+                    ActDeviceFlashStat = 1;
                 } else {
-                    send_ESC_package(FlashESC_ID, 0, [OW_OK]);
-                    waitForResponseID = FlashESC_ID;
+                    send_ESC_package(FlashDeviceId, 0, [OW_OK]);
+                    waitForResponseID = FlashDeviceId;
                     waitForResponseType = 0;
                     waitForResponseLength = 7;
-                    if (DEBUG) console.log("check if DEVICE with ID: " + FlashESC_ID + " is in bootloader mode");
+                    if (DEBUG) console.log("check if DEVICE with ID: " + FlashDeviceId + " is in bootloader mode");
                 }
-            } else if (act_ESC_flash_Stat == 2) {
-                send_ESC_package(FlashESC_ID, 0, [OW_BL_PAGES_TO_FLASH, (FW_update.pagesCount & 0xFF), (FW_update.pagesCount >> 8)]);
-                act_ESC_sent_Page = FW_update.pagesCount;
-                waitForResponseID = FlashESC_ID;
+            } else if (ActDeviceFlashStat == 2) {
+                send_ESC_package(FlashDeviceId, 0, [OW_BL_PAGES_TO_FLASH, (FW_update.pagesCount & 0xFF), (FW_update.pagesCount >> 8)]);
+                ActDeviceFlashPage = FW_update.pagesCount;
+                waitForResponseID = FlashDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
                 extraDelay = 1;
-                if (DEBUG) console.log("sent to DEVICE with ID: " + FlashESC_ID + " the block count that need to be flashed & erase flash command. ");
-            } else if (act_ESC_flash_Stat == 3) {
-                if (act_ESC_sent_Page > 0) {
-                    send_ESC_package(FlashESC_ID, act_ESC_sent_Page, FW_update.preparedPages[act_ESC_sent_Page - 1]);
-                    if (DEBUG) console.log("sent to DEVICE with ID: " + FlashESC_ID + " flash block number: " + act_ESC_sent_Page);
-                    waitForResponseID = FlashESC_ID;
-                    waitForResponseType = act_ESC_sent_Page;
+                if (DEBUG) console.log("sent to DEVICE with ID: " + FlashDeviceId + " the block count that need to be flashed & erase flash command. ");
+            } else if (ActDeviceFlashStat == 3) {
+                if (ActDeviceFlashPage > 0) {
+                    send_ESC_package(FlashDeviceId, ActDeviceFlashPage, FW_update.preparedPages[ActDeviceFlashPage - 1]);
+                    if (DEBUG) console.log("sent to DEVICE with ID: " + FlashDeviceId + " flash block number: " + ActDeviceFlashPage);
+                    waitForResponseID = FlashDeviceId;
+                    waitForResponseType = ActDeviceFlashPage;
                     waitForResponseLength = 134;
-                    $("#esc_info_progress_bar_" + FlashESC_ID).progressbar({
-                        value: Math.round((99 - (99 / FW_update.pagesCount * act_ESC_sent_Page)))
+                    $("#esc_info_progress_bar_" + FlashDeviceId).progressbar({
+                        value: Math.round((99 - (99 / FW_update.pagesCount * ActDeviceFlashPage)))
                     });
                 } else {
-                    $("#esc_info_progress_bar_" + FlashESC_ID).progressbar({
+                    $("#esc_info_progress_bar_" + FlashDeviceId).progressbar({
                         value: 100
                     });
-                    if (DEBUG) console.log("DEVICE with ID: " + FlashESC_ID + " update done");
-                    act_ESC_flash_Stat = 0;
-                    act_ESC_sent_Page = 0;
-                    DEVICEs[FlashESC_ID].asBL = false;
-                    FlashESC_ID++;
+                    if (DEBUG) console.log("DEVICE with ID: " + FlashDeviceId + " update done");
+                    ActDeviceFlashStat = 0;
+                    ActDeviceFlashPage = 0;
+                    DEVICEs[FlashDeviceId].asBL = false;
+                    FlashDeviceId++;
                 }
-            } else if (act_ESC_flash_Stat == 4) {
-                send_ESC_package(FlashESC_ID, 0, [OW_BL_PAGE_CORRECT]);
-                waitForResponseID = FlashESC_ID;
+            } else if (ActDeviceFlashStat == 4) {
+                send_ESC_package(FlashDeviceId, 0, [OW_BL_PAGE_CORRECT]);
+                waitForResponseID = FlashDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
                 if (DEBUG) console.log("verification done, sended write command");
@@ -2371,54 +2002,54 @@ function FlashProcessLoop() {
         } else {
             var responsePackage = checkForRespPackage();
             if (responsePackage) {
-                if (responsePackage[1] == FlashESC_ID) {
-                    timeoutESC_IDs[FlashESC_ID] = 0;
-                    if (act_ESC_flash_Stat == 1) {
+                if (responsePackage[1] == FlashDeviceId) {
+                    timeoutDeviceIDs[FlashDeviceId] = 0;
+                    if (ActDeviceFlashStat == 1) {
                         if (responsePackage[0] == OW_RESPONSE_IN_BL) {
-                            DEVICEs[FlashESC_ID].asBL = true;
-                            if (DEBUG) console.log("DEVICE with ID: " + FlashESC_ID + " is in bootloader mode");
-                            act_ESC_flash_Stat = 2;
+                            DEVICEs[FlashDeviceId].asBL = true;
+                            if (DEBUG) console.log("DEVICE with ID: " + FlashDeviceId + " is in bootloader mode");
+                            ActDeviceFlashStat = 2;
                         } else {
-                            if (DEBUG) console.log("DEVICE with ID: " + FlashESC_ID + " don't moves to bootloader!");
-                            send_ESC_package(FlashESC_ID, 0, [OW_RESET_TO_BL]);
-                            if (DEBUG) console.log("reset DEVICE with ID: " + FlashESC_ID + " to bootloader");
+                            if (DEBUG) console.log("DEVICE with ID: " + FlashDeviceId + " don't moves to bootloader!");
+                            send_ESC_package(FlashDeviceId, 0, [OW_RESET_TO_BL]);
+                            if (DEBUG) console.log("reset DEVICE with ID: " + FlashDeviceId + " to bootloader");
                         }
-                    } else if (act_ESC_flash_Stat == 2) {
+                    } else if (ActDeviceFlashStat == 2) {
                         if (responsePackage[5] == 0) {
-                            if (DEBUG) console.log("DEVICE with ID: " + FlashESC_ID + " confirmed flash erase");
-                            act_ESC_flash_Stat = 3;
+                            if (DEBUG) console.log("DEVICE with ID: " + FlashDeviceId + " confirmed flash erase");
+                            ActDeviceFlashStat = 3;
                             extraDelay = is_USB_only_bootloader;
                         } else {
-                            if (DEBUG) console.log("DEVICE with ID: " + FlashESC_ID + " reported error: " + responsePackage[5]);
+                            if (DEBUG) console.log("DEVICE with ID: " + FlashDeviceId + " reported error: " + responsePackage[5]);
                         }
-                    } else if (act_ESC_flash_Stat == 3) {
-                        if (DEBUG) console.log("received from DEVICE with ID: " + FlashESC_ID + " block number: " + act_ESC_sent_Page + " for verification.");
+                    } else if (ActDeviceFlashStat == 3) {
+                        if (DEBUG) console.log("received from DEVICE with ID: " + FlashDeviceId + " block number: " + ActDeviceFlashPage + " for verification.");
                         var verifyFailed = 0;
                         for (i = 0; i < 128; i++) {
-                            if (FW_update.preparedPages[act_ESC_sent_Page - 1][i] != responsePackage[i + 5]) {
+                            if (FW_update.preparedPages[ActDeviceFlashPage - 1][i] != responsePackage[i + 5]) {
                                 verifyFailed = 1;
                                 break;
                             }
                         }
                         if (verifyFailed == 0) {
-                            act_ESC_flash_Stat = 4;
+                            ActDeviceFlashStat = 4;
                             FlashProcessLoop();
                         } else {
                             if (DEBUG) console.log("verification failed");
                         }
-                    } else if (act_ESC_flash_Stat == 4) {
+                    } else if (ActDeviceFlashStat == 4) {
                         if (responsePackage[5] == 0) {
                             if (DEBUG) console.log("page written.");
-                            act_ESC_sent_Page--;
-                            act_ESC_flash_Stat = 3;
+                            ActDeviceFlashPage--;
+                            ActDeviceFlashStat = 3;
                             FlashProcessLoop();
                         } else {
                             if (DEBUG) console.log("page could not be written. error: " + responsePackage[5]);
                             // unable to write block 255 (require BL Update)
-                            if (act_ESC_sent_Page == 255 && responsePackage[5] == 2) {
+                            if (ActDeviceFlashPage == 255 && responsePackage[5] == 2) {
                                 if (DEBUG) console.log("Bootloader not supporting more than 255 pages ");
                                 $("#dialog").text("This DEVICE doesn't have the latest bootloader and can't support this firmware. Please flash the available bootloader update. Once completed please flash again this version.");
-                                FlashESC_ID = 0;
+                                FlashDeviceId = 0;
                                 FW_update.FlashProcessActive = 0;
                                 $("#dialog").dialog({
                                     modal: true,
@@ -2437,23 +2068,23 @@ function FlashProcessLoop() {
 
                             }
 
-                            timeoutESC_IDs[FlashESC_ID] = 0;
-                            act_ESC_flash_Stat = 2;
+                            timeoutDeviceIDs[FlashDeviceId] = 0;
+                            ActDeviceFlashStat = 2;
                             waitForResponseID = 0;
-                            if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + FlashESC_ID);
+                            if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + FlashDeviceId);
                         }
                     }
                 }
-            } else if (++timeoutESC_IDs[FlashESC_ID] == DEFAULT_TIMEOUT + (350 * extraDelay) || timeoutESC_IDs[FlashESC_ID] == (DEFAULT_TIMEOUT * 2) + (500 * extraDelay) || timeoutESC_IDs[FlashESC_ID] == (DEFAULT_TIMEOUT * 3) + (650 * extraDelay)) {
+            } else if (++timeoutDeviceIDs[FlashDeviceId] == DEFAULT_TIMEOUT + (350 * extraDelay) || timeoutDeviceIDs[FlashDeviceId] == (DEFAULT_TIMEOUT * 2) + (500 * extraDelay) || timeoutDeviceIDs[FlashDeviceId] == (DEFAULT_TIMEOUT * 3) + (650 * extraDelay)) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
 
-            } else if (timeoutESC_IDs[FlashESC_ID] > (DEFAULT_TIMEOUT * 3) + (800 * extraDelay)) {
-                send_ESC_package(FlashESC_ID, 0xFFFF, [FlashESC_ID + 10, FlashESC_ID + 20]);
-                timeoutESC_IDs[FlashESC_ID] = 0;
-                act_ESC_flash_Stat = 2;
+            } else if (timeoutDeviceIDs[FlashDeviceId] > (DEFAULT_TIMEOUT * 3) + (800 * extraDelay)) {
+                send_ESC_package(FlashDeviceId, 0xFFFF, [FlashDeviceId + 10, FlashDeviceId + 20]);
+                timeoutDeviceIDs[FlashDeviceId] = 0;
+                ActDeviceFlashStat = 2;
                 waitForResponseID = 0;
-                if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + FlashESC_ID);
+                if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + FlashDeviceId);
 
             }
         }
@@ -2491,7 +2122,7 @@ function FlashProcessLoop() {
                     }
                 }
             });
-            FlashESC_ID = 0;
+            FlashDeviceId = 0;
             FW_update.FlashProcessActive = 0;
             FW_update.fileUploadInput.disabled = false;
             FW_update.startUpdateInput.disabled = false;
@@ -2502,173 +2133,24 @@ function FlashProcessLoop() {
     }
 }
 
-var address_Counter = 0
-function parseHexFile(hexData) {
-    var tempHexString = hexData.replace(/(?:\r\n|\r|\n)/g, '').split(':');
-    var hexStartFound = 0;
-    var lineArr = [];
-    FW_update.hexString = [];
-    FW_update.binaryString = [];
-    FW_update.preparedPages = [];
-    FW_update.pagesCount = 0;
-    for (var i = 0; i < tempHexString.length; i++) {
-        lineArr = tempHexString[i].split("");
-        var hex_Line_Address = parseInt('0x' + lineArr[2] + '' + lineArr[3] + '' + lineArr[4] + '' + lineArr[5]);
-        if ((i == 2 && hexStartFound == 0) || (i == 1 && parseInt(lineArr[1]) != 2)) {
-            hexStartFound = 1;
-            address_Counter = parseInt(hex_Line_Address);
-            FW_update.startAddr = parseInt(hex_Line_Address)
-            if (DEBUG) console.log('hex start at: ' + (address_Counter));
-        }
-        if (i == 3) {
-            if (((parseInt(lineArr[2]) == 1 && parseInt(lineArr[3])) == 0) || ((parseInt(lineArr[2]) == 1 && parseInt(lineArr[3])) == 8) || ((parseInt(lineArr[2]) == 3 && parseInt(lineArr[3])) == 8) || parseInt(lineArr[2]) == 4) {
-                if (DEBUG) console.log('loaded hex file is a valid FW file');
-            } else {
-                if (DEBUG) console.log('loaded hex file is a invalid FW file');
-                $(".ui-notification-container").notification("create", {
-                    title: "Invalid Firmware",
-                    content: "This is an invalid firmware file.",
-                });
-                FW_update.preparedPages = [];
-                return;
-            }
-        }
-        if (parseInt('0x' + lineArr[6] + lineArr[7]) == 0) {
-            if (hex_Line_Address < address_Counter) hex_Line_Address = address_Counter;
-            while (address_Counter < hex_Line_Address) {
-                FW_update.binaryString.push(255);
-                address_Counter++;
-            }
-            for (var y = 8; y < lineArr.length - 2; y += 2) {
-                address_Counter++;
-                FW_update.binaryString.push(parseInt('0x' + lineArr[y] + lineArr[y + 1]));
-            }
-        }
-    }
-
-
-    PrepareUpdate(searchLogo(FW_update.binaryString));
-}
-
-function PrepareHex2Pages() {
-    //prepare block that need to be flashed
-    var page_counter = 0;
-    var page_Byte_counter = 0;
-
-    // resize to full pages
-    var fitting_pages = Math.ceil(FW_update.binaryString.length / 128);
-    var left_Bytes = (fitting_pages * 128) - (FW_update.binaryString.length);
-    if (DEBUG) console.log('loaded: ' + FW_update.binaryString.length + ' bytes');
-    for (var i = 0; i < left_Bytes; i++) {
-        FW_update.binaryString.push(255);
-    }
-    FW_update.pagesCount = FW_update.binaryString.length / 128;
-    if (DEBUG) console.log('page conform: ' + FW_update.binaryString.length + 'bytes, ' + FW_update.binaryString.length / 128 + ' pages');
-    TopPage = FW_update.binaryString.length / 128;
-
-    for (var i = 0; i < FW_update.binaryString.length; i++) {
-        if (page_Byte_counter == 0) FW_update.preparedPages[page_counter] = [];
-        FW_update.preparedPages[page_counter].push(FW_update.binaryString[i]);
-        page_Byte_counter++;
-        if (page_Byte_counter == 128) {
-            page_Byte_counter = 0;
-            page_counter++;
-        }
-    }
-}
-
-
-function searchLogo(ByteArr) {
-    FW_update.WhiteLogoPos = null;
-    FW_update.BlackLogoPos = null;
-
-    for (i = 0; i < ByteArr.length; i++) {
-        // Logo Black
-        if (getA2sign(ByteArr[i]) == "P") {
-            if (
-                getA2sign(ByteArr[i + 1]) == "I" &&
-                getA2sign(ByteArr[i + 2]) == "L" &&
-                getA2sign(ByteArr[i + 3]) == "O" &&
-                getA2sign(ByteArr[i + 4]) == "T" &&
-                getA2sign(ByteArr[i + 5]) == "_" &&
-                getA2sign(ByteArr[i + 6]) == "L" &&
-                getA2sign(ByteArr[i + 7]) == "O" &&
-                getA2sign(ByteArr[i + 8]) == "G" &&
-                getA2sign(ByteArr[i + 9]) == "O" &&
-                getA2sign(ByteArr[i + 10]) == "_" &&
-                getA2sign(ByteArr[i + 11]) == "B" &&
-                getA2sign(ByteArr[i + 12]) == "L" &&
-                getA2sign(ByteArr[i + 13]) == "A" &&
-                getA2sign(ByteArr[i + 14]) == "C" &&
-                getA2sign(ByteArr[i + 15]) == "K" &&
-                getA2sign(ByteArr[i + 16]) == ">"
-            ) {
-                FW_update.BlackLogoPos = i;
-                for (i2 = 0; i2 < (pilotlogorowbyte * pilotlogoheight); i2++) {
-                    FW_update.BlackLogoArr.push(ByteArr[i + i2 + 17]);
-                }
-                if (DEBUG) console.log("Black Pilot Logo found at position " + FW_update.BlackLogoPos);
-            }
-        }
-        // Logo White
-        if (getA2sign(ByteArr[i]) == "P") {
-            if (
-                getA2sign(ByteArr[i + 1]) == "I" &&
-                getA2sign(ByteArr[i + 2]) == "L" &&
-                getA2sign(ByteArr[i + 3]) == "O" &&
-                getA2sign(ByteArr[i + 4]) == "T" &&
-                getA2sign(ByteArr[i + 5]) == "_" &&
-                getA2sign(ByteArr[i + 6]) == "L" &&
-                getA2sign(ByteArr[i + 7]) == "O" &&
-                getA2sign(ByteArr[i + 8]) == "G" &&
-                getA2sign(ByteArr[i + 9]) == "O" &&
-                getA2sign(ByteArr[i + 10]) == "_" &&
-                getA2sign(ByteArr[i + 11]) == "W" &&
-                getA2sign(ByteArr[i + 12]) == "H" &&
-                getA2sign(ByteArr[i + 13]) == "I" &&
-                getA2sign(ByteArr[i + 14]) == "T" &&
-                getA2sign(ByteArr[i + 15]) == "E" &&
-                getA2sign(ByteArr[i + 16]) == ">"
-            ) {
-                FW_update.WhiteLogoPos = i;
-                for (i2 = 0; i2 < (pilotlogorowbyte * pilotlogoheight); i2++) {
-                    FW_update.WhiteLogoArr.push(ByteArr[i + i2 + 17]);
-                }
-                if (DEBUG) console.log("White Pilot Logo found at position " + FW_update.WhiteLogoPos);
-            }
-        }
-    }
-    if ((FW_update.BlackLogoPos != null) && (FW_update.WhiteLogoPos != null)) {
-        return 1
-    } else {
-        return 0
-    }
-}
 
 //===================================================================================== Tools
 
-var throttleWarningDone = 0;
-
-var MaxESCid = 0;
-var MinESCid = 0;
-
-var ESCsReady = 0;
-var GraphArr = [];
 
 function initTools() {
     throttleWarningDone = 0;
-    ESCsReady = 0;
+    DEVICEsReady = 0;
     checkESCsStat = 0;
     checkESCid = 0;
 
     // get max OneWire ID
-    MaxESCid = 0;
-    MinESCid = 25;
+    MaxDeviceId = 0;
+    MinDeviceId = 25;
     for (var i in DEVICEs) {
         DEVICEs[i].readyForFastCommand = false;
         DEVICEs[i].commandedThrottle = 0;
-        if (i > MaxESCid) MaxESCid = i;
-        if (i < MinESCid) MinESCid = i;
+        if (i > MaxDeviceId) MaxDeviceId = i;
+        if (i < MinDeviceId) MinDeviceId = i;
 
         if (DEVICE_types.find(x => x.id === DEVICEs[i].type).blOnly != true) {
             DEVICEs[i].TLMCanvasCTX = DEVICEs[i].TLMCanvasElement.getContext("2d");
@@ -2697,7 +2179,7 @@ function sentFastThrottleSignal() {
         }
     }
 
-    var startIndex = MinESCid - 1;
+    var startIndex = MinDeviceId - 1;
 
     throttleCommand[0] = 128 | (lastRequestedTLM << 4);
     throttleCommand[0] |= ((throttle_Values[startIndex] >> 10) & 0x01) << 3;
@@ -2711,7 +2193,7 @@ function sentFastThrottleSignal() {
     var BitsLeftFromCommand = 7;
     var actByte = 2;
     var bitsFromByteLeft = 8;
-    var bitsToAddLeft = (12 + (((MaxESCid - MinESCid) + 1) * 11)) - 16;
+    var bitsToAddLeft = (12 + (((MaxDeviceId - MinDeviceId) + 1) * 11)) - 16;
     while (bitsToAddLeft > 0) {
         if (bitsFromByteLeft >= BitsLeftFromCommand) {
             throttleCommand[actByte] |= (throttle_Values[actThrottleCommand] & ((1 << BitsLeftFromCommand) - 1)) << (bitsFromByteLeft - BitsLeftFromCommand);
@@ -2735,7 +2217,7 @@ function sentFastThrottleSignal() {
             }
         }
     }
-    var commandLength = Math.ceil((12 + (((MaxESCid - MinESCid) + 1) * 11)) / 8);
+    var commandLength = Math.ceil((12 + (((MaxDeviceId - MinDeviceId) + 1) * 11)) / 8);
     lastCRC = getCRC(throttleCommand, commandLength);
     throttleCommand[commandLength] = lastCRC;
     sendBytes(throttleCommand, 1);
@@ -2749,9 +2231,9 @@ var start_check = 0;
 
 function ToolProcessLoop() {
     var blProblem = 0;
-    if (ESCsReady) {
+    if (DEVICEsReady) {
         if (buttonsDisabled) enableButtons();
-        var waitForTlmCount = (((MaxESCid - MinESCid) + 1) * 2) + OneWire;
+        var waitForTlmCount = (((MaxDeviceId - MinDeviceId) + 1) * 2) + OneWire;
         if (SerialAvailable() == waitForTlmCount) {
             var last_CRC_byte_Valid = 1;
             if (OneWire) {
@@ -2829,7 +2311,7 @@ function ToolProcessLoop() {
             while ((!(checkESCid in DEVICEs)) && checkESCid < 25) checkESCid++;
 
             if (checkESCid == 25) {
-                ESCsReady = 1;
+                DEVICEsReady = 1;
                 return;
             }
             if (DEVICE_types.find(x => x.id === DEVICEs[checkESCid].type).blOnly == true) {
@@ -2844,7 +2326,7 @@ function ToolProcessLoop() {
                 waitForResponseLength = 7;
                 if (DEBUG) console.log("check with id: " + checkESCid + " ");
             } else {
-                send_ESC_package(checkESCid, 0, [OW_SET_FAST_COM_LENGTH, (Math.ceil((12 + (((MaxESCid - MinESCid) + 1) * 11)) / 8) + 1), MinESCid, (MaxESCid - MinESCid) + 1]);
+                send_ESC_package(checkESCid, 0, [OW_SET_FAST_COM_LENGTH, (Math.ceil((12 + (((MaxDeviceId - MinDeviceId) + 1) * 11)) / 8) + 1), MinDeviceId, (MaxDeviceId - MinDeviceId) + 1]);
                 waitForResponseID = checkESCid;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
@@ -2853,7 +2335,7 @@ function ToolProcessLoop() {
         } else {
             var responsePackage = checkForRespPackage();
             if (responsePackage) {
-                timeoutESC_IDs[checkESCid] = 0;
+                timeoutDeviceIDs[checkESCid] = 0;
                 if (checkESCsStat == 0) {
                     if ((responsePackage[0] & 0x07) == OW_RESPONSE_IN_FW) {
                         DEVICEs[checkESCid].asBL = false;
@@ -2878,10 +2360,10 @@ function ToolProcessLoop() {
                         checkESCid++;
                     }
                 }
-            } else if (++timeoutESC_IDs[checkESCid] == DEFAULT_TIMEOUT || timeoutESC_IDs[checkESCid] == DEFAULT_TIMEOUT * 2 || timeoutESC_IDs[checkESCid] == DEFAULT_TIMEOUT * 3) {
+            } else if (++timeoutDeviceIDs[checkESCid] == DEFAULT_TIMEOUT || timeoutDeviceIDs[checkESCid] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[checkESCid] == DEFAULT_TIMEOUT * 3) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutESC_IDs[checkESCid] > DEFAULT_TIMEOUT * 3) {
+            } else if (timeoutDeviceIDs[checkESCid] > DEFAULT_TIMEOUT * 3) {
                 if (DEBUG) console.log("no response from DEVICE with id: " + checkESCid + " ->stop");
                 throwSerialBadCommunicationError = 1;
                 waitForResponseID = 0;
@@ -2903,13 +2385,13 @@ function displayTLMValues(tlmVal) {
         GraphArr[i][tlmVal].pop();
 
         if (tlmVal == 0) {
-            DEVICEs[i].TLMCanvasCTX.clearRect(0, 0, canvas_width, canvas_height);
+            DEVICEs[i].TLMCanvasCTX.clearRect(0, 0, TLMcanvasWidth, TLMcanvasHeight);
             for (var j = 0; j < 8; j++) {
                 if (DEVICEs[i].settingsActive[j]) {
                     DEVICEs[i].TLMCanvasCTX.beginPath();
-                    DEVICEs[i].TLMCanvasCTX.moveTo(0, canvas_height - GraphArr[i][j][0]);
+                    DEVICEs[i].TLMCanvasCTX.moveTo(0, TLMcanvasHeight - GraphArr[i][j][0]);
                     for (var k = 1; k < 121; k++) {
-                        DEVICEs[i].TLMCanvasCTX.lineTo(k * 5, canvas_height - GraphArr[i][j][k]);
+                        DEVICEs[i].TLMCanvasCTX.lineTo(k * 5, TLMcanvasHeight - GraphArr[i][j][k]);
                     }
                     DEVICEs[i].TLMCanvasCTX.strokeStyle = colorFromCSSClass("canvas_element_" + j);
                     DEVICEs[i].TLMCanvasCTX.stroke();
@@ -2977,26 +2459,20 @@ function colorFromCSSClass(className) {
 
 //===================================================================================== ConfigurationLoop
 
-var SettingsRead = 0;
-var readSetting = 0;
-var read_ESC_ids = [];
-var read_ESC_settings = [];
-var ESC_ID_Index = 0;
-var ESC_Setting_Index = 0;
-var settings_index_max = 0;
+
 
 function initConfig() {
     change_ESCs_status(1);
     SettingsRead = 0;
     read_ESC_ids = [];
     read_ESC_settings = [];
-    ESC_ID_Index = 0;
-    ESC_Setting_Index = 0;
+    DeviceIdIndex = 0;
+    DeviceSettingIndex = 0;
     checkESCsStat = 0;
     for (var ESC_IDs in DEVICEs) {
         if (DEVICE_types.find(x => x.id === DEVICEs[ESC_IDs].type).blOnly != true) {
             read_ESC_ids.push(ESC_IDs);
-            timeoutESC_IDs[ESC_IDs] = 0;
+            timeoutDeviceIDs[ESC_IDs] = 0;
         }
     }
     for (var ESC_Settings in DEVICEs[read_ESC_ids[0]].ESC_settings) {
@@ -3004,92 +2480,91 @@ function initConfig() {
     }
 }
 
-var saveNewSettingsToId = 0;
-var newSettingsValues = {};
+
 function ConfigLoop() {
     var blProblem = 0;
     if (!SettingsRead) {
         if (waitForResponseID == 0) {
 
-            if (ESC_Setting_Index == read_ESC_settings.length) {
-                ESC_Setting_Index = 0;
-                ESC_ID_Index++;
+            if (DeviceSettingIndex == read_ESC_settings.length) {
+                DeviceSettingIndex = 0;
+                DeviceIdIndex++;
                 checkESCsStat = 0;
             }
-            if (ESC_ID_Index == read_ESC_ids.length) {
+            if (DeviceIdIndex == read_ESC_ids.length) {
                 SettingsRead = 1;
                 document.getElementById("overview").innerHTML = "";
                 displayESCs(document.getElementById("overview"));
                 if (buttonsDisabled) enableButtons();
                 return;
             }
-            if ((DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].eever != 0 && DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].eever > DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[0].active) || DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].escTypes.indexOf(DEVICEs[read_ESC_ids[ESC_ID_Index]].type) == -1) {
-                ESC_Setting_Index++;
+            if ((DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].eever != 0 && DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].eever > DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[0].active) || DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].escTypes.indexOf(DEVICEs[read_ESC_ids[DeviceIdIndex]].type) == -1) {
+                DeviceSettingIndex++;
                 checkESCsStat = 0;
                 return;
             }
             if (checkESCsStat == 0) {
-                send_ESC_package(read_ESC_ids[ESC_ID_Index], 0, [OW_OK]);
-                waitForResponseID = read_ESC_ids[ESC_ID_Index];
+                send_ESC_package(read_ESC_ids[DeviceIdIndex], 0, [OW_OK]);
+                waitForResponseID = read_ESC_ids[DeviceIdIndex];
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("check with id: " + read_ESC_ids[ESC_ID_Index] + " ");
+                if (DEBUG) console.log("check with id: " + read_ESC_ids[DeviceIdIndex] + " ");
             } else {
-                send_ESC_package(read_ESC_ids[ESC_ID_Index], 0, [DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand]);
-                waitForResponseID = read_ESC_ids[ESC_ID_Index];
+                send_ESC_package(read_ESC_ids[DeviceIdIndex], 0, [DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].getCommand]);
+                waitForResponseID = read_ESC_ids[DeviceIdIndex];
                 waitForResponseType = 0;
-                waitForResponseLength = 6 + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount;
-                if (DEBUG) console.log("requesting Setting " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand + " from DEVICE with id: " + read_ESC_ids[ESC_ID_Index] + " ");
+                waitForResponseLength = 6 + DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount;
+                if (DEBUG) console.log("requesting Setting " + DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].name + " with command " + DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].getCommand + " from DEVICE with id: " + read_ESC_ids[DeviceIdIndex] + " ");
             }
         } else {
             var responsePackage = checkForRespPackage();
             if (responsePackage) {
-                timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] = 0;
+                timeoutDeviceIDs[read_ESC_ids[DeviceIdIndex]] = 0;
                 if (checkESCsStat == 0) {
                     if ((responsePackage[0] & 0x07) == OW_RESPONSE_IN_FW) {
-                        DEVICEs[read_ESC_ids[ESC_ID_Index]].asBL = false;
+                        DEVICEs[read_ESC_ids[DeviceIdIndex]].asBL = false;
                         checkESCsStat++;
                     } else {
-                        DEVICEs[read_ESC_ids[ESC_ID_Index]].asBL = true;
+                        DEVICEs[read_ESC_ids[DeviceIdIndex]].asBL = true;
                         if (blProblem == 0) {
-                            if (DEBUG) console.log("DEVICE with id: " + read_ESC_ids[ESC_ID_Index] + " remains in bootloader mode ->retry");
-                            send_ESC_package(read_ESC_ids[ESC_ID_Index], 0, [OW_BL_START_FW]);
+                            if (DEBUG) console.log("DEVICE with id: " + read_ESC_ids[DeviceIdIndex] + " remains in bootloader mode ->retry");
+                            send_ESC_package(read_ESC_ids[DeviceIdIndex], 0, [OW_BL_START_FW]);
                             blProblem = 1;
                         } else {
-                            if (DEBUG) console.log("DEVICE with id: " + read_ESC_ids[ESC_ID_Index] + " remains in bootloader mode ->stop");
+                            if (DEBUG) console.log("DEVICE with id: " + read_ESC_ids[DeviceIdIndex] + " remains in bootloader mode ->stop");
                             throwSerialBadCommunicationError = 1;
                             checkESCid++;
                             blProblem = 0;
                         }
                     }
                 } else {
-                    if (DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 1) {
-                        DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active = responsePackage[5];
-                    } else if (DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 2) {
-                        DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active = (responsePackage[5] << 8) | responsePackage[6];
-                    } else if (DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 4) {
-                        DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
+                    if (DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 1) {
+                        DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].active = responsePackage[5];
+                    } else if (DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 2) {
+                        DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].active = (responsePackage[5] << 8) | responsePackage[6];
+                    } else if (DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 4) {
+                        DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].active = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
                     }
                     checkESCsStat = 0;
-                    if (DEBUG) console.log("Setting " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " from DEVICE with id: " + read_ESC_ids[ESC_ID_Index] + " is " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active + " bytecound: " + DEVICEs[read_ESC_ids[ESC_ID_Index]].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount);
-                    ESC_Setting_Index++;
+                    if (DEBUG) console.log("Setting " + DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].name + " from DEVICE with id: " + read_ESC_ids[DeviceIdIndex] + " is " + DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].active + " bytecound: " + DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount);
+                    DeviceSettingIndex++;
                 }
-            } else if (++timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == DEFAULT_TIMEOUT || timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == DEFAULT_TIMEOUT * 2 || timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] == DEFAULT_TIMEOUT * 3) {
+            } else if (++timeoutDeviceIDs[read_ESC_ids[DeviceIdIndex]] == DEFAULT_TIMEOUT || timeoutDeviceIDs[read_ESC_ids[DeviceIdIndex]] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[read_ESC_ids[DeviceIdIndex]] == DEFAULT_TIMEOUT * 3) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutESC_IDs[read_ESC_ids[ESC_ID_Index]] > DEFAULT_TIMEOUT * 3) {
-                if (DEBUG) console.log("no response from DEVICE with id: " + read_ESC_ids[ESC_ID_Index] + " ->stop");
+            } else if (timeoutDeviceIDs[read_ESC_ids[DeviceIdIndex]] > DEFAULT_TIMEOUT * 3) {
+                if (DEBUG) console.log("no response from DEVICE with id: " + read_ESC_ids[DeviceIdIndex] + " ->stop");
                 throwSerialBadCommunicationError = 1;
                 waitForResponseID = 0;
                 checkESCsStat = 0;
-                ESC_ID_Index++;
+                DeviceIdIndex++;
             }
         }
         // save settings
     } else if (saveNewSettingsToId) {
         if (waitForResponseID == 0) {
-            while (ESC_Setting_Index < read_ESC_settings.length && DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].changed == false) ESC_Setting_Index++;
-            if (ESC_Setting_Index >= read_ESC_settings.length) {
+            while (DeviceSettingIndex < read_ESC_settings.length && DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].changed == false) DeviceSettingIndex++;
+            if (DeviceSettingIndex >= read_ESC_settings.length) {
                 if (DEBUG) console.log("allChanges saved");
                 document.getElementById("esc_save_id_" + saveNewSettingsToId).className = "settings_save_button_inactive ui-button";
                 saveNewSettingsToId = 0;
@@ -3097,57 +2572,57 @@ function ConfigLoop() {
             }
 
             if (checkESCsStat == 0) {
-                send_ESC_package(saveNewSettingsToId, 0, [DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand]);
+                send_ESC_package(saveNewSettingsToId, 0, [DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].getCommand]);
                 waitForResponseID = saveNewSettingsToId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("GET Setting " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand + " from DEVICE with id: " + saveNewSettingsToId + " ");
+                if (DEBUG) console.log("GET Setting " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].name + " with command " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].getCommand + " from DEVICE with id: " + saveNewSettingsToId + " ");
             } else {
-                if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 1) {
-                    send_ESC_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].setCommand), newSettingsValues[read_ESC_settings[ESC_Setting_Index]]]);
-                } else if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 2) {
-                    send_ESC_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].setCommand), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 8), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] & 0xFF)]);
-                } else if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 4) {
-                    send_ESC_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].setCommand), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 24), (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 16) & 0xFF, (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] >> 8) & 0xFF, (newSettingsValues[read_ESC_settings[ESC_Setting_Index]] & 0xFF)]);
+                if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 1) {
+                    send_ESC_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].setCommand), newSettingsValues[read_ESC_settings[DeviceSettingIndex]]]);
+                } else if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 2) {
+                    send_ESC_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].setCommand), (newSettingsValues[read_ESC_settings[DeviceSettingIndex]] >> 8), (newSettingsValues[read_ESC_settings[DeviceSettingIndex]] & 0xFF)]);
+                } else if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 4) {
+                    send_ESC_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].setCommand), (newSettingsValues[read_ESC_settings[DeviceSettingIndex]] >> 24), (newSettingsValues[read_ESC_settings[DeviceSettingIndex]] >> 16) & 0xFF, (newSettingsValues[read_ESC_settings[DeviceSettingIndex]] >> 8) & 0xFF, (newSettingsValues[read_ESC_settings[DeviceSettingIndex]] & 0xFF)]);
                 }
-                if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand == OW_GET_ID) {
-                    waitForResponseID = newSettingsValues[read_ESC_settings[ESC_Setting_Index]];
+                if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].getCommand == OW_GET_ID) {
+                    waitForResponseID = newSettingsValues[read_ESC_settings[DeviceSettingIndex]];
                 } else {
                     waitForResponseID = saveNewSettingsToId;
                 }
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("SET Setting " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name + " with command " + (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand + 1) + " to:" + newSettingsValues[read_ESC_settings[ESC_Setting_Index]] + " at DEVICE with id: " + saveNewSettingsToId + " ");
+                if (DEBUG) console.log("SET Setting " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].name + " with command " + (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].getCommand + 1) + " to:" + newSettingsValues[read_ESC_settings[DeviceSettingIndex]] + " at DEVICE with id: " + saveNewSettingsToId + " ");
             }
         } else {
             var responsePackage = checkForRespPackage();
             if (responsePackage) {
-                timeoutESC_IDs[saveNewSettingsToId] = 0;
+                timeoutDeviceIDs[saveNewSettingsToId] = 0;
                 if (checkESCsStat == 0) {
                     var responsePayload = 0;
-                    if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 1) {
+                    if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 1) {
                         responsePayload = responsePackage[5];
-                    } else if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 2) {
+                    } else if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 2) {
                         responsePayload = (responsePackage[5] << 8) | responsePackage[6];
                     }
-                    else if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].byteCount == 4) {
+                    else if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 4) {
                         responsePayload = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
                     }
-                    if (responsePayload == DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active) {
+                    if (responsePayload == DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].active) {
                         if (DEBUG) console.log("GET response correct");
                         checkESCsStat++;
                     } else {
-                        if (DEBUG) console.log("SET response not correct (" + responsePayload + ") instead of (" + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active + "). stop");
+                        if (DEBUG) console.log("SET response not correct (" + responsePayload + ") instead of (" + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].active + "). stop");
                         throwSerialBadCommunicationError = 1;
-                        ESC_Setting_Index++;
+                        DeviceSettingIndex++;
                     }
                     waitForResponseID = 0;
                 } else {
                     if (responsePackage[5] == OW_OK) {
-                        DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].changed = false;
-                        DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].active = newSettingsValues[read_ESC_settings[ESC_Setting_Index]];
+                        DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].changed = false;
+                        DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].active = newSettingsValues[read_ESC_settings[DeviceSettingIndex]];
                         checkESCsStat = 0;
-                        if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].getCommand == OW_GET_ID) {
+                        if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].getCommand == OW_GET_ID) {
                             $("#dialog").text("OneWire ID was changed. GUI must reset! please connect again.");
                             $("#dialog").dialog({
                                 modal: true,
@@ -3160,29 +2635,28 @@ function ConfigLoop() {
                             disconnect();
                             return;
                         }
-                        if (DEBUG) console.log("saved setting: " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name);
-                        ESC_Setting_Index++;
+                        if (DEBUG) console.log("saved setting: " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].name);
+                        DeviceSettingIndex++;
                     } else {
-                        if (DEBUG) console.log("error while saving..." + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[ESC_Setting_Index]].name);
+                        if (DEBUG) console.log("error while saving..." + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].name);
                         checkESCsStat = 0;
-                        ESC_Setting_Index++;
+                        DeviceSettingIndex++;
                     }
                     waitForResponseID = 0;
                 }
-            } else if (++timeoutESC_IDs[saveNewSettingsToId] == DEFAULT_TIMEOUT || timeoutESC_IDs[saveNewSettingsToId] == DEFAULT_TIMEOUT * 2 || timeoutESC_IDs[saveNewSettingsToId] == DEFAULT_TIMEOUT * 3) {
+            } else if (++timeoutDeviceIDs[saveNewSettingsToId] == DEFAULT_TIMEOUT || timeoutDeviceIDs[saveNewSettingsToId] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[saveNewSettingsToId] == DEFAULT_TIMEOUT * 3) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutESC_IDs[saveNewSettingsToId] > DEFAULT_TIMEOUT * 3) {
+            } else if (timeoutDeviceIDs[saveNewSettingsToId] > DEFAULT_TIMEOUT * 3) {
                 if (DEBUG) console.log("no response from DEVICE with id: " + saveNewSettingsToId + " ->stop");
                 throwSerialBadCommunicationError = 1;
                 waitForResponseID = 0;
                 checkESCsStat = 0;
-                ESC_Setting_Index++;
+                DeviceSettingIndex++;
             }
         }
     }
 }
-
 
 function checkChangedSettings(ID) {
     var changedSettings = false;
@@ -3243,9 +2717,9 @@ function saveSettingsOfId(ID) {
             return;
         }
     }
-    ESC_Setting_Index = 0;
+    DeviceSettingIndex = 0;
     checkESCsStat = 0;
-    for (var ESC_IDs in DEVICEs) timeoutESC_IDs[ESC_IDs] = 0;
+    for (var ESC_IDs in DEVICEs) timeoutDeviceIDs[ESC_IDs] = 0;
     if (changedSettings) {
         saveNewSettingsToId = ID; // make the loop save the settings
     }
