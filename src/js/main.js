@@ -257,10 +257,14 @@ var FW_update = {
     FlashProcessActive: 0,
     loadedFileName: "",
     startAddr: null,
-    WhiteLogoPos: null,
-    BlackLogoPos: null,
-    WhiteLogoArr: [],
-    BlackLogoArr: []
+    WhitePilotLogoPos: null,
+    BlackPilotLogoPos: null,
+    WhitePilotLogoArr: [],
+    BlackPilotLogoArr: [],
+    WhiteStartLogoPos: null,
+    BlackStartLogoPos: null,
+    WhiteStartLogoArr: [],
+    BlackStartLogoArr: []
 }
 
 //===================================================================================== init
@@ -587,10 +591,14 @@ function disconnect() {
     FW_update.preparedPages = [];
     FW_update.pagesCount = 0;
     FW_update.startAddr = null;
-    FW_update.WhiteLogoPos = null;
-    FW_update.BlackLogoPos = null;
-    FW_update.WhiteLogoArr = [];
-    FW_update.BlackLogoArr = [];
+    FW_update.WhitePilotLogoPos = null;
+    FW_update.BlackPilotLogoPos = null;
+    FW_update.WhitePilotLogoArr = [];
+    FW_update.BlackPilotLogoArr = [];
+    FW_update.WhiteStartLogoPos = null;
+    FW_update.BlackStartLogoPos = null;
+    FW_update.WhiteStartLogoArr = [];
+    FW_update.BlackStartLogoArr = [];
 
     if (typeof SerialConnection.connection.connectionId !== 'undefined')
         chrome.serial.disconnect(SerialConnection.connection.connectionId, function () { });
@@ -1794,7 +1802,8 @@ function initFWUpdater() {
             return function (e) {
                 FW_update.hexString = e.target.result;
                 parseHexFile(FW_update.hexString);
-                PrepareUpdate(searchPilotLogo(FW_update.binaryString));
+                
+                PrepareUpdate();
                 $("#remoteFWSelect").remove()
             };
         })(evt.target.files[0]);
@@ -1865,7 +1874,7 @@ function initFWUpdater() {
                                 success: function (data) {
                                     if (DEBUG) console.log("Loaded remote DEVICE hex file " + fw_url + " Filename:" + FW_update.loadedFileName);
                                     self.pages = parseHexFile(data);
-                                    PrepareUpdate(searchPilotLogo(FW_update.binaryString));
+                                    PrepareUpdate();
                                 },
                                 error: function (data) {
                                     if (DEBUG) console.log("ERROR on download file " + fw_url)
@@ -1885,7 +1894,7 @@ function initFWUpdater() {
     $("#remoteFW").append().html("Remote Firmware");
 }
 
-function PrepareUpdate(attr) {
+function PrepareUpdate() {
     $.each(DEVICEs, function (index, device) {
         if (device !== undefined) {
             var tmpContainer = document.getElementById("ESC_container_" + device.id);
@@ -1903,19 +1912,32 @@ function PrepareUpdate(attr) {
     })
     $('#FW_flash').remove();
     $("#FW_chPlogo").remove();
+    $("#FW_chSlogo").remove();
 
-    if (attr == 1) { // Logo
+    if (searchPilotLogo(FW_update.binaryString) == 1) { // Logo
         $("#toolbar").append(
             $('<button/>')
                 .attr({ id: 'FW_chPlogo' })
                 .button()
                 .click(function () {
-                    showLogoEditor()
+                    showLogoEditor(pilotLogoWidth, pilotLogoHeight, FW_update.WhitePilotLogoArr, FW_update.BlackPilotLogoArr, FW_update.WhitePilotLogoPos, FW_update.BlackPilotLogoPos);
                 }))
             ;
         $("#FW_chPlogo").append().html("Pilot Logo");
     }
 
+    var StartLogo = searchStartLogo(FW_update.binaryString);
+    if (StartLogo == 1) { // Logo
+        $("#toolbar").append(
+            $('<button/>')
+                .attr({ id: 'FW_chSlogo' })
+                .button()
+                .click(function () {
+                    showLogoEditor(startLogoWidth, startLogoHeight, FW_update.WhiteStartLogoArr, FW_update.BlackStartLogoArr, FW_update.WhiteStartLogoPos, FW_update.BlackStartLogoPos);
+                }))
+            ;
+        $("#FW_chSlogo").append().html("Start Logo");
+    }
     if ($('#FW_flash').length == 0) {
         $("#toolbar").append(
             $('<button/>')

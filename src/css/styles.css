@@ -50,8 +50,8 @@ img {
 #logoeditor {
     visibility: hidden;
     position: absolute;
-    width: 400px;
-    height: 150px;
+    min-width: 400px;
+    min-height: 150px;
     top: 25%;
     border: 2px solid #6180A3;
     left: 25%;

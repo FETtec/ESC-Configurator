@@ -1,43 +1,50 @@
 "user strict";
 // Begin const and local var
+var logeditorActive = 0;
 
 // logo consts
 const pilotLogoWidth = 130;
 const pilotLogoHeight = 66;
 
+const startLogoWidth = 416;
+const startLogoHeight = 280;
+
 // Begin functions
 
-function showLogoEditor() {
+function showLogoEditor(width, height, WhiteLogoArr, BlackLogoArr, WhiteLogoPos, BlackLogoPos) {
+    if (logeditorActive == 1) return;
+
+    logeditorActive = 1;
     $("#logoeditor").css("visibility", "visible");
 
     var LogoCanvas = $('<canvas/>', {
         'class': 'logocanvas',
-        id: 'canvasHex'
+        id: 'canvasLogo'
     }).prop({
-        width: pilotLogoWidth,
-        height: pilotLogoHeight
+        width: width,
+        height: height
     });
     $('#logoeditor').append(LogoCanvas);
 
-    initializeCanvas("canvasHex")
-    drawLogo("canvasHex", FW_update.WhiteLogoArr, FW_update.BlackLogoArr)
+    initializeCanvas("canvasLogo", width, height)
+    drawLogo("canvasLogo", WhiteLogoArr, BlackLogoArr, width, height)
 
-    $("#logoeditor").append($('<div/>').text("The Logo needs to be 130 x 66px and the only recognized colors are black and white."))
+    $("#logoeditor").append($('<div/>').text("The Logo needs to be " + width + " x " + height + "px and the only recognized colors are black and white."))
 
     // BEGIN load file
     $("#logoeditor").append(
-        $('<div/>').attr({ id: 'localPilotImage', class: 'fileContainer' }).button().click(function () {
+        $('<div/>').attr({ id: 'localImage', class: 'fileContainer' }).button().click(function () {
             if (DEBUG) console.log("LOCAL Logo File Selected");
-            $("#pilot_logo_upload").val(null);
+            $("#logo_upload").val(null);
         }
         ));
-    $("#localPilotImage").append().html("<span>Load Image</span>");
+    $("#localImage").append().html("<span>Load Image</span>");
 
-    toolbar = document.getElementById("localPilotImage");
+    toolbar = document.getElementById("localImage");
     document.getElementById('toolbar').style.display = "block";
     var fileUploadInput = document.createElement('input');
     fileUploadInput.type = "file";
-    fileUploadInput.id = "pilot_logo_upload";
+    fileUploadInput.id = "logo_upload";
     fileUploadInput.addEventListener('change', function (evt) {
         var fileLoaded = this.value.split('\\');
         var loadedFileName = fileLoaded[fileLoaded.length - 1].replace(/^.*[\\\/]/, '');
@@ -46,7 +53,7 @@ function showLogoEditor() {
         var reader = new FileReader();
         reader.onloadend = function () {
             img_data = reader.result;
-            loadCanvas("canvasHex");
+            loadCanvas("canvasLogo", width, height);
         };
         reader.readAsDataURL(file);
 
@@ -56,42 +63,45 @@ function showLogoEditor() {
 
     $("#logoeditor").append(
         $('<button/>')
-            .attr({ id: 'updatePilotLogo' })
+            .attr({ id: 'updateLogo' })
             .button()
             .click(function () {
 
-                convertImgCanvas("canvasHex");
+                convertImgCanvas("canvasLogo",WhiteLogoArr, BlackLogoArr);
                 Array.prototype.splice.apply(
                     FW_update.binaryString,
-                    [FW_update.BlackLogoPos, FW_update.BlackLogoArr.length].concat(FW_update.BlackLogoArr)
+                    [BlackLogoPos, BlackLogoArr.length].concat(BlackLogoArr)
                 );
                 Array.prototype.splice.apply(
                     FW_update.binaryString,
-                    [FW_update.WhiteLogoPos, FW_update.WhiteLogoArr.length].concat(FW_update.WhiteLogoArr)
+                    [WhiteLogoPos, WhiteLogoArr.length].concat(WhiteLogoArr)
                 );
 
+
                 $("#logoeditor").css("visibility", "hidden");
-                $("#logoeditor").empty()
+                $("#logoeditor").empty();
+                logeditorActive = 0;
             }))
         ;
-    $("#updatePilotLogo").append().html("Update");
+    $("#updateLogo").append().html("Update");
 
     $("#logoeditor").append(
         $('<button/>')
-            .attr({ id: 'cancelPilotLogo' })
+            .attr({ id: 'cancelLogo' })
             .button()
             .click(function () {
                 $("#logoeditor").css("visibility", "hidden");
-                $("#logoeditor").empty()
+                $("#logoeditor").empty();
+                logeditorActive = 0;
             }))
         ;
-    $("#cancelPilotLogo").append().html("Cancel");
+    $("#cancelLogo").append().html("Cancel");
 }
 
 
 function searchPilotLogo(ByteArr) {
-    FW_update.WhiteLogoPos = null;
-    FW_update.BlackLogoPos = null;
+    FW_update.WhitePilotLogoPos = null;
+    FW_update.BlackPilotLogoPos = null;
 
     for (i = 0; i < ByteArr.length; i++) {
         // Logo Black
@@ -114,11 +124,11 @@ function searchPilotLogo(ByteArr) {
                 getA2sign(ByteArr[i + 15]) == "K" &&
                 getA2sign(ByteArr[i + 16]) == ">"
             ) {
-                FW_update.BlackLogoPos = i;
+                FW_update.BlackPilotLogoPos = i + 17;
                 for (i2 = 0; i2 < (Math.ceil(pilotLogoWidth / 8) * pilotLogoHeight); i2++) {
-                    FW_update.BlackLogoArr.push(ByteArr[i + i2 + 17]);
+                    FW_update.BlackPilotLogoArr.push(ByteArr[i + i2 + 17]);
                 }
-                if (DEBUG) console.log("Black Pilot Logo found at position " + FW_update.BlackLogoPos);
+                if (DEBUG) console.log("Black Pilot Logo found at position " + FW_update.BlackPilotLogoPos);
             }
         }
         // Logo White
@@ -141,15 +151,82 @@ function searchPilotLogo(ByteArr) {
                 getA2sign(ByteArr[i + 15]) == "E" &&
                 getA2sign(ByteArr[i + 16]) == ">"
             ) {
-                FW_update.WhiteLogoPos = i;
+                FW_update.WhitePilotLogoPos = i + 17;
                 for (i2 = 0; i2 < (Math.ceil(pilotLogoWidth / 8) * pilotLogoHeight); i2++) {
-                    FW_update.WhiteLogoArr.push(ByteArr[i + i2 + 17]);
+                    FW_update.WhitePilotLogoArr.push(ByteArr[i + i2 + 17]);
                 }
-                if (DEBUG) console.log("White Pilot Logo found at position " + FW_update.WhiteLogoPos);
+                if (DEBUG) console.log("White Pilot Logo found at position " + FW_update.WhitePilotLogoPos);
             }
         }
     }
-    if ((FW_update.BlackLogoPos != null) && (FW_update.WhiteLogoPos != null)) {
+    if ((FW_update.BlackPilotLogoPos != null) && (FW_update.WhitePilotLogoPos != null)) {
+        return 1
+    } else {
+        return 0
+    }
+}
+
+function searchStartLogo(ByteArr) {
+    FW_update.WhiteStartLogoPos = null;
+    FW_update.BlackStartLogoPos = null;
+
+    for (i = 0; i < ByteArr.length; i++) {
+        // Logo Black - START_LOGO_BLACK>
+        if (getA2sign(ByteArr[i]) == "S") {
+            if (
+                getA2sign(ByteArr[i + 1]) == "T" &&
+                getA2sign(ByteArr[i + 2]) == "A" &&
+                getA2sign(ByteArr[i + 3]) == "R" &&
+                getA2sign(ByteArr[i + 4]) == "T" &&
+                getA2sign(ByteArr[i + 5]) == "_" &&
+                getA2sign(ByteArr[i + 6]) == "L" &&
+                getA2sign(ByteArr[i + 7]) == "O" &&
+                getA2sign(ByteArr[i + 8]) == "G" &&
+                getA2sign(ByteArr[i + 9]) == "O" &&
+                getA2sign(ByteArr[i + 10]) == "_" &&
+                getA2sign(ByteArr[i + 11]) == "B" &&
+                getA2sign(ByteArr[i + 12]) == "L" &&
+                getA2sign(ByteArr[i + 13]) == "A" &&
+                getA2sign(ByteArr[i + 14]) == "C" &&
+                getA2sign(ByteArr[i + 15]) == "K" &&
+                getA2sign(ByteArr[i + 16]) == ">"
+            ) {
+                FW_update.BlackStartLogoPos = i + 17;
+                for (i2 = 0; i2 < (Math.ceil(startLogoWidth / 8) * startLogoHeight); i2++) {
+                    FW_update.BlackStartLogoArr.push(ByteArr[i + i2 + 17]);
+                }
+                if (DEBUG) console.log("Black Start Logo found at position " + FW_update.BlackStartLogoPos);
+            }
+        }
+        // Logo White - START_LOGO_WHITE>
+        if (getA2sign(ByteArr[i]) == "S") {
+            if (
+                getA2sign(ByteArr[i + 1]) == "T" &&
+                getA2sign(ByteArr[i + 2]) == "A" &&
+                getA2sign(ByteArr[i + 3]) == "R" &&
+                getA2sign(ByteArr[i + 4]) == "T" &&
+                getA2sign(ByteArr[i + 5]) == "_" &&
+                getA2sign(ByteArr[i + 6]) == "L" &&
+                getA2sign(ByteArr[i + 7]) == "O" &&
+                getA2sign(ByteArr[i + 8]) == "G" &&
+                getA2sign(ByteArr[i + 9]) == "O" &&
+                getA2sign(ByteArr[i + 10]) == "_" &&
+                getA2sign(ByteArr[i + 11]) == "W" &&
+                getA2sign(ByteArr[i + 12]) == "H" &&
+                getA2sign(ByteArr[i + 13]) == "I" &&
+                getA2sign(ByteArr[i + 14]) == "T" &&
+                getA2sign(ByteArr[i + 15]) == "E" &&
+                getA2sign(ByteArr[i + 16]) == ">"
+            ) {
+                FW_update.WhiteStartLogoPos = i + 17;
+                for (i2 = 0; i2 < (Math.ceil(startLogoWidth / 8) * startLogoHeight); i2++) {
+                    FW_update.WhiteStartLogoArr.push(ByteArr[i + i2 + 17]);
+                }
+                if (DEBUG) console.log("White Start Logo found at position " + FW_update.WhiteStartLogoPos);
+            }
+        }
+    }
+    if ((FW_update.BlackStartLogoPos != null) && (FW_update.WhiteStartLogoPos != null)) {
         return 1
     } else {
         return 0
@@ -157,33 +234,34 @@ function searchPilotLogo(ByteArr) {
 }
 
 
-function initializeCanvas(obj) {
+
+function initializeCanvas(obj, width, height) {
     var canvas = document.getElementById(obj);
-    canvas.width = pilotLogoWidth;
-    canvas.height = pilotLogoHeight;
+    canvas.width = width;
+    canvas.height = height;
     var ctx = canvas.getContext("2d");
     ctx.fillStyle = "#00ff00";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-function loadCanvas(obj) {
+function loadCanvas(obj, width, height) {
     var canvas = document.getElementById(obj);
-    canvas.width = pilotLogoWidth;
-    canvas.height = pilotLogoHeight;
+    canvas.width = width;
+    canvas.height = height;
     var ctx = canvas.getContext("2d");
     var image = new Image();
     image.onload = function () {
         ctx.fillStyle = "#00ff00";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(image, 0, 0); //TODO
+        ctx.drawImage(image, 0, 0);
     };
     image.src = img_data;
 }
 
-function convertImgCanvas(obj) {
+function convertImgCanvas(obj, WhiteArr, BlackArr ) {
     // clear some variables
-    FW_update.BlackLogoArr.length = 0;
-    FW_update.WhiteLogoArr.length = 0;
+    BlackArr.length = 0;
+    WhiteArr.length = 0;
 
     // init canvas
     var canvas = document.getElementById(obj);
@@ -208,8 +286,8 @@ function convertImgCanvas(obj) {
 
             if (x_count >= 7 || x == canvas.width - 1) {
                 x_count = 0;
-                FW_update.BlackLogoArr.push(tmp_value_blk);
-                FW_update.WhiteLogoArr.push(tmp_value_white);
+                BlackArr.push(tmp_value_blk);
+                WhiteArr.push(tmp_value_white);
                 tmp_value_blk = 0;
                 tmp_value_white = 0;
             } else {
@@ -217,20 +295,20 @@ function convertImgCanvas(obj) {
             }
         }
     }
-    if (DEBUG) console.log("Canvas Whitelogo size: " + FW_update.WhiteLogoArr.length);
-    if (DEBUG) console.log("Canvas Blacklogo size: " + FW_update.BlackLogoArr.length);
+    if (DEBUG) console.log("Canvas Whitelogo size: " + WhiteArr.length);
+    if (DEBUG) console.log("Canvas Blacklogo size: " + BlackArr.length);
 }
 
 
-function drawLogo(canvasId, whitelogo, blacklogo) {
+function drawLogo(canvasId, whitelogo, blacklogo, width, height) {
     var canvas = document.getElementById(canvasId);
-    canvas.width = pilotLogoWidth;
-    canvas.height = pilotLogoHeight;
+    canvas.width = width;
+    canvas.height = height;
 
     var ctx = canvas.getContext("2d");
     // set background to green
     ctx.fillStyle = "#00ff00";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, width, height);
 
     // reset pos
     var pos_x = 0;
@@ -244,7 +322,7 @@ function drawLogo(canvasId, whitelogo, blacklogo) {
             }
             pos_x++;
         }
-        if (pos_x > pilotLogoWidth) {
+        if (pos_x >= width) {
             pos_x = 0;
             pos_y++;
         }
@@ -261,7 +339,7 @@ function drawLogo(canvasId, whitelogo, blacklogo) {
             }
             pos_x++;
         }
-        if (pos_x > pilotLogoWidth) {
+        if (pos_x >= width) {
             pos_x = 0;
             pos_y++;
         }
