@@ -1926,7 +1926,7 @@ function PrepareUpdate() {
         $("#FW_chPlogo").append().html("Pilot Logo");
     }
 
-    var StartLogo = searchStartLogo(FW_update.binaryString);
+    var StartLogo = 0; //searchStartLogo(FW_update.binaryString);
     if (StartLogo == 1) { // Logo
         $("#toolbar").append(
             $('<button/>')
