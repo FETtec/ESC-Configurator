@@ -872,7 +872,7 @@ function Internal_Loop() {
                                     if (DEBUG) console.log("passthrough active!");
                                     waitLoops = 5;
                                     PT_status = 3;
-                                    break;
+                                    break;                                 
                             }
                             noLoop = 0;
                         },

@@ -3,6 +3,7 @@
 
 var ignoreOwnBytesIndex = 0;
 var TX_busy = 0;
+var oldPortPath;
 
 // Begin functions
 
@@ -89,7 +90,7 @@ function TX() {
     chrome.serial.send(SerialConnection.connection.connectionId, str2ab(sendBuf), TX_done);
 }
 
-var oldPortPath;
+
 function ReconnectOnSend(reconnectState) {
     if (ConnectionType == VCP) {
         if (reconnectState == 0) { // wait for data to be sent
@@ -107,17 +108,19 @@ function ReconnectOnSend(reconnectState) {
             });
         }
     }
+    PT_status = 0;
 }
 
 function ReconnectToOldPort(ports) {
     if (DEBUG) console.log("reconnect, search new port");
-    var foundPort;
+    //var foundPort;
     if (DEBUG) console.log("reconnect, oldPortPath = " + oldPortPath);
     for (var i in ports) {
         if (ports[i].path == oldPortPath) {
             if (DEBUG) console.log("reconnect, connect to new port");
             if (DEBUG) console.log("reconnect, foundPortPath = " + ports[i].path);
             chrome.serial.connect(ports[i].path, { bitrate: use_bit_rate, bufferSize: 200000, persistent: true }, onPortOpen);
+            UpdateSerialSection("connect");
             return;
         }
     }
