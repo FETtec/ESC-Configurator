@@ -78,20 +78,20 @@ const DEVICE_types = [
     { id: 129, name: "FETtec G0-OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true }
 ];
 
-const serial_options = [
+const Serial_Options = [
     { id: 0, name: 'KISS FC Passthrough', connect_bitrate: 115200, disabled: false },
     { id: 1, name: 'Betaflight Passthrough', connect_bitrate: 115200, disabled: false },
     { id: 2, name: 'USB UART', connect_bitrate: 2000000, disabled: false },
     { id: 3, name: 'USB', connect_bitrate: 2000000, disabled: false }
 ];
 
-const menu_options = [
+const Menu_Options = [
     { id: 0, name: 'Overview', icon: "ui-icon-info", disabled: false },
     { id: 1, name: 'Settings', icon: "ui-icon-gear", disabled: false },
     { id: 2, name: 'Telemetry', icon: "ui-icon-heart", disabled: false },
 ];
 
-const ESC_stats = [
+const TLM_Device_Stats = [
     "Temp",
     "Voltage",
     "Current",
@@ -135,7 +135,7 @@ function DEVICE() {
     this.subversion = 0;
     this.activated = 0;
     this.activationkey = 0;
-    this.ESC_select_Input = 0;
+    this.Device_select_Input = 0;
     this.selected = true;
     this.loadingBar = 0;
     this.warning = false;
@@ -148,7 +148,7 @@ function DEVICE() {
     this.TLMCanvasElement;
     this.TLMCanvasCTX;
     // end ESC specific settings
-    this.ESC_settings = {
+    this.DeviceSettings = {
         0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "readonly", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, escTypes: onAllESCs }, // must always be 0
         40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse rotation direction", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
         41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
@@ -222,8 +222,8 @@ var throwSerialBadCommunicationError = 0;
 var newSettingsValues = {};
 
 var DEVICEs = [];
-var read_ESC_ids = [];
-var read_ESC_settings = [];
+var readDeviceIDs = [];
+var readDeviceSettings = [];
 var DevicePackage = [];
 var GraphArr = [];
 var timeoutDeviceIDs = [];
@@ -275,7 +275,7 @@ onload = function () {
     });
 
     Gen_Menu_Buttons(-1, true); // Generate Menu Button
-    Gen_Types_Dropdown(serial_options); // Generate Serial Options
+    Gen_Types_Dropdown(Serial_Options); // Generate Serial Options
 
     // Check for serial ports and build options
     chrome.serial.getDevices(function (ports) {
@@ -429,24 +429,24 @@ function Gen_Types_Dropdown(array) {
 function Gen_Menu_Buttons(active_id, is_disabled) {
 
     $("#menu").empty();
-    for (var i in menu_options) {
+    for (var i in Menu_Options) {
         var button_class = "";
-        if (menu_options[i].id === active_id) {
+        if (Menu_Options[i].id === active_id) {
             button_class = "ui-state-active";
         }
         var disabled_val = false;
         if (is_disabled == true) {
             disabled_val = true;
         } else {
-            disabled_val = menu_options[i].disabled;
+            disabled_val = Menu_Options[i].disabled;
         }
         $('#menu')
             .append($('<button/>')
-                .attr('id', "MB_" + menu_options[i].id)
+                .attr('id', "MB_" + Menu_Options[i].id)
                 .attr('class', button_class)
                 .button({
-                    label: menu_options[i].name,
-                    icon: menu_options[i].icon,
+                    label: Menu_Options[i].name,
+                    icon: Menu_Options[i].icon,
                     disabled: disabled_val
                 })
                 .click(function () {
@@ -675,13 +675,13 @@ function activationLoop() {
         if (SwitchStatus == 0) {
             // request
             if (DEBUG) console.log("DEVICE " + DeviceActivateId + " send OK_OK cmd");
-            send_ESC_package(DeviceActivateId, 0, [OW_OK]);
+            send_OneWire_package(DeviceActivateId, 0, [OW_OK]);
             waitForResponseID = DeviceActivateId;
             waitForResponseType = 0;
             waitForResponseLength = 7;
         } else {
             if (DEBUG) console.log("DEVICE " + DeviceActivateId + " send OW_GET_ACTIVATION cmd");
-            send_ESC_package(DeviceActivateId, 0, [OW_GET_ACTIVATION]);
+            send_OneWire_package(DeviceActivateId, 0, [OW_GET_ACTIVATION]);
             waitForResponseID = DeviceActivateId;
             waitForResponseType = 0;
             waitForResponseLength = 7;
@@ -698,7 +698,7 @@ function activationLoop() {
                 } else {
                     if (switchProblem == 0) {
                         if (DEBUG) console.log("DEVICE " + DeviceActivateId + " send OW_BL_START_FW cmd");
-                        send_ESC_package(DeviceActivateId, 0, [OW_BL_START_FW]);
+                        send_OneWire_package(DeviceActivateId, 0, [OW_BL_START_FW]);
                         if (ConnectionType == VCP) {
                             if (DEBUG) console.log("starting reconnect procedure 1");
                             ReconnectOnSend(0);
@@ -707,7 +707,7 @@ function activationLoop() {
                         waitLoops = 20;
                     } else if (switchProblem < 20) {
                         if (DEBUG) console.log("ESC with id: " + DeviceActivateId + " don't switches ->retry");
-                        send_ESC_package(DeviceActivateId, 0, [SwitchCommand]);
+                        send_OneWire_package(DeviceActivateId, 0, [SwitchCommand]);
                         switchProblem++;
                         waitLoops = 20;
                     } else {
@@ -724,7 +724,7 @@ function activationLoop() {
                 if (DEVICEs[DeviceActivateId].activated == 0) {
                     if (DEBUG) console.log("Activating DEVICE " + DeviceActivateId + " with key " + DEVICEs[DeviceActivateId].activationkey);
                     // -6F0A6E67
-                    send_ESC_package(DeviceActivateId, 0, [OW_SET_ACTIVATION, -0x6F, 0x0A, 0x6E, 0x67]); // need to replace with proper key
+                    send_OneWire_package(DeviceActivateId, 0, [OW_SET_ACTIVATION, -0x6F, 0x0A, 0x6E, 0x67]); // need to replace with proper key
                     waitForResponseID = DeviceActivateId;
                     waitForResponseType = 0;
                     waitForResponseLength = 7;
@@ -738,7 +738,7 @@ function activationLoop() {
                 if (responsePackage[5] == OW_OK) {
                     if (DEBUG) console.log("DEVICE " + DeviceActivateId + " response OK.");
                     if (DEBUG) console.log("DEVICE " + DeviceActivateId + " send OW_GET_ACTIVATION cmd");
-                    send_ESC_package(DeviceActivateId, 0, [OW_GET_ACTIVATION]);
+                    send_OneWire_package(DeviceActivateId, 0, [OW_GET_ACTIVATION]);
                     waitForResponseID = DeviceActivateId;
                     waitForResponseType = 0;
                     waitForResponseLength = 7;
@@ -1030,14 +1030,14 @@ function check_ESCs_In_BL() {
         }
 
         if (SwitchStatus == 0) {
-            send_ESC_package(SwitchESCsFW_ID, 0, [OW_OK]);
+            send_OneWire_package(SwitchESCsFW_ID, 0, [OW_OK]);
             waitForResponseID = SwitchESCsFW_ID;
             waitForResponseType = 0;
             waitForResponseLength = 7;
             if (DEBUG) console.log("check with id: " + SwitchESCsFW_ID + " ");
         } else {
             if (refreshVersion) {
-                send_ESC_package(SwitchESCsFW_ID, 0, [OW_REQ_SW_VER]);
+                send_OneWire_package(SwitchESCsFW_ID, 0, [OW_REQ_SW_VER]);
                 waitForResponseID = SwitchESCsFW_ID;
                 waitForResponseType = 0;
                 waitForResponseLength = 8;
@@ -1063,7 +1063,7 @@ function check_ESCs_In_BL() {
                     if (switchProblem == 0) {
                         if (DEVICE_types.find(x => x.id === DEVICEs[SwitchESCsFW_ID].type).blOnly == true) return
                         if (DEBUG) console.log("switching DEVICE with id: " + SwitchESCsFW_ID);
-                        send_ESC_package(SwitchESCsFW_ID, 0, [SwitchCommand]);
+                        send_OneWire_package(SwitchESCsFW_ID, 0, [SwitchCommand]);
                         if (ConnectionType == VCP) {
                             if (DEBUG) console.log("starting reconnect procedure 1");
                             ReconnectOnSend(0);
@@ -1072,7 +1072,7 @@ function check_ESCs_In_BL() {
                         waitLoops = 20;
                     } else if (switchProblem < 20) {
                         if (DEBUG) console.log("DEVICE with id: " + SwitchESCsFW_ID + " don't switches ->retry");
-                        send_ESC_package(SwitchESCsFW_ID, 0, [SwitchCommand]);
+                        send_OneWire_package(SwitchESCsFW_ID, 0, [SwitchCommand]);
                         switchProblem++;
                         waitLoops = 20;
                     } else {
@@ -1181,7 +1181,7 @@ function ChangeDisplay(displayType) {
         for (var i in DEVICEs) {
             DEVICEs[i].settingsActive[8] = 0;
             DEVICEs[i].settingsActive[9] = 0;
-            DEVICEs[i].ESC_settings[0].active = 0;
+            DEVICEs[i].DeviceSettings[0].active = 0;
         }
         $('#overview').empty();
         $('#toolbar').empty();
@@ -1212,7 +1212,7 @@ function ChangeDisplay(displayType) {
 
 //===================================================================================== DEVICE communication
 
-function send_ESC_package(id, type, bytes) {
+function send_OneWire_package(id, type, bytes) {
     var B_length = bytes.length + 6;
     DevicePackage = [0x01, id, type, ((type >> 8) & 0xFF), B_length];
     for (var i = 0; i < bytes.length; i++) DevicePackage.push(bytes[i]);
@@ -1278,28 +1278,28 @@ function ScanForESCs() {
     if (!waitForResponseID) {
         if (scanStep == 0) { // look for ID
             timeoutDeviceIDs[scanID] = 0;
-            send_ESC_package(scanID, 0, [OW_OK]);
+            send_OneWire_package(scanID, 0, [OW_OK]);
             waitForResponseID = scanID;
             waitForResponseType = 0;
             waitForResponseLength = 7;
             if (DEBUG) console.log("scan for ID: " + scanID);
         } else if (scanStep == 1) { //get Type
             timeoutDeviceIDs[scanID] = 0;
-            send_ESC_package(scanID, 0, [OW_REQ_TYPE]);
+            send_OneWire_package(scanID, 0, [OW_REQ_TYPE]);
             waitForResponseID = scanID;
             waitForResponseType = 0;
             waitForResponseLength = 7;
             if (DEBUG) console.log("request version of DEVICE with ID: " + scanID);
         } else if (scanStep == 2) { //get version
             timeoutDeviceIDs[scanID] = 0;
-            send_ESC_package(scanID, 0, [OW_REQ_SW_VER]);
+            send_OneWire_package(scanID, 0, [OW_REQ_SW_VER]);
             waitForResponseID = scanID;
             waitForResponseType = 0;
             waitForResponseLength = 8;
             if (DEBUG) console.log("request type of DEVICE with ID: " + scanID);
         } else if (scanStep == 3) { //get SN
             timeoutDeviceIDs[scanID] = 0;
-            send_ESC_package(scanID, 0, [OW_REQ_SN]);
+            send_OneWire_package(scanID, 0, [OW_REQ_SN]);
             waitForResponseID = scanID;
             waitForResponseType = 0;
             waitForResponseLength = 18;
@@ -1390,68 +1390,68 @@ function ScanForESCs() {
 
 function displayESCs(ParentElement) {
     for (var i in DEVICEs) {
-        var ESC_div = document.createElement('div');
+        var DeviceDiv = document.createElement('div');
         Gen_Menu_Buttons(selectedMenu, false);
         if (selectedMenu == 0) {
-            ESC_div.id = "ESC_container_" + i;
+            DeviceDiv.id = "Device_container_" + i;
             if (DEVICEs[i].selected || selectedMenu != 0)
-                ESC_div.className = "esc_active";
+                DeviceDiv.className = "Device_active";
             else
-                ESC_div.className = "esc_inactive";
+                DeviceDiv.className = "Device_inactive";
 
-            var ESC_ID_div = document.createElement('div');
-            ESC_ID_div.className = "esc_info_id";
-            ESC_ID_div.innerHTML = DEVICEs[i].id;
-            ESC_div.appendChild(ESC_ID_div);
+            var DeviceIdDiv = document.createElement('div');
+            DeviceIdDiv.className = "Device_Info_id";
+            DeviceIdDiv.innerHTML = DEVICEs[i].id;
+            DeviceDiv.appendChild(DeviceIdDiv);
 
-            var ESC_info_div = document.createElement('div');
-            ESC_info_div.className = "esc_info_div";
-            ESC_div.appendChild(ESC_info_div);
+            var DeviceInfoDiv = document.createElement('div');
+            DeviceInfoDiv.className = "Device_Info_div";
+            DeviceDiv.appendChild(DeviceInfoDiv);
 
-            var ESC_TypeDiv = document.createElement('div');
-            ESC_TypeDiv.className = "esc_info_type";
-            ESC_TypeDiv.innerHTML = DEVICE_types.find(x => x.id === DEVICEs[i].type).name;
-            ESC_info_div.appendChild(ESC_TypeDiv);
+            var DeviceTypeDiv = document.createElement('div');
+            DeviceTypeDiv.className = "Device_Info_type";
+            DeviceTypeDiv.innerHTML = DEVICE_types.find(x => x.id === DEVICEs[i].type).name;
+            DeviceInfoDiv.appendChild(DeviceTypeDiv);
 
-            var ESC_versionDiv = document.createElement('div');
-            ESC_versionDiv.className = "esc_info_version";
-            ESC_versionDiv.innerHTML = "FW. ver. : " + DEVICEs[i].version + "-" + DEVICEs[i].subversion;
-            ESC_info_div.appendChild(ESC_versionDiv);
+            var DeviceVersionDiv = document.createElement('div');
+            DeviceVersionDiv.className = "Device_Info_version";
+            DeviceVersionDiv.innerHTML = "FW. ver. : " + DEVICEs[i].version + "-" + DEVICEs[i].subversion;
+            DeviceInfoDiv.appendChild(DeviceVersionDiv);
 
-            var ESC_SNDiv = document.createElement('div');
-            ESC_SNDiv.className = "esc_info_sn";
-            ESC_SNDiv.innerHTML = "SN: ";
+            var DeviceSerialDiv = document.createElement('div');
+            DeviceSerialDiv.className = "Device_Info_sn";
+            DeviceSerialDiv.innerHTML = "SN: ";
             for (var y = 0; y < 12; y++)
-                ESC_SNDiv.innerHTML += dec2hex(DEVICEs[i].SN[y]) + " ";
-            ESC_info_div.appendChild(ESC_SNDiv);
+                DeviceSerialDiv.innerHTML += dec2hex(DEVICEs[i].SN[y]) + " ";
+            DeviceInfoDiv.appendChild(DeviceSerialDiv);
 
-            var ESC_selectDiv = document.createElement('div');
-            ESC_selectDiv.className = "esc_info_select";
-            ESC_info_div.appendChild(ESC_selectDiv);
+            var DeviceSelectDiv = document.createElement('div');
+            DeviceSelectDiv.className = "Device_Info_select";
+            DeviceInfoDiv.appendChild(DeviceSelectDiv);
 
-            DEVICEs[i].ESC_select_Input = document.createElement('input');
-            DEVICEs[i].ESC_select_Input.type = "checkbox";
-            DEVICEs[i].ESC_select_Input.id = "esc_select_id_" + i;
+            DEVICEs[i].Device_select_Input = document.createElement('input');
+            DEVICEs[i].Device_select_Input.type = "checkbox";
+            DEVICEs[i].Device_select_Input.id = "device_select_id_" + i;
             if (DEVICEs[i].selected)
-                DEVICEs[i].ESC_select_Input.checked = true;
-            else DEVICEs[i].ESC_select_Input.checked = false;
-            DEVICEs[i].ESC_select_Input.onclick = function () {
-                var ownId = this.id.replace(/esc_select_id_/, "");
-                var targetESC = DEVICEs[ownId];
-                var divContainer = document.getElementById("ESC_container_" + ownId);
-                if (!targetESC.selected) {
-                    targetESC.selected = true;
+                DEVICEs[i].Device_select_Input.checked = true;
+            else DEVICEs[i].Device_select_Input.checked = false;
+            DEVICEs[i].Device_select_Input.onclick = function () {
+                var ownId = this.id.replace(/device_select_id_/, "");
+                var targetDevice = DEVICEs[ownId];
+                var divContainer = document.getElementById("Device_container_" + ownId);
+                if (!targetDevice.selected) {
+                    targetDevice.selected = true;
                     this.checked = true;
-                    divContainer.className = "esc_active";
+                    divContainer.className = "Device_active";
                 } else {
-                    targetESC.selected = false;
+                    targetDevice.selected = false;
                     this.checked = false;
-                    divContainer.className = "esc_inactive";
+                    divContainer.className = "Device_inactive";
                 }
             }
 
             setting_Checkbox_label = document.createElement('label');
-            setting_Checkbox_label.htmlFor = "esc_select_id_" + i;
+            setting_Checkbox_label.htmlFor = "device_select_id_" + i;
             setting_Checkbox_label.className = "checklabel";
 
             checkmark_div = document.createElement('div');
@@ -1467,59 +1467,59 @@ function displayESCs(ParentElement) {
 
             setting_Checkbox_label.appendChild(checkmark_div);
 
-            ESC_selectDiv.appendChild(DEVICEs[i].ESC_select_Input);
-            ESC_selectDiv.appendChild(setting_Checkbox_label);
+            DeviceSelectDiv.appendChild(DEVICEs[i].Device_select_Input);
+            DeviceSelectDiv.appendChild(setting_Checkbox_label);
 
             DEVICEs[i].loadingBar = document.createElement('div');
-            DEVICEs[i].loadingBar.id = "esc_info_progress_bar_" + i;
-            ESC_div.appendChild(DEVICEs[i].loadingBar);
+            DEVICEs[i].loadingBar.id = "Device_Info_progress_bar_" + i;
+            DeviceDiv.appendChild(DEVICEs[i].loadingBar);
         } else if (selectedMenu == 1) {
             // ---------------------------------------------------------------------------------------------------// settings
-            // ESC_settings
+            // DeviceSettings
             if (DEVICE_types.find(x => x.id === DEVICEs[i].type).blOnly == true) break;
-            ESC_div.id = "ESC_container_" + i;
+            DeviceDiv.id = "Device_container_" + i;
 
-            ESC_div.className = "settings_container";
+            DeviceDiv.className = "settings_container";
 
-            var ESC_ID_div = document.createElement('div');
-            ESC_ID_div.className = "esc_info_id";
-            ESC_ID_div.innerHTML = DEVICEs[i].id;
-            ESC_div.appendChild(ESC_ID_div);
+            var DeviceIdDiv = document.createElement('div');
+            DeviceIdDiv.className = "Device_Info_id";
+            DeviceIdDiv.innerHTML = DEVICEs[i].id;
+            DeviceDiv.appendChild(DeviceIdDiv);
 
-            var ESC_info_div = document.createElement('div');
-            ESC_info_div.className = "esc_settings_div";
-            ESC_div.appendChild(ESC_info_div);
+            var DeviceInfoDiv = document.createElement('div');
+            DeviceInfoDiv.className = "Device_settings_div";
+            DeviceDiv.appendChild(DeviceInfoDiv);
 
-            for (var y in DEVICEs[i].ESC_settings) {
+            for (var y in DEVICEs[i].DeviceSettings) {
                 // Type decision
-                switch (DEVICEs[i].ESC_settings[y].type) {
+                switch (DEVICEs[i].DeviceSettings[y].type) {
                     case "checkbox":
-                        var ESC_setting = document.createElement('div');
-                        ESC_setting.className = "setting_container";
-                        if (DEVICEs[i].ESC_settings[y].eever > DEVICEs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
+                        var DeviceSetting = document.createElement('div');
+                        DeviceSetting.className = "setting_container";
+                        if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].active) DeviceSetting.style.display = "none";
 
-                        ESC_setting_text = document.createElement('div')
-                        ESC_setting_text.className = "setting_text";
+                        DeviceSettingText = document.createElement('div')
+                        DeviceSettingText.className = "setting_text";
 
-                        ESC_setting_text.innerHTML = DEVICEs[i].ESC_settings[y].name + " ";
+                        DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
 
-                        ESC_setting.appendChild(ESC_setting_text);
-                        ESC_info_div.appendChild(ESC_setting);
+                        DeviceSetting.appendChild(DeviceSettingText);
+                        DeviceInfoDiv.appendChild(DeviceSetting);
                         settingCheckbox = document.createElement('input');
                         settingCheckbox.type = "checkbox";
-                        settingCheckbox.id = DEVICEs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
+                        settingCheckbox.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
                         settingCheckbox.onchange = function () {
                             SettingsChanged(this.id);
                         }
-                        if (DEVICEs[i].ESC_settings[y].active) {
+                        if (DEVICEs[i].DeviceSettings[y].active) {
                             settingCheckbox.checked = true;
-                            ESC_setting.className += " setting_container_active";
+                            DeviceSetting.className += " setting_container_active";
                         } else {
-                            ESC_setting.className += " setting_container_inactive";
+                            DeviceSetting.className += " setting_container_inactive";
                         }
-                        ESC_setting.appendChild(settingCheckbox);
+                        DeviceSetting.appendChild(settingCheckbox);
                         setting_Checkbox_label = document.createElement('label');
-                        setting_Checkbox_label.htmlFor = DEVICEs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
+                        setting_Checkbox_label.htmlFor = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
                         setting_Checkbox_label.className = "checklabel";
 
                         checkmark_div = document.createElement('div');
@@ -1535,24 +1535,24 @@ function displayESCs(ParentElement) {
 
                         setting_Checkbox_label.appendChild(checkmark_div);
 
-                        ESC_setting.appendChild(setting_Checkbox_label);
+                        DeviceSetting.appendChild(setting_Checkbox_label);
                         break
                     case "slider":
-                        var ESC_setting = document.createElement('div');
-                        ESC_setting.className = "setting_container";
-                        if (DEVICEs[i].ESC_settings[y].eever > DEVICEs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
-                        ESC_setting_text = document.createElement('div')
-                        ESC_setting_text.className = "setting_text";
-                        ESC_setting_text.innerHTML = DEVICEs[i].ESC_settings[y].name + " ";
-                        ESC_setting.appendChild(ESC_setting_text);
-                        ESC_info_div.appendChild(ESC_setting);
+                        var DeviceSetting = document.createElement('div');
+                        DeviceSetting.className = "setting_container";
+                        if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].active) DeviceSetting.style.display = "none";
+                        DeviceSettingText = document.createElement('div')
+                        DeviceSettingText.className = "setting_text";
+                        DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
+                        DeviceSetting.appendChild(DeviceSettingText);
+                        DeviceInfoDiv.appendChild(DeviceSetting);
                         settingSlider = document.createElement('input');
                         settingSlider.type = "range";
-                        settingSlider.min = DEVICEs[i].ESC_settings[y].min
-                        settingSlider.max = DEVICEs[i].ESC_settings[y].max
+                        settingSlider.min = DEVICEs[i].DeviceSettings[y].min
+                        settingSlider.max = DEVICEs[i].DeviceSettings[y].max
                         settingSlider.className = "settings_rangeSlider"; //  ui-corner-all
-                        settingSlider.value = DEVICEs[i].ESC_settings[y].active;
-                        settingSlider.id = DEVICEs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
+                        settingSlider.value = DEVICEs[i].DeviceSettings[y].active;
+                        settingSlider.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
                         settingSlider.onchange = function () {
                             SettingsChanged(this.id);
                         }
@@ -1560,90 +1560,89 @@ function displayESCs(ParentElement) {
                             var tmpid = this.id.replace(/setting_id_/, "setting_id_value_")
                             document.getElementById(tmpid).value = document.getElementById(this.id).value
                         }
-                        ESC_setting.appendChild(settingSlider);
+                        DeviceSetting.appendChild(settingSlider);
                         settingNumber = document.createElement('output');
                         settingNumber.className = "setting_value";
                         settingNumber.type = "hidden"
-                        settingNumber.value = DEVICEs[i].ESC_settings[y].active;
-                        settingNumber.id = DEVICEs[i].ESC_settings[y].getCommand + "_setting_id_value_" + i;
-                        ESC_setting.appendChild(settingNumber);
+                        settingNumber.value = DEVICEs[i].DeviceSettings[y].active;
+                        settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_value_" + i;
+                        DeviceSetting.appendChild(settingNumber);
 
                         break
                     case "colorpick":
                         break
                     case "value":
-                        var ESC_setting = document.createElement('div');
-                        ESC_setting.className = "setting_container";
-                        if (DEVICEs[i].ESC_settings[y].eever > DEVICEs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
-                        ESC_setting_text = document.createElement('div')
-                        ESC_setting_text.className = "setting_text";
-                        ESC_setting_text.innerHTML = DEVICEs[i].ESC_settings[y].name + " ";
-                        ESC_setting.appendChild(ESC_setting_text);
-                        ESC_info_div.appendChild(ESC_setting);
+                        var DeviceSetting = document.createElement('div');
+                        DeviceSetting.className = "setting_container";
+                        if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].active) DeviceSetting.style.display = "none";
+                        DeviceSettingText = document.createElement('div')
+                        DeviceSettingText.className = "setting_text";
+                        DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
+                        DeviceSetting.appendChild(DeviceSettingText);
+                        DeviceInfoDiv.appendChild(DeviceSetting);
                         settingNumber = document.createElement('input');
                         settingNumber.type = "number";
-                        settingNumber.style.width = ((DEVICEs[i].ESC_settings[y].max.toString(10).length * 12) + 5) + "px";
+                        settingNumber.style.width = ((DEVICEs[i].DeviceSettings[y].max.toString(10).length * 12) + 5) + "px";
                         settingNumber.className = "settings_numberBox"; //  ui-corner-all
-                        settingNumber.value = DEVICEs[i].ESC_settings[y].active;
-                        settingNumber.id = DEVICEs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
+                        settingNumber.value = DEVICEs[i].DeviceSettings[y].active;
+                        settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
                         settingNumber.onchange = function () {
                             SettingsChanged(this.id);
                         }
-                        ESC_setting.appendChild(settingNumber);
+                        DeviceSetting.appendChild(settingNumber);
                         break
                     case "readonly":
-                        var ESC_setting = document.createElement('div');
-                        ESC_setting.className = "setting_container";
-                        //if (ESCs[i].ESC_settings[y].eever > ESCs[i].ESC_settings[0].active) ESC_setting.style.display = "none";
-                        ESC_setting.style.display = "none";
-                        ESC_setting_text = document.createElement('div')
-                        ESC_setting_text.className = "setting_text";
-                        ESC_setting_text.innerHTML = DEVICEs[i].ESC_settings[y].name + " ";
-                        ESC_setting.appendChild(ESC_setting_text);
-                        ESC_info_div.appendChild(ESC_setting);
+                        var DeviceSetting = document.createElement('div');
+                        DeviceSetting.className = "setting_container";
+                        DeviceSetting.style.display = "none";
+                        DeviceSettingText = document.createElement('div')
+                        DeviceSettingText.className = "setting_text";
+                        DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
+                        DeviceSetting.appendChild(DeviceSettingText);
+                        DeviceInfoDiv.appendChild(DeviceSetting);
                         settingNumber = document.createElement('input');
                         settingNumber.type = "number";
                         settingNumber.readOnly = true;
-                        settingNumber.style.width = ((DEVICEs[i].ESC_settings[y].max.toString(10).length * 12) + 20) + "px";
+                        settingNumber.style.width = ((DEVICEs[i].DeviceSettings[y].max.toString(10).length * 12) + 20) + "px";
                         settingNumber.className = "settings_numberBox"; //  ui-corner-all
-                        settingNumber.value = DEVICEs[i].ESC_settings[y].active;
-                        settingNumber.id = DEVICEs[i].ESC_settings[y].getCommand + "_setting_id_" + i;
-                        ESC_setting.appendChild(settingNumber);
+                        settingNumber.value = DEVICEs[i].DeviceSettings[y].active;
+                        settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
+                        DeviceSetting.appendChild(settingNumber);
                         break;
                     default:
                 }
             }
 
-            ESC_save_Input = document.createElement('input');
-            ESC_save_Input.type = "button";
-            ESC_save_Input.value = "Save";
-            ESC_save_Input.id = "esc_save_id_" + i;
-            ESC_save_Input.className = "settings_save_button_inactive ui-button";
-            ESC_save_Input.onclick = function () {
-                saveSettingsOfId(parseInt(this.id.replace(/esc_save_id_/, "")));
+            DeviceSaveInput = document.createElement('input');
+            DeviceSaveInput.type = "button";
+            DeviceSaveInput.value = "Save";
+            DeviceSaveInput.id = "device_save_id_" + i;
+            DeviceSaveInput.className = "settings_save_button_inactive ui-button";
+            DeviceSaveInput.onclick = function () {
+                saveSettingsOfId(parseInt(this.id.replace(/device_save_id_/, "")));
             }
-            ESC_div.appendChild(ESC_save_Input);
+            DeviceDiv.appendChild(DeviceSaveInput);
 
         } else if (selectedMenu == 2) {
             // ---------------------------------------------------------------------------------------------------// tools
             if (DEVICE_types.find(x => x.id === DEVICEs[i].type).blOnly == true) break;
-            ESC_div.id = "ESC_Canvas_Container_" + i;
+            DeviceDiv.id = "Device_Canvas_Container_" + i;
 
-            var ESC_ToolDiv = document.createElement('div');
-            ESC_ToolDiv.className = "canvas_header";
-            ESC_div.appendChild(ESC_ToolDiv);
+            var DeviceToolDiv = document.createElement('div');
+            DeviceToolDiv.className = "canvas_header";
+            DeviceDiv.appendChild(DeviceToolDiv);
 
-            var ESC_CommandDIV = document.createElement('div');
-            ESC_CommandDIV.className = "canvas_button_area";
+            var DeviceCommandDiv = document.createElement('div');
+            DeviceCommandDiv.className = "canvas_button_area";
 
-            ESC_ToolDiv.appendChild(ESC_CommandDIV);
+            DeviceToolDiv.appendChild(DeviceCommandDiv);
 
-            var ESC_Name = document.createElement('div');
-            ESC_Name.className = "canvas_esc_name";
-            ESC_Name.innerHTML = DEVICEs[i].id;
-            ESC_CommandDIV.appendChild(ESC_Name);
+            var DeviceName = document.createElement('div');
+            DeviceName.className = "canvas_Device_name";
+            DeviceName.innerHTML = DEVICEs[i].id;
+            DeviceCommandDiv.appendChild(DeviceName);
 
-            for (var setting in ESC_stats) {
+            for (var setting in TLM_Device_Stats) {
                 var NewSetting = document.createElement('button');
 
                 if (DEVICEs[i].settingsActive[setting]) {
@@ -1652,7 +1651,7 @@ function displayESCs(ParentElement) {
                     NewSetting.className = "button_inactive";
                 }
                 NewSetting.id = "SE_" + i + "_" + setting;
-                NewSetting.innerHTML = ESC_stats[setting];
+                NewSetting.innerHTML = TLM_Device_Stats[setting];
                 NewSetting.onclick = function () {
                     if (this.className == "button_inactive") {
                         CheckSetting(this.id.replace(/SE_/, ''), 1);
@@ -1662,20 +1661,20 @@ function displayESCs(ParentElement) {
                         this.className = "button_inactive";
                     }
                 }
-                ESC_CommandDIV.appendChild(NewSetting);
+                DeviceCommandDiv.appendChild(NewSetting);
             }
             var clearDiv = document.createElement('div');
             clearDiv.className = "clear";
-            ESC_CommandDIV.appendChild(clearDiv);
+            DeviceCommandDiv.appendChild(clearDiv);
 
             var TLMnameDiv = document.createElement('div');
             TLMnameDiv.className = "canvas_legend_area";
-            ESC_div.appendChild(TLMnameDiv);
+            DeviceDiv.appendChild(TLMnameDiv);
 
             for (var y = 0; y < 8; y++) {
                 var TLM_element = document.createElement('div');
                 TLM_element.className = "canvas_legend_text canvas_element_" + y;
-                TLM_element.innerHTML = ESC_stats[y] + " :"
+                TLM_element.innerHTML = TLM_Device_Stats[y] + " :"
                 TLMnameDiv.appendChild(TLM_element);
                 DEVICEs[i].TLMValueElements[y] = document.createElement('div');
                 DEVICEs[i].TLMValueElements[y].id = "canvas_legend_value_" + y;
@@ -1686,17 +1685,17 @@ function displayESCs(ParentElement) {
 
             DEVICEs[i].TLMCanvasElement = document.createElement('CANVAS');
             DEVICEs[i].TLMCanvasElement.className = "canvas_area"
-            ESC_div.appendChild(DEVICEs[i].TLMCanvasElement);
+            DeviceDiv.appendChild(DEVICEs[i].TLMCanvasElement);
 
 
             var clearDiv = document.createElement('div');
             clearDiv.className = "clear";
-            ESC_div.appendChild(clearDiv);
+            DeviceDiv.appendChild(clearDiv);
 
             // Throttle to start            
             var throttleContainerDiv = document.createElement('div');
             throttleContainerDiv.className = "throttle_bar_container";
-            ESC_div.appendChild(throttleContainerDiv);
+            DeviceDiv.appendChild(throttleContainerDiv);
 
 
             var Throttle_word_div = document.createElement('div');
@@ -1711,9 +1710,9 @@ function displayESCs(ParentElement) {
 
             throttleContainerDiv.appendChild(Throttle_word_div);
 
-            var ESC_ThrottleDiv = document.createElement('div');
-            ESC_ThrottleDiv.className = "throttle_bar_div";
-            throttleContainerDiv.appendChild(ESC_ThrottleDiv);
+            var DeviceThrottleDiv = document.createElement('div');
+            DeviceThrottleDiv.className = "throttle_bar_div";
+            throttleContainerDiv.appendChild(DeviceThrottleDiv);
 
             DEVICEs[i].ThrottleValue = document.createElement('input');
             DEVICEs[i].ThrottleValue.type = "range";
@@ -1721,10 +1720,10 @@ function displayESCs(ParentElement) {
             DEVICEs[i].ThrottleValue.className = "ThrottleSlider";
             DEVICEs[i].ThrottleValue.min = -100;
             DEVICEs[i].ThrottleValue.max = 100;
-            DEVICEs[i].ThrottleValue.id = "ESC_Thr_Value_" + i;
+            DEVICEs[i].ThrottleValue.id = "device_throttle_val_" + i;
             DEVICEs[i].ThrottleValue.addEventListener('input', function (evt) {
                 var tmpESCval = parseInt(this.valueAsNumber);
-                var tmpESCid = parseInt(this.id.replace(/ESC_Thr_Value_/, ''))
+                var tmpESCid = parseInt(this.id.replace(/device_throttle_val_/, ''))
                 if (DEVICEs[tmpESCid].settingsActive[8]) {
                     if (!DEVICEs[tmpESCid].settingsActive[9] && tmpESCval < 0) {
                         // reverse not active prevent negative values
@@ -1744,15 +1743,15 @@ function displayESCs(ParentElement) {
 
             })
             DEVICEs[i].ThrottleValue.addEventListener('dblclick', function (evt) {
-                var tmpESCid = parseInt(this.id.replace(/ESC_Thr_Value_/, ''))
+                var tmpESCid = parseInt(this.id.replace(/device_throttle_val_/, ''))
                 DEVICEs[tmpESCid].ThrottleValue.value = 0
                 DEVICEs[tmpESCid].commandedThrottle = 0
                 document.getElementById("throttle_id_value_text_" + tmpESCid).value = DEVICEs[tmpESCid].ThrottleValue.value + "%";
             })
 
-            ESC_ThrottleDiv.appendChild(DEVICEs[i].ThrottleValue);
+            DeviceThrottleDiv.appendChild(DEVICEs[i].ThrottleValue);
         }
-        ParentElement.appendChild(ESC_div);
+        ParentElement.appendChild(DeviceDiv);
     }
 }
 
@@ -1762,7 +1761,7 @@ function displayESCs(ParentElement) {
 function disableButtons() {
     Gen_Menu_Buttons(selectedMenu, true);
     for (var i in DEVICEs) {
-        DEVICEs[i].ESC_select_Input.disabled = true;
+        DEVICEs[i].Device_select_Input.disabled = true;
     }
     menuEnabled = 0;
     buttonsDisabled = 1;
@@ -1770,7 +1769,7 @@ function disableButtons() {
 function enableButtons() {
     Gen_Menu_Buttons(selectedMenu, false);
     for (var i in DEVICEs) {
-        DEVICEs[i].ESC_select_Input.disabled = false;
+        DEVICEs[i].Device_select_Input.disabled = false;
     }
     menuEnabled = 1;
     buttonsDisabled = 0;
@@ -1897,15 +1896,15 @@ function initFWUpdater() {
 function PrepareUpdate() {
     $.each(DEVICEs, function (index, device) {
         if (device !== undefined) {
-            var tmpContainer = document.getElementById("ESC_container_" + device.id);
-            var tmpcheckBox = document.getElementById("esc_select_id_" + device.id);
+            var tmpContainer = document.getElementById("Device_container_" + device.id);
+            var tmpcheckBox = document.getElementById("device_select_id_" + device.id);
             if ((FW_update.loadedFileName).startsWith(DEVICE_types.find(x => x.id === device.type).filename)) {
                 DEVICEs[device.id].selected = true
-                tmpContainer.className = "esc_active";
+                tmpContainer.className = "Device_active";
                 tmpcheckBox.checked = true
             } else {
                 DEVICEs[device.id].selected = false
-                tmpContainer.className = "esc_inactive";
+                tmpContainer.className = "Device_inactive";
                 tmpcheckBox.checked = false
             }
         }
@@ -1975,19 +1974,19 @@ function FlashProcessLoop() {
                 if (ActDeviceFlashStat == 0) {
                     if (DEBUG) console.log("Starting to flash DEVICE with ID: " + FlashDeviceId + "...");
                     if (!DEVICEs[FlashDeviceId].asBL) {
-                        send_ESC_package(FlashDeviceId, 0, [OW_RESET_TO_BL]);
+                        send_OneWire_package(FlashDeviceId, 0, [OW_RESET_TO_BL]);
                         if (DEBUG) console.log("reset DEVICE with ID: " + FlashDeviceId + " to bootloader");
                     }
                     ActDeviceFlashStat = 1;
                 } else {
-                    send_ESC_package(FlashDeviceId, 0, [OW_OK]);
+                    send_OneWire_package(FlashDeviceId, 0, [OW_OK]);
                     waitForResponseID = FlashDeviceId;
                     waitForResponseType = 0;
                     waitForResponseLength = 7;
                     if (DEBUG) console.log("check if DEVICE with ID: " + FlashDeviceId + " is in bootloader mode");
                 }
             } else if (ActDeviceFlashStat == 2) {
-                send_ESC_package(FlashDeviceId, 0, [OW_BL_PAGES_TO_FLASH, (FW_update.pagesCount & 0xFF), (FW_update.pagesCount >> 8)]);
+                send_OneWire_package(FlashDeviceId, 0, [OW_BL_PAGES_TO_FLASH, (FW_update.pagesCount & 0xFF), (FW_update.pagesCount >> 8)]);
                 ActDeviceFlashPage = FW_update.pagesCount;
                 waitForResponseID = FlashDeviceId;
                 waitForResponseType = 0;
@@ -1996,16 +1995,16 @@ function FlashProcessLoop() {
                 if (DEBUG) console.log("sent to DEVICE with ID: " + FlashDeviceId + " the block count that need to be flashed & erase flash command. ");
             } else if (ActDeviceFlashStat == 3) {
                 if (ActDeviceFlashPage > 0) {
-                    send_ESC_package(FlashDeviceId, ActDeviceFlashPage, FW_update.preparedPages[ActDeviceFlashPage - 1]);
+                    send_OneWire_package(FlashDeviceId, ActDeviceFlashPage, FW_update.preparedPages[ActDeviceFlashPage - 1]);
                     if (DEBUG) console.log("sent to DEVICE with ID: " + FlashDeviceId + " flash block number: " + ActDeviceFlashPage);
                     waitForResponseID = FlashDeviceId;
                     waitForResponseType = ActDeviceFlashPage;
                     waitForResponseLength = 134;
-                    $("#esc_info_progress_bar_" + FlashDeviceId).progressbar({
+                    $("#Device_Info_progress_bar_" + FlashDeviceId).progressbar({
                         value: Math.round((99 - (99 / FW_update.pagesCount * ActDeviceFlashPage)))
                     });
                 } else {
-                    $("#esc_info_progress_bar_" + FlashDeviceId).progressbar({
+                    $("#Device_Info_progress_bar_" + FlashDeviceId).progressbar({
                         value: 100
                     });
                     if (DEBUG) console.log("DEVICE with ID: " + FlashDeviceId + " update done");
@@ -2015,7 +2014,7 @@ function FlashProcessLoop() {
                     FlashDeviceId++;
                 }
             } else if (ActDeviceFlashStat == 4) {
-                send_ESC_package(FlashDeviceId, 0, [OW_BL_PAGE_CORRECT]);
+                send_OneWire_package(FlashDeviceId, 0, [OW_BL_PAGE_CORRECT]);
                 waitForResponseID = FlashDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
@@ -2033,7 +2032,7 @@ function FlashProcessLoop() {
                             ActDeviceFlashStat = 2;
                         } else {
                             if (DEBUG) console.log("DEVICE with ID: " + FlashDeviceId + " don't moves to bootloader!");
-                            send_ESC_package(FlashDeviceId, 0, [OW_RESET_TO_BL]);
+                            send_OneWire_package(FlashDeviceId, 0, [OW_RESET_TO_BL]);
                             if (DEBUG) console.log("reset DEVICE with ID: " + FlashDeviceId + " to bootloader");
                         }
                     } else if (ActDeviceFlashStat == 2) {
@@ -2102,7 +2101,7 @@ function FlashProcessLoop() {
                 if (DEBUG) console.log("no response, retrying");
 
             } else if (timeoutDeviceIDs[FlashDeviceId] > (DEFAULT_TIMEOUT * 3) + (800 * extraDelay)) {
-                send_ESC_package(FlashDeviceId, 0xFFFF, [FlashDeviceId + 10, FlashDeviceId + 20]);
+                send_OneWire_package(FlashDeviceId, 0xFFFF, [FlashDeviceId + 10, FlashDeviceId + 20]);
                 timeoutDeviceIDs[FlashDeviceId] = 0;
                 ActDeviceFlashStat = 2;
                 waitForResponseID = 0;
@@ -2342,13 +2341,13 @@ function ToolProcessLoop() {
             }
 
             if (checkESCsStat == 0) {
-                send_ESC_package(checkESCid, 0, [OW_OK]);
+                send_OneWire_package(checkESCid, 0, [OW_OK]);
                 waitForResponseID = checkESCid;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
                 if (DEBUG) console.log("check with id: " + checkESCid + " ");
             } else {
-                send_ESC_package(checkESCid, 0, [OW_SET_FAST_COM_LENGTH, (Math.ceil((12 + (((MaxDeviceId - MinDeviceId) + 1) * 11)) / 8) + 1), MinDeviceId, (MaxDeviceId - MinDeviceId) + 1]);
+                send_OneWire_package(checkESCid, 0, [OW_SET_FAST_COM_LENGTH, (Math.ceil((12 + (((MaxDeviceId - MinDeviceId) + 1) * 11)) / 8) + 1), MinDeviceId, (MaxDeviceId - MinDeviceId) + 1]);
                 waitForResponseID = checkESCid;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
@@ -2366,7 +2365,7 @@ function ToolProcessLoop() {
                         DEVICEs[checkESCid].asBL = true;
                         if (blProblem == 0) {
                             if (DEBUG) console.log("DEVICE with id: " + checkESCid + " remains in bootloader mode ->retry");
-                            send_ESC_package(checkESCid, 0, [OW_BL_START_FW]);
+                            send_OneWire_package(checkESCid, 0, [OW_BL_START_FW]);
                             blProblem = 1;
                         } else {
                             if (DEBUG) console.log("DEVICE with id: " + checkESCid + " remains in bootloader mode ->stop");
@@ -2486,19 +2485,19 @@ function colorFromCSSClass(className) {
 function initConfig() {
     change_ESCs_status(1);
     SettingsRead = 0;
-    read_ESC_ids = [];
-    read_ESC_settings = [];
+    readDeviceIDs = [];
+    readDeviceSettings = [];
     DeviceIdIndex = 0;
     DeviceSettingIndex = 0;
     checkESCsStat = 0;
-    for (var ESC_IDs in DEVICEs) {
-        if (DEVICE_types.find(x => x.id === DEVICEs[ESC_IDs].type).blOnly != true) {
-            read_ESC_ids.push(ESC_IDs);
-            timeoutDeviceIDs[ESC_IDs] = 0;
+    for (var IDs in DEVICEs) {
+        if (DEVICE_types.find(x => x.id === DEVICEs[IDs].type).blOnly != true) {
+            readDeviceIDs.push(IDs);
+            timeoutDeviceIDs[IDs] = 0;
         }
     }
-    for (var ESC_Settings in DEVICEs[read_ESC_ids[0]].ESC_settings) {
-        read_ESC_settings.push(ESC_Settings);
+    for (var Settings in DEVICEs[readDeviceIDs[0]].DeviceSettings) {
+        readDeviceSettings.push(Settings);
     }
 }
 
@@ -2508,74 +2507,74 @@ function ConfigLoop() {
     if (!SettingsRead) {
         if (waitForResponseID == 0) {
 
-            if (DeviceSettingIndex == read_ESC_settings.length) {
+            if (DeviceSettingIndex == readDeviceSettings.length) {
                 DeviceSettingIndex = 0;
                 DeviceIdIndex++;
                 checkESCsStat = 0;
             }
-            if (DeviceIdIndex == read_ESC_ids.length) {
+            if (DeviceIdIndex == readDeviceIDs.length) {
                 SettingsRead = 1;
                 document.getElementById("overview").innerHTML = "";
                 displayESCs(document.getElementById("overview"));
                 if (buttonsDisabled) enableButtons();
                 return;
             }
-            if ((DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].eever != 0 && DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].eever > DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[0].active) || DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].escTypes.indexOf(DEVICEs[read_ESC_ids[DeviceIdIndex]].type) == -1) {
+            if ((DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].eever != 0 && DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].eever > DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[0].active) || DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].escTypes.indexOf(DEVICEs[readDeviceIDs[DeviceIdIndex]].type) == -1) {
                 DeviceSettingIndex++;
                 checkESCsStat = 0;
                 return;
             }
             if (checkESCsStat == 0) {
-                send_ESC_package(read_ESC_ids[DeviceIdIndex], 0, [OW_OK]);
-                waitForResponseID = read_ESC_ids[DeviceIdIndex];
+                send_OneWire_package(readDeviceIDs[DeviceIdIndex], 0, [OW_OK]);
+                waitForResponseID = readDeviceIDs[DeviceIdIndex];
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("check with id: " + read_ESC_ids[DeviceIdIndex] + " ");
+                if (DEBUG) console.log("check with id: " + readDeviceIDs[DeviceIdIndex] + " ");
             } else {
-                send_ESC_package(read_ESC_ids[DeviceIdIndex], 0, [DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].getCommand]);
-                waitForResponseID = read_ESC_ids[DeviceIdIndex];
+                send_OneWire_package(readDeviceIDs[DeviceIdIndex], 0, [DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand]);
+                waitForResponseID = readDeviceIDs[DeviceIdIndex];
                 waitForResponseType = 0;
-                waitForResponseLength = 6 + DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount;
-                if (DEBUG) console.log("requesting Setting " + DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].name + " with command " + DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].getCommand + " from DEVICE with id: " + read_ESC_ids[DeviceIdIndex] + " ");
+                waitForResponseLength = 6 + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount;
+                if (DEBUG) console.log("requesting Setting " + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].name + " with command " + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand + " from DEVICE with id: " + readDeviceIDs[DeviceIdIndex] + " ");
             }
         } else {
             var responsePackage = checkForRespPackage();
             if (responsePackage) {
-                timeoutDeviceIDs[read_ESC_ids[DeviceIdIndex]] = 0;
+                timeoutDeviceIDs[readDeviceIDs[DeviceIdIndex]] = 0;
                 if (checkESCsStat == 0) {
                     if ((responsePackage[0] & 0x07) == OW_RESPONSE_IN_FW) {
-                        DEVICEs[read_ESC_ids[DeviceIdIndex]].asBL = false;
+                        DEVICEs[readDeviceIDs[DeviceIdIndex]].asBL = false;
                         checkESCsStat++;
                     } else {
-                        DEVICEs[read_ESC_ids[DeviceIdIndex]].asBL = true;
+                        DEVICEs[readDeviceIDs[DeviceIdIndex]].asBL = true;
                         if (blProblem == 0) {
-                            if (DEBUG) console.log("DEVICE with id: " + read_ESC_ids[DeviceIdIndex] + " remains in bootloader mode ->retry");
-                            send_ESC_package(read_ESC_ids[DeviceIdIndex], 0, [OW_BL_START_FW]);
+                            if (DEBUG) console.log("DEVICE with id: " + readDeviceIDs[DeviceIdIndex] + " remains in bootloader mode ->retry");
+                            send_OneWire_package(readDeviceIDs[DeviceIdIndex], 0, [OW_BL_START_FW]);
                             blProblem = 1;
                         } else {
-                            if (DEBUG) console.log("DEVICE with id: " + read_ESC_ids[DeviceIdIndex] + " remains in bootloader mode ->stop");
+                            if (DEBUG) console.log("DEVICE with id: " + readDeviceIDs[DeviceIdIndex] + " remains in bootloader mode ->stop");
                             throwSerialBadCommunicationError = 1;
                             checkESCid++;
                             blProblem = 0;
                         }
                     }
                 } else {
-                    if (DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 1) {
-                        DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].active = responsePackage[5];
-                    } else if (DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 2) {
-                        DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].active = (responsePackage[5] << 8) | responsePackage[6];
-                    } else if (DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 4) {
-                        DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].active = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
+                    if (DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 1) {
+                        DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active = responsePackage[5];
+                    } else if (DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 2) {
+                        DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active = (responsePackage[5] << 8) | responsePackage[6];
+                    } else if (DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 4) {
+                        DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
                     }
                     checkESCsStat = 0;
-                    if (DEBUG) console.log("Setting " + DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].name + " from DEVICE with id: " + read_ESC_ids[DeviceIdIndex] + " is " + DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].active + " bytecound: " + DEVICEs[read_ESC_ids[DeviceIdIndex]].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount);
+                    if (DEBUG) console.log("Setting " + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].name + " from DEVICE with id: " + readDeviceIDs[DeviceIdIndex] + " is " + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active + " bytecound: " + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount);
                     DeviceSettingIndex++;
                 }
-            } else if (++timeoutDeviceIDs[read_ESC_ids[DeviceIdIndex]] == DEFAULT_TIMEOUT || timeoutDeviceIDs[read_ESC_ids[DeviceIdIndex]] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[read_ESC_ids[DeviceIdIndex]] == DEFAULT_TIMEOUT * 3) {
+            } else if (++timeoutDeviceIDs[readDeviceIDs[DeviceIdIndex]] == DEFAULT_TIMEOUT || timeoutDeviceIDs[readDeviceIDs[DeviceIdIndex]] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[readDeviceIDs[DeviceIdIndex]] == DEFAULT_TIMEOUT * 3) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutDeviceIDs[read_ESC_ids[DeviceIdIndex]] > DEFAULT_TIMEOUT * 3) {
-                if (DEBUG) console.log("no response from DEVICE with id: " + read_ESC_ids[DeviceIdIndex] + " ->stop");
+            } else if (timeoutDeviceIDs[readDeviceIDs[DeviceIdIndex]] > DEFAULT_TIMEOUT * 3) {
+                if (DEBUG) console.log("no response from DEVICE with id: " + readDeviceIDs[DeviceIdIndex] + " ->stop");
                 throwSerialBadCommunicationError = 1;
                 waitForResponseID = 0;
                 checkESCsStat = 0;
@@ -2585,36 +2584,36 @@ function ConfigLoop() {
         // save settings
     } else if (saveNewSettingsToId) {
         if (waitForResponseID == 0) {
-            while (DeviceSettingIndex < read_ESC_settings.length && DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].changed == false) DeviceSettingIndex++;
-            if (DeviceSettingIndex >= read_ESC_settings.length) {
+            while (DeviceSettingIndex < readDeviceSettings.length && DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].changed == false) DeviceSettingIndex++;
+            if (DeviceSettingIndex >= readDeviceSettings.length) {
                 if (DEBUG) console.log("allChanges saved");
-                document.getElementById("esc_save_id_" + saveNewSettingsToId).className = "settings_save_button_inactive ui-button";
+                document.getElementById("device_save_id_" + saveNewSettingsToId).className = "settings_save_button_inactive ui-button";
                 saveNewSettingsToId = 0;
                 return;
             }
 
             if (checkESCsStat == 0) {
-                send_ESC_package(saveNewSettingsToId, 0, [DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].getCommand]);
+                send_OneWire_package(saveNewSettingsToId, 0, [DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand]);
                 waitForResponseID = saveNewSettingsToId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("GET Setting " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].name + " with command " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].getCommand + " from DEVICE with id: " + saveNewSettingsToId + " ");
+                if (DEBUG) console.log("GET Setting " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].name + " with command " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand + " from DEVICE with id: " + saveNewSettingsToId + " ");
             } else {
-                if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 1) {
-                    send_ESC_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].setCommand), newSettingsValues[read_ESC_settings[DeviceSettingIndex]]]);
-                } else if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 2) {
-                    send_ESC_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].setCommand), (newSettingsValues[read_ESC_settings[DeviceSettingIndex]] >> 8), (newSettingsValues[read_ESC_settings[DeviceSettingIndex]] & 0xFF)]);
-                } else if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 4) {
-                    send_ESC_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].setCommand), (newSettingsValues[read_ESC_settings[DeviceSettingIndex]] >> 24), (newSettingsValues[read_ESC_settings[DeviceSettingIndex]] >> 16) & 0xFF, (newSettingsValues[read_ESC_settings[DeviceSettingIndex]] >> 8) & 0xFF, (newSettingsValues[read_ESC_settings[DeviceSettingIndex]] & 0xFF)]);
+                if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 1) {
+                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].setCommand), newSettingsValues[readDeviceSettings[DeviceSettingIndex]]]);
+                } else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 2) {
+                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].setCommand), (newSettingsValues[readDeviceSettings[DeviceSettingIndex]] >> 8), (newSettingsValues[readDeviceSettings[DeviceSettingIndex]] & 0xFF)]);
+                } else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 4) {
+                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].setCommand), (newSettingsValues[readDeviceSettings[DeviceSettingIndex]] >> 24), (newSettingsValues[readDeviceSettings[DeviceSettingIndex]] >> 16) & 0xFF, (newSettingsValues[readDeviceSettings[DeviceSettingIndex]] >> 8) & 0xFF, (newSettingsValues[readDeviceSettings[DeviceSettingIndex]] & 0xFF)]);
                 }
-                if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].getCommand == OW_GET_ID) {
-                    waitForResponseID = newSettingsValues[read_ESC_settings[DeviceSettingIndex]];
+                if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand == OW_GET_ID) {
+                    waitForResponseID = newSettingsValues[readDeviceSettings[DeviceSettingIndex]];
                 } else {
                     waitForResponseID = saveNewSettingsToId;
                 }
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("SET Setting " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].name + " with command " + (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].getCommand + 1) + " to:" + newSettingsValues[read_ESC_settings[DeviceSettingIndex]] + " at DEVICE with id: " + saveNewSettingsToId + " ");
+                if (DEBUG) console.log("SET Setting " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].name + " with command " + (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand + 1) + " to:" + newSettingsValues[readDeviceSettings[DeviceSettingIndex]] + " at DEVICE with id: " + saveNewSettingsToId + " ");
             }
         } else {
             var responsePackage = checkForRespPackage();
@@ -2622,29 +2621,29 @@ function ConfigLoop() {
                 timeoutDeviceIDs[saveNewSettingsToId] = 0;
                 if (checkESCsStat == 0) {
                     var responsePayload = 0;
-                    if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 1) {
+                    if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 1) {
                         responsePayload = responsePackage[5];
-                    } else if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 2) {
+                    } else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 2) {
                         responsePayload = (responsePackage[5] << 8) | responsePackage[6];
                     }
-                    else if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].byteCount == 4) {
+                    else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 4) {
                         responsePayload = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
                     }
-                    if (responsePayload == DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].active) {
+                    if (responsePayload == DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active) {
                         if (DEBUG) console.log("GET response correct");
                         checkESCsStat++;
                     } else {
-                        if (DEBUG) console.log("SET response not correct (" + responsePayload + ") instead of (" + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].active + "). stop");
+                        if (DEBUG) console.log("SET response not correct (" + responsePayload + ") instead of (" + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active + "). stop");
                         throwSerialBadCommunicationError = 1;
                         DeviceSettingIndex++;
                     }
                     waitForResponseID = 0;
                 } else {
                     if (responsePackage[5] == OW_OK) {
-                        DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].changed = false;
-                        DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].active = newSettingsValues[read_ESC_settings[DeviceSettingIndex]];
+                        DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].changed = false;
+                        DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active = newSettingsValues[readDeviceSettings[DeviceSettingIndex]];
                         checkESCsStat = 0;
-                        if (DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].getCommand == OW_GET_ID) {
+                        if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand == OW_GET_ID) {
                             $("#dialog").text("OneWire ID was changed. GUI must reset! please connect again.");
                             $("#dialog").dialog({
                                 modal: true,
@@ -2657,10 +2656,10 @@ function ConfigLoop() {
                             disconnect();
                             return;
                         }
-                        if (DEBUG) console.log("saved setting: " + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].name);
+                        if (DEBUG) console.log("saved setting: " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].name);
                         DeviceSettingIndex++;
                     } else {
-                        if (DEBUG) console.log("error while saving..." + DEVICEs[saveNewSettingsToId].ESC_settings[read_ESC_settings[DeviceSettingIndex]].name);
+                        if (DEBUG) console.log("error while saving..." + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].name);
                         checkESCsStat = 0;
                         DeviceSettingIndex++;
                     }
@@ -2683,24 +2682,24 @@ function ConfigLoop() {
 function checkChangedSettings(ID) {
     var changedSettings = false;
     newSettingsValues = {};
-    for (var y in DEVICEs[ID].ESC_settings) {
-        if ((DEVICEs[ID].ESC_settings[y].min != 0 || DEVICEs[ID].ESC_settings[y].max != 0) && DEVICEs[ID].ESC_settings[y].escTypes.indexOf(DEVICEs[ID].type) != -1) {
-            if (DEVICEs[ID].ESC_settings[y].min == 0 && DEVICEs[ID].ESC_settings[y].max == 1) { // just active or inactive
-                if (document.getElementById(DEVICEs[ID].ESC_settings[y].getCommand + "_setting_id_" + ID).checked) {
+    for (var y in DEVICEs[ID].DeviceSettings) {
+        if ((DEVICEs[ID].DeviceSettings[y].min != 0 || DEVICEs[ID].DeviceSettings[y].max != 0) && DEVICEs[ID].DeviceSettings[y].escTypes.indexOf(DEVICEs[ID].type) != -1) {
+            if (DEVICEs[ID].DeviceSettings[y].min == 0 && DEVICEs[ID].DeviceSettings[y].max == 1) { // just active or inactive
+                if (document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID).checked) {
                     newSettingsValues[y] = 1;
-                    document.getElementById(DEVICEs[ID].ESC_settings[y].getCommand + "_setting_id_" + ID).parentElement.className = "setting_container setting_container_active";
+                    document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID).parentElement.className = "setting_container setting_container_active";
                 } else {
                     newSettingsValues[y] = 0;
-                    document.getElementById(DEVICEs[ID].ESC_settings[y].getCommand + "_setting_id_" + ID).parentElement.className = "setting_container setting_container_inactive";
+                    document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID).parentElement.className = "setting_container setting_container_inactive";
                 }
             } else { // value
-                newSettingsValues[y] = parseInt(document.getElementById(DEVICEs[ID].ESC_settings[y].getCommand + "_setting_id_" + ID).value);
-                if (newSettingsValues[y] > DEVICEs[ID].ESC_settings[y].max) newSettingsValues[y] = DEVICEs[ID].ESC_settings[y].max;
-                if (newSettingsValues[y] < DEVICEs[ID].ESC_settings[y].min) newSettingsValues[y] = DEVICEs[ID].ESC_settings[y].min;
-                document.getElementById(DEVICEs[ID].ESC_settings[y].getCommand + "_setting_id_" + ID).value = newSettingsValues[y];
+                newSettingsValues[y] = parseInt(document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID).value);
+                if (newSettingsValues[y] > DEVICEs[ID].DeviceSettings[y].max) newSettingsValues[y] = DEVICEs[ID].DeviceSettings[y].max;
+                if (newSettingsValues[y] < DEVICEs[ID].DeviceSettings[y].min) newSettingsValues[y] = DEVICEs[ID].DeviceSettings[y].min;
+                document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID).value = newSettingsValues[y];
             }
-            if (newSettingsValues[y] != DEVICEs[ID].ESC_settings[y].active) {
-                DEVICEs[ID].ESC_settings[y].changed = true;
+            if (newSettingsValues[y] != DEVICEs[ID].DeviceSettings[y].active) {
+                DEVICEs[ID].DeviceSettings[y].changed = true;
                 changedSettings = true;
             }
         }
@@ -2713,18 +2712,18 @@ function SettingsChanged(inputID) {
     var idString = inputID.split("_");
     var ID = parseInt(idString[idString.length - 1]);
     var changedSettings = checkChangedSettings(ID);
-    if (changedSettings) document.getElementById("esc_save_id_" + ID).className = "settings_save_button_active ui-button";
-    else document.getElementById("esc_save_id_" + ID).className = "settings_save_button_inactive ui-button";
+    if (changedSettings) document.getElementById("device_save_id_" + ID).className = "settings_save_button_active ui-button";
+    else document.getElementById("device_save_id_" + ID).className = "settings_save_button_inactive ui-button";
 }
 
 
 function saveSettingsOfId(ID) {
     //collect Settings-
     var changedSettings = checkChangedSettings(ID);
-    if (DEVICEs[ID].ESC_settings[99].changed) {
+    if (DEVICEs[ID].DeviceSettings[99].changed) {
         var ID_is_free = 1;
-        for (i = 0; i < read_ESC_ids.length; i++) {
-            if (newSettingsValues[99] == read_ESC_ids[i]) ID_is_free = 0;
+        for (i = 0; i < readDeviceIDs.length; i++) {
+            if (newSettingsValues[99] == readDeviceIDs[i]) ID_is_free = 0;
         }
         if (ID_is_free == 0) {
             $("#dialog").text("OneWire ID " + newSettingsValues[99] + " is already in use, please choose another one.");
@@ -2741,7 +2740,7 @@ function saveSettingsOfId(ID) {
     }
     DeviceSettingIndex = 0;
     checkESCsStat = 0;
-    for (var ESC_IDs in DEVICEs) timeoutDeviceIDs[ESC_IDs] = 0;
+    for (var IDs in DEVICEs) timeoutDeviceIDs[IDs] = 0;
     if (changedSettings) {
         saveNewSettingsToId = ID; // make the loop save the settings
     }

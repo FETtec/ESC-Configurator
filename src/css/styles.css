@@ -100,7 +100,7 @@ img {
     color: #FFF;
 }
 
-[id*='ESC_container_'] {
+[id*='Device_container_'] {
     border: 1px;
     border-style: solid;
     border-color: #c0c0c0;
@@ -113,13 +113,13 @@ img {
     overflow: auto;
 }
 
-[class*='esc_info_'] {
+[class*='Device_Info_'] {
     font-size: 14px;
     color: #050505;
     float: left;
 }
 
-.esc_info_id {
+.Device_Info_id {
     font-size: 18px;
     width: 10%;
     line-height: 50px;
@@ -132,7 +132,7 @@ img {
     color: #FFF;
 }
 
-.esc_info_div {
+.Device_Info_div {
     width: 90%;
     line-height: 50px;
     text-align: center;
@@ -142,24 +142,24 @@ img {
     float: left;
 }
 
-.esc_info_type {
+.Device_Info_type {
     width: 160px;
 }
 
-.esc_info_version {
+.Device_Info_version {
     width: 200px;
 }
 
-.esc_info_sn {
+.Device_Info_sn {
     width: 270px;
 }
 
-.esc_info_select {
+.Device_Info_select {
     width: 50px;
     padding-top: 10px;
 }
 
-[id*='esc_info_progress_bar'] {
+[id*='Device_Info_progress_bar'] {
     height: 10px;
     width: 90%;
     margin-left: 10.4%;
@@ -167,11 +167,11 @@ img {
     overflow: visible;
 }
 
-[id*='esc_info_progress_bar']>.ui-widget-header {
+[id*='Device_Info_progress_bar']>.ui-widget-header {
     background: #98e698;
 }
 
-[id*='ESC_Canvas_Container_'] {
+[id*='Device_Canvas_Container_'] {
     border: 1px;
     border-style: solid;
     border-color: #c0c0c0;
@@ -187,11 +187,11 @@ img {
     border-color: #E31121;
 }
 
-.esc_active {
+.Device_active {
     background-color: #F5F5F5;
 }
 
-.esc_inactive {
+.Device_inactive {
     background-color: #FDFDFD;
 }
 
@@ -228,7 +228,7 @@ img {
     color: #050505;
 }
 
-.canvas_esc_name {
+.canvas_Device_name {
     font-size: 14px;
     float: left;
     margin-left: -10px;
@@ -349,7 +349,7 @@ img {
     margin-right: 3px;
 }
 
-.esc_settings_div {
+.Device_settings_div {
     width: 80%;
     min-height: 50px;
     margin-left: 10px;
