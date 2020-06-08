@@ -8,38 +8,38 @@ var oldPortPath;
 // Begin functions
 
 
-    // Serial listener
-    chrome.serial.onReceive.addListener(function RX_data(DataIn) {
-        if (DataIn) {
-            if (DataIn.data.byteLength > 0) {
-                var data = new Uint8Array(DataIn.data);
-                if (DEBUG) console.log(data);
-                for (var i = 0; i < data.length; i++) {
-                    if (OneWire) {
-                        if (ignoreOwnBytesIndex > 0) {
-                            ignoreOwnBytesIndex--;
-                            continue;
-                        }
+// Serial listener
+chrome.serial.onReceive.addListener(function RX_data(DataIn) {
+    if (DataIn) {
+        if (DataIn.data.byteLength > 0) {
+            var data = new Uint8Array(DataIn.data);
+            if (DEBUG) console.log(data);
+            for (var i = 0; i < data.length; i++) {
+                if (OneWire) {
+                    if (ignoreOwnBytesIndex > 0) {
+                        ignoreOwnBytesIndex--;
+                        continue;
                     }
-                    SerialConnection.RXBuffer[SerialConnection.RX_head++] = data[i];
                 }
+                SerialConnection.RXBuffer[SerialConnection.RX_head++] = data[i];
             }
         }
-    });
+    }
+});
 
-    chrome.serial.onReceiveError.addListener(function check_receive_error(info) {
-        switch (info.error) {
-            case 'device_lost':
-                disconnect();
-                break;
-            case 'disconnected':
-                break;
-            default:
-                console.log(info.error)
-                break;
+chrome.serial.onReceiveError.addListener(function check_receive_error(info) {
+    switch (info.error) {
+        case 'device_lost':
+            disconnect();
+            break;
+        case 'disconnected':
+            break;
+        default:
+            console.log(info.error)
+            break;
 
-        }
-    });
+    }
+});
 
 function sendBytes(bytes, do_not_Ignore_Last_Byte = 0) {
     LastSentData = [];

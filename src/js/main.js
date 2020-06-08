@@ -149,23 +149,23 @@ function DEVICE() {
     this.TLMCanvasCTX;
     // end ESC specific settings
     this.DeviceSettings = {
-        0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "readonly", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, escTypes: onAllESCs }, // must always be 0
-        40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse rotation direction", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
-        41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
-        42: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, escTypes: onAllESCs },
-        43: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs },
-        44: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min. Signal", type: "slider", feature: "advanced", min: 1000, max: 1400, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
-        45: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max. Signal", type: "slider", feature: "advanced", min: 1600, max: 2000, active: 0, changed: false, eever: 17, byteCount: 2, escTypes: onAllESCs },
-        46: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
-        47: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, active: 0, changed: false, eever: 18, byteCount: 1, escTypes: onAllESCs },
-        48: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
-        49: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, escTypes: onAllESCs },
-        50: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, escTypes: onAllESCs },
-        51: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, escTypes: onAllESCs },
+        0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "readonly", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, DeviceTypes: onAllESCs }, // must always be 0
+        40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse rotation direction", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
+        41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
+        42: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, DeviceTypes: onAllESCs },
+        43: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
+        44: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min. Signal", type: "slider", feature: "advanced", min: 1000, max: 1400, active: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
+        45: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max. Signal", type: "slider", feature: "advanced", min: 1600, max: 2000, active: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
+        46: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
+        47: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, active: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
+        48: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
+        49: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
+        50: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, DeviceTypes: onAllESCs },
+        51: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, DeviceTypes: onAllESCs },
 
-        56: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, escTypes: onAllESCs },
+        56: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, DeviceTypes: onAllESCs },
 
-        99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, escTypes: onAllESCs } // must always be 99 and the last one
+        99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs } // must always be 99 and the last one
     };
 }
 
@@ -173,12 +173,16 @@ function DEVICE() {
 var onAllESCs = [];
 for (var i in DEVICE_types) onAllESCs.push(DEVICE_types[i].id);
 
-
+var ActDeviceFlashPage = 0;
+var ActDeviceFlashStat = 0;
+var activationActive = 0;
+var address_Counter = 0
+var afterFlashedDisplay = 0;
 
 var toolbar = 0;
 var OneWire = 0;
 
-var address_Counter = 0
+
 var throttleWarningDone = 0;
 var MaxDeviceId = 0;
 var MinDeviceId = 0;
@@ -186,9 +190,6 @@ var DEVICEsReady = 0;
 var DeviceActivateId = 0;
 var FlashDeviceId = 0;
 
-var ActDeviceFlashStat = 0;
-var ActDeviceFlashPage = 0;
-var afterFlashedDisplay = 0;
 var extraDelay = 1;
 var scanDone = 0;
 var DEVICEsDisplayed = 0;
@@ -197,7 +198,7 @@ var FW_updater_Init_Done = 0;
 var loopInterval = 0;
 var interval_Speedup_Done = 0;
 var selectedMenu = 0;
-var activationActive = 0;
+
 var DEVICEsToBL = 0;
 var menuEnabled = 1;
 
@@ -215,11 +216,49 @@ var buttonsDisabled = 0;
 var ConnectionType = KISS_PT;
 var PT_status = 0;
 
-var checkESCsStat = 0;
-var checkESCid = 0;
-var throwSerialBadCommunicationError = 0;
+var checkDEVICEsStats = 0;
+var checkDeviceId = 0;
+var serialBadError = 0;
+var switchDeviceId = 0;
+var expectedHeader = 0;
+var SwitchCommand = 0;
+var switchProblem = 0;
+var enableButtonsAfterSwitch = 0;
+var refreshVersion = 0;
+var SwitchStatus = 0;
+var waitLoops = 0;
 
-var newSettingsValues = {};
+var scanID = 1;
+var scanStep = 0;
+
+
+var wait_for_TLM = 0;
+var wait_for_TLM_loops = 0;
+var display_TLM = 0;
+var start_check = 0;
+
+var lastCRC = 0;
+var Throttle_Com_First_Byte = 0;
+var lastRequestedTLM = 0;
+
+var NewBaud = 0;
+var use_bit_rate = 2000000;
+
+var sentTestPackage = 0;
+var bytesCount = 1;
+var waitLoops = 0;
+var noLoop = 0;
+var communicationErrorWarningDone = 0;
+var do_not_Update_Progress_Bar = 0;
+var connection_attempts = 0;
+
+var waitForResponseID = 0;
+var waitForResponseType = 0;
+var waitForResponseLength = 0;
+
+var RespIndex = 0;
+var getLength = 5;
+var reconnectOnTxDone = 0;
 
 var DEVICEs = [];
 var readDeviceIDs = [];
@@ -228,6 +267,9 @@ var DevicePackage = [];
 var GraphArr = [];
 var timeoutDeviceIDs = [];
 var LastSentData = [];
+var RespBuf = [];
+
+var newSettingsValues = {};
 
 var SerialConnection = {
     connection: [],
@@ -342,7 +384,6 @@ onload = function () {
 }
 onclose = function () {
     chrome.serial.disconnect(connection.connectionId, function () { });
-
 }
 
 //===================================================================================== port handling
@@ -430,8 +471,6 @@ function Gen_Menu_Buttons(active_id, is_disabled) {
     }
 }
 
-var use_bit_rate = 2000000;
-
 function OpenPort(port) {
     UpdateSerialSection("connect");
     ConnectionType = parseInt(document.getElementById("con_type").value);
@@ -481,8 +520,6 @@ function OpenPort(port) {
     chrome.serial.connect(port, { bitrate: use_bit_rate, bufferSize: 200000, persistent: true }, onPortOpen);
 }
 
-var reconnectOnTxDone = 0;
-
 function onPortOpen(cInfo) {
     if (typeof cInfo !== 'undefined') {
         SerialConnection.connection = cInfo;
@@ -515,8 +552,6 @@ function onPortOpen(cInfo) {
     }
 }
 
-var NewBaud = 0;
-
 function changeBaud(changeBaud) {
     NewBaud = changeBaud;
     chrome.serial.update(SerialConnection.connection.connectionId, { bitrate: NewBaud }, Reconnect);
@@ -527,7 +562,6 @@ function Reconnect() {
     SerialConnection.pass_through = SerialConnection.Port;
     if (DEBUG) console.log("changed Baud to: " + NewBaud);
 }
-
 
 function disconnect() {
     selectedMenu = 0;
@@ -592,13 +626,7 @@ function disconnect() {
     $('#overview').empty();
     $('#toolbar').empty();
     Gen_Menu_Buttons(-1, true);
-
 }
-
-
-
-// New functions
-
 
 function OW_activate() {
     activationActive = 1;
@@ -677,7 +705,7 @@ function activationLoop() {
                         waitLoops = 20;
                     } else {
                         if (DEBUG) console.log("DEVICE with id: " + DeviceActivateId + " don't switches ->stop");
-                        throwSerialBadCommunicationError = 1;
+                        serialBadError = 1;
                         switchProblem = 0;
                     }
                 }
@@ -723,23 +751,14 @@ function activationLoop() {
             if (DEBUG) console.log("no response, retrying");
         } else if (timeoutDeviceIDs[DeviceActivateId] > DEFAULT_TIMEOUT * 3) {
             if (DEBUG) console.log("no response from DEVICE with id: " + DeviceActivateId + " ->stop");
-            throwSerialBadCommunicationError = 1;
+            serialBadError = 1;
             waitForResponseID = 0;
             DeviceActivateId++;
         }
     }
 }
 
-
 //===================================================================================== a slow loop to check com ports and stuff
-
-var sentTestPackage = 0;
-var bytesCount = 1;
-var waitLoops = 0;
-var noLoop = 0;
-var communicationErrorWarningDone = 0;
-var do_not_Update_Progress_Bar = 0;
-var connection_attempts = 0;
 
 function Internal_Loop() {
     if (noLoop) return;
@@ -748,7 +767,7 @@ function Internal_Loop() {
         return;
     }
 
-    if (throwSerialBadCommunicationError && communicationErrorWarningDone == 0) {
+    if (serialBadError && communicationErrorWarningDone == 0) {
         communicationErrorWarningDone = 1;
         if (DEBUG) console.log("Many serial comm errors");
         $("#dialog").text("Many serial communication errors occurred! Proper functionality cannot be granted.");
@@ -757,7 +776,7 @@ function Internal_Loop() {
             buttons: {
                 Ok: function () {
                     $(this).dialog("close");
-                    throwSerialBadCommunicationError = 0;
+                    serialBadError = 0;
                 }
             }
         });
@@ -872,7 +891,7 @@ function Internal_Loop() {
                                     if (DEBUG) console.log("passthrough active!");
                                     waitLoops = 5;
                                     PT_status = 3;
-                                    break;                                 
+                                    break;
                             }
                             noLoop = 0;
                         },
@@ -906,13 +925,13 @@ function Internal_Loop() {
             Gen_Menu_Buttons(selectedMenu, true);
             ScanForESCs();
         } else if (!DEVICEsDisplayed) {
-            displayESCs(document.getElementById("overview"));
+            displayDevices(document.getElementById("overview"));
             DEVICEsDisplayed = 1;
             // Enable Disconnect
             Gen_Menu_Buttons(selectedMenu, false);
         } else if (!FW_updater_Init_Done) {
             initFWUpdater();
-            change_ESCs_status(0, 1, 0);
+            change_Devices_status(0, 1, 0);
             FW_updater_Init_Done = 1;
         }
     }
@@ -937,17 +956,10 @@ function Internal_Loop() {
 }
 
 //===================================================================================== Switch from Bootloader to Firmware and back
-var SwitchESCsFW_ID = 0;
-var expectedHeader = 0;
-var SwitchCommand = 0;
-var switchProblem = 0;
-var enableButtonsAfterSwitch = 0;
-var refreshVersion = 0;
-var SwitchStatus = 0;
 
-function change_ESCs_status(stat, enableButtonsIfDone = 0, refreshVersionIfDone = 0) {
+function change_Devices_status(stat, enableButtonsIfDone = 0, refreshVersionIfDone = 0) {
     disableButtons();
-    SwitchESCsFW_ID = 0;
+    switchDeviceId = 0;
     switchProblem = 0;
     enableButtonsAfterSwitch = enableButtonsIfDone;
     refreshVersion = refreshVersionIfDone;
@@ -962,9 +974,7 @@ function change_ESCs_status(stat, enableButtonsIfDone = 0, refreshVersionIfDone 
     }
     SwitchStatus = 0;
     DEVICEsToBL = 1;
-
 }
-var waitLoops = 0;
 
 function check_ESCs_In_BL() {
     if (waitLoops > 0) {
@@ -974,13 +984,13 @@ function check_ESCs_In_BL() {
     if (reconnectOnTxDone != 0 && ConnectionType == VCP) return;
 
     if (waitForResponseID == 0) {
-        while ((!(SwitchESCsFW_ID in DEVICEs)) && SwitchESCsFW_ID < 25) SwitchESCsFW_ID++;
-        if (SwitchESCsFW_ID == 25) {
+        while ((!(switchDeviceId in DEVICEs)) && switchDeviceId < 25) switchDeviceId++;
+        if (switchDeviceId == 25) {
             DEVICEsToBL = 0;
             if (refreshVersion) {
                 refreshVersion = 0;
                 document.getElementById("overview").innerHTML = "";
-                displayESCs(document.getElementById("overview"));
+                displayDevices(document.getElementById("overview"));
             }
             if (enableButtonsAfterSwitch) {
                 enableButtons();
@@ -989,47 +999,47 @@ function check_ESCs_In_BL() {
             return;
         }
 
-        if ((DEVICE_types.find(x => x.id === DEVICEs[SwitchESCsFW_ID].type)).blOnly == true) {
+        if ((DEVICE_types.find(x => x.id === DEVICEs[switchDeviceId].type)).blOnly == true) {
             SwitchStatus = 0;
-            SwitchESCsFW_ID++;
+            switchDeviceId++;
             return;
         }
 
         if (SwitchStatus == 0) {
-            send_OneWire_package(SwitchESCsFW_ID, 0, [OW_OK]);
-            waitForResponseID = SwitchESCsFW_ID;
+            send_OneWire_package(switchDeviceId, 0, [OW_OK]);
+            waitForResponseID = switchDeviceId;
             waitForResponseType = 0;
             waitForResponseLength = 7;
-            if (DEBUG) console.log("check with id: " + SwitchESCsFW_ID + " ");
+            if (DEBUG) console.log("check with id: " + switchDeviceId + " ");
         } else {
             if (refreshVersion) {
-                send_OneWire_package(SwitchESCsFW_ID, 0, [OW_REQ_SW_VER]);
-                waitForResponseID = SwitchESCsFW_ID;
+                send_OneWire_package(switchDeviceId, 0, [OW_REQ_SW_VER]);
+                waitForResponseID = switchDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 8;
-                if (DEBUG) console.log("check FW version with id: " + SwitchESCsFW_ID + " ");
+                if (DEBUG) console.log("check FW version with id: " + switchDeviceId + " ");
             } else {
                 SwitchStatus = 0;
-                SwitchESCsFW_ID++;
+                switchDeviceId++;
             }
         }
     } else {
         var responsePackage = checkForRespPackage();
         if (responsePackage) {
-            timeoutDeviceIDs[SwitchESCsFW_ID] = 0;
+            timeoutDeviceIDs[switchDeviceId] = 0;
             if (SwitchStatus == 0) {
                 if (responsePackage[0] == expectedHeader) {
-                    if (expectedHeader == OW_RESPONSE_IN_BL) DEVICEs[SwitchESCsFW_ID].asBL = true;
-                    else DEVICEs[SwitchESCsFW_ID].asBL = false;
-                    if (DEBUG) console.log("DEVICE with id: " + SwitchESCsFW_ID + " is ready");
+                    if (expectedHeader == OW_RESPONSE_IN_BL) DEVICEs[switchDeviceId].asBL = true;
+                    else DEVICEs[switchDeviceId].asBL = false;
+                    if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " is ready");
                     SwitchStatus++;
                 } else {
-                    if (expectedHeader != OW_RESPONSE_IN_BL) DEVICEs[SwitchESCsFW_ID].asBL = false;
-                    else DEVICEs[SwitchESCsFW_ID].asBL = true;
+                    if (expectedHeader != OW_RESPONSE_IN_BL) DEVICEs[switchDeviceId].asBL = false;
+                    else DEVICEs[switchDeviceId].asBL = true;
                     if (switchProblem == 0) {
-                        if (DEVICE_types.find(x => x.id === DEVICEs[SwitchESCsFW_ID].type).blOnly == true) return
-                        if (DEBUG) console.log("switching DEVICE with id: " + SwitchESCsFW_ID);
-                        send_OneWire_package(SwitchESCsFW_ID, 0, [SwitchCommand]);
+                        if (DEVICE_types.find(x => x.id === DEVICEs[switchDeviceId].type).blOnly == true) return
+                        if (DEBUG) console.log("switching DEVICE with id: " + switchDeviceId);
+                        send_OneWire_package(switchDeviceId, 0, [SwitchCommand]);
                         if (ConnectionType == VCP) {
                             if (DEBUG) console.log("starting reconnect procedure 1");
                             ReconnectOnSend(0);
@@ -1037,42 +1047,38 @@ function check_ESCs_In_BL() {
                         switchProblem++;
                         waitLoops = 20;
                     } else if (switchProblem < 20) {
-                        if (DEBUG) console.log("DEVICE with id: " + SwitchESCsFW_ID + " don't switches ->retry");
-                        send_OneWire_package(SwitchESCsFW_ID, 0, [SwitchCommand]);
+                        if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " don't switches ->retry");
+                        send_OneWire_package(switchDeviceId, 0, [SwitchCommand]);
                         switchProblem++;
                         waitLoops = 20;
                     } else {
-                        if (DEBUG) console.log("DEVICE with id: " + SwitchESCsFW_ID + " don't switches ->stop");
-                        throwSerialBadCommunicationError = 1;
-                        SwitchESCsFW_ID++;
+                        if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " don't switches ->stop");
+                        serialBadError = 1;
+                        switchDeviceId++;
                         switchProblem = 0;
                     }
                 }
             } else {
-                DEVICEs[SwitchESCsFW_ID].version = (responsePackage[5] / 10);
-                DEVICEs[SwitchESCsFW_ID].subversion = (responsePackage[6] / 100);
-                if (DEBUG) console.log("DEVICE with id: " + SwitchESCsFW_ID + " software version is: " + DEVICEs[SwitchESCsFW_ID].version + "." + DEVICEs[SwitchESCsFW_ID].subversion);
+                DEVICEs[switchDeviceId].version = (responsePackage[5] / 10);
+                DEVICEs[switchDeviceId].subversion = (responsePackage[6] / 100);
+                if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " software version is: " + DEVICEs[switchDeviceId].version + "." + DEVICEs[switchDeviceId].subversion);
                 SwitchStatus = 0;
-                SwitchESCsFW_ID++;
+                switchDeviceId++;
             }
-        } else if (++timeoutDeviceIDs[SwitchESCsFW_ID] == DEFAULT_TIMEOUT || timeoutDeviceIDs[SwitchESCsFW_ID] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[SwitchESCsFW_ID] == DEFAULT_TIMEOUT * 3) {
+        } else if (++timeoutDeviceIDs[switchDeviceId] == DEFAULT_TIMEOUT || timeoutDeviceIDs[switchDeviceId] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[switchDeviceId] == DEFAULT_TIMEOUT * 3) {
             sendBytes(LastSentData);
             if (DEBUG) console.log("no response, retrying");
-        } else if (timeoutDeviceIDs[SwitchESCsFW_ID] > DEFAULT_TIMEOUT * 3) {
-            if (DEBUG) console.log("no response from DEVICE with id: " + SwitchESCsFW_ID + " ->stop");
-            throwSerialBadCommunicationError = 1;
+        } else if (timeoutDeviceIDs[switchDeviceId] > DEFAULT_TIMEOUT * 3) {
+            if (DEBUG) console.log("no response from DEVICE with id: " + switchDeviceId + " ->stop");
+            serialBadError = 1;
             waitForResponseID = 0;
-            SwitchESCsFW_ID++;
+            switchDeviceId++;
         }
     }
 }
 
-
 function refresh_displayed_version() {
-
 }
-
-
 
 //===================================================================================== Display handling
 
@@ -1158,12 +1164,12 @@ function ChangeDisplay(displayType) {
         if (displayType == 0) document.getElementById('toolbar').style.display = "block";
         else document.getElementById('toolbar').style.display = "none";
 
-        displayESCs(document.getElementById("overview"));
+        displayDevices(document.getElementById("overview"));
 
         switch (displayType) {
             case 0:
                 initFWUpdater();
-                change_ESCs_status(0, 1, 0);
+                change_Devices_status(0, 1, 0);
                 break;
             case 1:
                 initConfig();
@@ -1177,13 +1183,6 @@ function ChangeDisplay(displayType) {
 }
 
 //===================================================================================== DEVICE communication
-
-var waitForResponseID = 0;
-var waitForResponseType = 0;
-var waitForResponseLength = 0;
-var RespBuf = [];
-var RespIndex = 0;
-var getLength = 5;
 
 function checkForRespPackage() {
     var responsePackage = [];
@@ -1221,9 +1220,6 @@ function checkForRespPackage() {
     }
     else return false;
 }
-
-var scanID = 1;
-var scanStep = 0;
 
 function ScanForESCs() {
     var current_progress = Math.round(100 / 24 * scanID);
@@ -1345,7 +1341,7 @@ function ScanForESCs() {
 
 //===================================================================================== Display ESC's
 
-function displayESCs(ParentElement) {
+function displayDevices(ParentElement) {
     for (var i in DEVICEs) {
         var DeviceDiv = document.createElement('div');
         Gen_Menu_Buttons(selectedMenu, false);
@@ -1679,31 +1675,31 @@ function displayESCs(ParentElement) {
             DEVICEs[i].ThrottleValue.max = 100;
             DEVICEs[i].ThrottleValue.id = "device_throttle_val_" + i;
             DEVICEs[i].ThrottleValue.addEventListener('input', function (evt) {
-                var tmpESCval = parseInt(this.valueAsNumber);
-                var tmpESCid = parseInt(this.id.replace(/device_throttle_val_/, ''))
-                if (DEVICEs[tmpESCid].settingsActive[8]) {
-                    if (!DEVICEs[tmpESCid].settingsActive[9] && tmpESCval < 0) {
+                var tmpDeviceVal = parseInt(this.valueAsNumber);
+                var tmpDeviceId = parseInt(this.id.replace(/device_throttle_val_/, ''))
+                if (DEVICEs[tmpDeviceId].settingsActive[8]) {
+                    if (!DEVICEs[tmpDeviceId].settingsActive[9] && tmpDeviceVal < 0) {
                         // reverse not active prevent negative values
-                        DEVICEs[tmpESCid].ThrottleValue.value = 0
-                        DEVICEs[tmpESCid].commandedThrottle = 0
-                        flash_button("SE_" + tmpESCid + "_9");
+                        DEVICEs[tmpDeviceId].ThrottleValue.value = 0
+                        DEVICEs[tmpDeviceId].commandedThrottle = 0
+                        flash_button("SE_" + tmpDeviceId + "_9");
                     } else {
                         // update throttle value
-                        DEVICEs[tmpESCid].commandedThrottle = tmpESCval;
+                        DEVICEs[tmpDeviceId].commandedThrottle = tmpDeviceVal;
                     }
                 } else {
                     // DEVICE not enabled
-                    DEVICEs[tmpESCid].ThrottleValue.value = 0
-                    flash_button("SE_" + tmpESCid + "_8");
+                    DEVICEs[tmpDeviceId].ThrottleValue.value = 0
+                    flash_button("SE_" + tmpDeviceId + "_8");
                 }
-                document.getElementById("throttle_id_value_text_" + tmpESCid).value = DEVICEs[tmpESCid].ThrottleValue.value + "%";
+                document.getElementById("throttle_id_value_text_" + tmpDeviceId).value = DEVICEs[tmpDeviceId].ThrottleValue.value + "%";
 
             })
             DEVICEs[i].ThrottleValue.addEventListener('dblclick', function (evt) {
-                var tmpESCid = parseInt(this.id.replace(/device_throttle_val_/, ''))
-                DEVICEs[tmpESCid].ThrottleValue.value = 0
-                DEVICEs[tmpESCid].commandedThrottle = 0
-                document.getElementById("throttle_id_value_text_" + tmpESCid).value = DEVICEs[tmpESCid].ThrottleValue.value + "%";
+                var tmpDeviceId = parseInt(this.id.replace(/device_throttle_val_/, ''))
+                DEVICEs[tmpDeviceId].ThrottleValue.value = 0
+                DEVICEs[tmpDeviceId].commandedThrottle = 0
+                document.getElementById("throttle_id_value_text_" + tmpDeviceId).value = DEVICEs[tmpDeviceId].ThrottleValue.value + "%";
             })
 
             DeviceThrottleDiv.appendChild(DEVICEs[i].ThrottleValue);
@@ -1711,9 +1707,6 @@ function displayESCs(ParentElement) {
         ParentElement.appendChild(DeviceDiv);
     }
 }
-
-
-
 
 function disableButtons() {
     Gen_Menu_Buttons(selectedMenu, true);
@@ -1758,7 +1751,6 @@ function initFWUpdater() {
             return function (e) {
                 FW_update.hexString = e.target.result;
                 parseHexFile(FW_update.hexString);
-
                 PrepareUpdate();
                 $("#remoteFWSelect").remove()
             };
@@ -1909,8 +1901,6 @@ function PrepareUpdate() {
 
 }
 
-
-
 function StartFlashProcess() {
     if (FW_update.FlashProcessActive == 0) {
         FW_update.fileUploadInput.disabled = true;
@@ -2034,10 +2024,9 @@ function FlashProcessLoop() {
                                     buttons: {
                                         Ok: function () {
                                             $(this).dialog("close");
-
                                             FW_update.fileUploadInput.disabled = false;
                                             FW_update.startUpdateInput.disabled = false;
-                                            change_ESCs_status(0, 1, 1);
+                                            change_Devices_status(0, 1, 1);
                                             $('#toolbar').empty();
                                             initFWUpdater(); //lets reset the
                                         }
@@ -2045,7 +2034,6 @@ function FlashProcessLoop() {
                                 });
 
                             }
-
                             timeoutDeviceIDs[FlashDeviceId] = 0;
                             ActDeviceFlashStat = 2;
                             waitForResponseID = 0;
@@ -2056,21 +2044,18 @@ function FlashProcessLoop() {
             } else if (++timeoutDeviceIDs[FlashDeviceId] == DEFAULT_TIMEOUT + (350 * extraDelay) || timeoutDeviceIDs[FlashDeviceId] == (DEFAULT_TIMEOUT * 2) + (500 * extraDelay) || timeoutDeviceIDs[FlashDeviceId] == (DEFAULT_TIMEOUT * 3) + (650 * extraDelay)) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-
             } else if (timeoutDeviceIDs[FlashDeviceId] > (DEFAULT_TIMEOUT * 3) + (800 * extraDelay)) {
                 send_OneWire_package(FlashDeviceId, 0xFFFF, [FlashDeviceId + 10, FlashDeviceId + 20]);
                 timeoutDeviceIDs[FlashDeviceId] = 0;
                 ActDeviceFlashStat = 2;
                 waitForResponseID = 0;
                 if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + FlashDeviceId);
-
             }
         }
     } else {
         if (afterFlashedDisplay == 0) {
             if (is_USB_only_bootloader == 0) {
-                change_ESCs_status(1);
-
+                change_Devices_status(1);
             } else {
                 $("#dialog").text("Firmware update done! Please power cycle board.");
                 $("#dialog").dialog({
@@ -2087,7 +2072,7 @@ function FlashProcessLoop() {
             afterFlashedDisplay = 1;
         } else if (afterFlashedDisplay < 50) afterFlashedDisplay++;
         else if (afterFlashedDisplay == 50) {
-            if (is_USB_only_bootloader == 0) change_ESCs_status(0);
+            if (is_USB_only_bootloader == 0) change_Devices_status(0);
             afterFlashedDisplay = 51;
         } else if (afterFlashedDisplay == 51) {
             if (DEBUG) console.log('flash process done!');
@@ -2104,22 +2089,20 @@ function FlashProcessLoop() {
             FW_update.FlashProcessActive = 0;
             FW_update.fileUploadInput.disabled = false;
             FW_update.startUpdateInput.disabled = false;
-            if (is_USB_only_bootloader == 0) change_ESCs_status(0, 1, 1);
+            if (is_USB_only_bootloader == 0) change_Devices_status(0, 1, 1);
             $('#toolbar').empty();
             initFWUpdater(); //lets reset the
         }
     }
 }
 
-
 //===================================================================================== Tools
-
 
 function initTools() {
     throttleWarningDone = 0;
     DEVICEsReady = 0;
-    checkESCsStat = 0;
-    checkESCid = 0;
+    checkDEVICEsStats = 0;
+    checkDeviceId = 0;
 
     // get max OneWire ID
     MaxDeviceId = 0;
@@ -2139,16 +2122,12 @@ function initTools() {
             }
         }
     }
-    change_ESCs_status(1);
+    change_Devices_status(1);
 }
-var lastCRC = 0;
-var Throttle_Com_First_Byte = 0;
-var lastRequestedTLM = 0;
 
 function sentFastThrottleSignal() {
     var throttle_Values = [];
     var throttleCommand = [];
-
     for (var i in DEVICEs) {
         if (DEVICEs[i].readyForFastCommand == true) {
             throttle_Values[i - 1] = (100 + DEVICEs[i].commandedThrottle) * 10;
@@ -2156,14 +2135,12 @@ function sentFastThrottleSignal() {
             throttle_Values[i - 1] = 1000;
         }
     }
-
     var startIndex = MinDeviceId - 1;
 
     throttleCommand[0] = 128 | (lastRequestedTLM << 4);
     throttleCommand[0] |= ((throttle_Values[startIndex] >> 10) & 0x01) << 3;
     throttleCommand[0] |= 0x01;
     Throttle_Com_First_Byte = throttleCommand[0];
-
     throttleCommand[1] = (((throttle_Values[startIndex] >> 7) & 0x07)) << 5;
     throttleCommand[1] |= ALL_ID;
 
@@ -2200,12 +2177,6 @@ function sentFastThrottleSignal() {
     throttleCommand[commandLength] = lastCRC;
     sendBytes(throttleCommand, 1);
 }
-
-
-var wait_for_TLM = 0;
-var wait_for_TLM_loops = 0;
-var display_TLM = 0;
-var start_check = 0;
 
 function ToolProcessLoop() {
     var blProblem = 0;
@@ -2286,67 +2257,67 @@ function ToolProcessLoop() {
         }
     } else { // prepare ESC's for fast Command
         if (waitForResponseID == 0) {
-            while ((!(checkESCid in DEVICEs)) && checkESCid < 25) checkESCid++;
+            while ((!(checkDeviceId in DEVICEs)) && checkDeviceId < 25) checkDeviceId++;
 
-            if (checkESCid == 25) {
+            if (checkDeviceId == 25) {
                 DEVICEsReady = 1;
                 return;
             }
-            if (DEVICE_types.find(x => x.id === DEVICEs[checkESCid].type).blOnly == true) {
-                checkESCid++;
+            if (DEVICE_types.find(x => x.id === DEVICEs[checkDeviceId].type).blOnly == true) {
+                checkDeviceId++;
                 return;
             }
 
-            if (checkESCsStat == 0) {
-                send_OneWire_package(checkESCid, 0, [OW_OK]);
-                waitForResponseID = checkESCid;
+            if (checkDEVICEsStats == 0) {
+                send_OneWire_package(checkDeviceId, 0, [OW_OK]);
+                waitForResponseID = checkDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("check with id: " + checkESCid + " ");
+                if (DEBUG) console.log("check with id: " + checkDeviceId + " ");
             } else {
-                send_OneWire_package(checkESCid, 0, [OW_SET_FAST_COM_LENGTH, (Math.ceil((12 + (((MaxDeviceId - MinDeviceId) + 1) * 11)) / 8) + 1), MinDeviceId, (MaxDeviceId - MinDeviceId) + 1]);
-                waitForResponseID = checkESCid;
+                send_OneWire_package(checkDeviceId, 0, [OW_SET_FAST_COM_LENGTH, (Math.ceil((12 + (((MaxDeviceId - MinDeviceId) + 1) * 11)) / 8) + 1), MinDeviceId, (MaxDeviceId - MinDeviceId) + 1]);
+                waitForResponseID = checkDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("set fast throttle for DEVICE with id: " + checkESCid + " ");
+                if (DEBUG) console.log("set fast throttle for DEVICE with id: " + checkDeviceId + " ");
             }
         } else {
             var responsePackage = checkForRespPackage();
             if (responsePackage) {
-                timeoutDeviceIDs[checkESCid] = 0;
-                if (checkESCsStat == 0) {
+                timeoutDeviceIDs[checkDeviceId] = 0;
+                if (checkDEVICEsStats == 0) {
                     if ((responsePackage[0] & 0x07) == OW_RESPONSE_IN_FW) {
-                        DEVICEs[checkESCid].asBL = false;
-                        checkESCsStat++;
+                        DEVICEs[checkDeviceId].asBL = false;
+                        checkDEVICEsStats++;
                     } else {
-                        DEVICEs[checkESCid].asBL = true;
+                        DEVICEs[checkDeviceId].asBL = true;
                         if (blProblem == 0) {
-                            if (DEBUG) console.log("DEVICE with id: " + checkESCid + " remains in bootloader mode ->retry");
-                            send_OneWire_package(checkESCid, 0, [OW_BL_START_FW]);
+                            if (DEBUG) console.log("DEVICE with id: " + checkDeviceId + " remains in bootloader mode ->retry");
+                            send_OneWire_package(checkDeviceId, 0, [OW_BL_START_FW]);
                             blProblem = 1;
                         } else {
-                            if (DEBUG) console.log("DEVICE with id: " + checkESCid + " remains in bootloader mode ->stop");
-                            throwSerialBadCommunicationError = 1;
-                            checkESCid++;
+                            if (DEBUG) console.log("DEVICE with id: " + checkDeviceId + " remains in bootloader mode ->stop");
+                            serialBadError = 1;
+                            checkDeviceId++;
                             blProblem = 0;
                         }
                     }
                 } else {
                     if (responsePackage[5] == OW_OK) {
-                        DEVICEs[checkESCid].readyForFastCommand = true;
-                        checkESCsStat = 0;
-                        checkESCid++;
+                        DEVICEs[checkDeviceId].readyForFastCommand = true;
+                        checkDEVICEsStats = 0;
+                        checkDeviceId++;
                     }
                 }
-            } else if (++timeoutDeviceIDs[checkESCid] == DEFAULT_TIMEOUT || timeoutDeviceIDs[checkESCid] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[checkESCid] == DEFAULT_TIMEOUT * 3) {
+            } else if (++timeoutDeviceIDs[checkDeviceId] == DEFAULT_TIMEOUT || timeoutDeviceIDs[checkDeviceId] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[checkDeviceId] == DEFAULT_TIMEOUT * 3) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutDeviceIDs[checkESCid] > DEFAULT_TIMEOUT * 3) {
-                if (DEBUG) console.log("no response from DEVICE with id: " + checkESCid + " ->stop");
-                throwSerialBadCommunicationError = 1;
+            } else if (timeoutDeviceIDs[checkDeviceId] > DEFAULT_TIMEOUT * 3) {
+                if (DEBUG) console.log("no response from DEVICE with id: " + checkDeviceId + " ->stop");
+                serialBadError = 1;
                 waitForResponseID = 0;
-                checkESCsStat = 0;
-                checkESCid++;
+                checkDEVICEsStats = 0;
+                checkDeviceId++;
             }
         }
     }
@@ -2378,9 +2349,6 @@ function displayTLMValues(tlmVal) {
         }
     }
 }
-
-
-
 
 function CheckSetting(settingID, active) {
     var settingIDs = settingID.split("_");
@@ -2437,16 +2405,14 @@ function colorFromCSSClass(className) {
 
 //===================================================================================== ConfigurationLoop
 
-
-
 function initConfig() {
-    change_ESCs_status(1);
+    change_Devices_status(1);
     SettingsRead = 0;
     readDeviceIDs = [];
     readDeviceSettings = [];
     DeviceIdIndex = 0;
     DeviceSettingIndex = 0;
-    checkESCsStat = 0;
+    checkDEVICEsStats = 0;
     for (var IDs in DEVICEs) {
         if (DEVICE_types.find(x => x.id === DEVICEs[IDs].type).blOnly != true) {
             readDeviceIDs.push(IDs);
@@ -2458,7 +2424,6 @@ function initConfig() {
     }
 }
 
-
 function ConfigLoop() {
     var blProblem = 0;
     if (!SettingsRead) {
@@ -2467,21 +2432,21 @@ function ConfigLoop() {
             if (DeviceSettingIndex == readDeviceSettings.length) {
                 DeviceSettingIndex = 0;
                 DeviceIdIndex++;
-                checkESCsStat = 0;
+                checkDEVICEsStats = 0;
             }
             if (DeviceIdIndex == readDeviceIDs.length) {
                 SettingsRead = 1;
                 document.getElementById("overview").innerHTML = "";
-                displayESCs(document.getElementById("overview"));
+                displayDevices(document.getElementById("overview"));
                 if (buttonsDisabled) enableButtons();
                 return;
             }
-            if ((DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].eever != 0 && DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].eever > DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[0].active) || DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].escTypes.indexOf(DEVICEs[readDeviceIDs[DeviceIdIndex]].type) == -1) {
+            if ((DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].eever != 0 && DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].eever > DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[0].active) || DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].DeviceTypes.indexOf(DEVICEs[readDeviceIDs[DeviceIdIndex]].type) == -1) {
                 DeviceSettingIndex++;
-                checkESCsStat = 0;
+                checkDEVICEsStats = 0;
                 return;
             }
-            if (checkESCsStat == 0) {
+            if (checkDEVICEsStats == 0) {
                 send_OneWire_package(readDeviceIDs[DeviceIdIndex], 0, [OW_OK]);
                 waitForResponseID = readDeviceIDs[DeviceIdIndex];
                 waitForResponseType = 0;
@@ -2498,10 +2463,10 @@ function ConfigLoop() {
             var responsePackage = checkForRespPackage();
             if (responsePackage) {
                 timeoutDeviceIDs[readDeviceIDs[DeviceIdIndex]] = 0;
-                if (checkESCsStat == 0) {
+                if (checkDEVICEsStats == 0) {
                     if ((responsePackage[0] & 0x07) == OW_RESPONSE_IN_FW) {
                         DEVICEs[readDeviceIDs[DeviceIdIndex]].asBL = false;
-                        checkESCsStat++;
+                        checkDEVICEsStats++;
                     } else {
                         DEVICEs[readDeviceIDs[DeviceIdIndex]].asBL = true;
                         if (blProblem == 0) {
@@ -2510,8 +2475,8 @@ function ConfigLoop() {
                             blProblem = 1;
                         } else {
                             if (DEBUG) console.log("DEVICE with id: " + readDeviceIDs[DeviceIdIndex] + " remains in bootloader mode ->stop");
-                            throwSerialBadCommunicationError = 1;
-                            checkESCid++;
+                            serialBadError = 1;
+                            checkDeviceId++;
                             blProblem = 0;
                         }
                     }
@@ -2523,7 +2488,7 @@ function ConfigLoop() {
                     } else if (DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 4) {
                         DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
                     }
-                    checkESCsStat = 0;
+                    checkDEVICEsStats = 0;
                     if (DEBUG) console.log("Setting " + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].name + " from DEVICE with id: " + readDeviceIDs[DeviceIdIndex] + " is " + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active + " bytecound: " + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount);
                     DeviceSettingIndex++;
                 }
@@ -2532,9 +2497,9 @@ function ConfigLoop() {
                 if (DEBUG) console.log("no response, retrying");
             } else if (timeoutDeviceIDs[readDeviceIDs[DeviceIdIndex]] > DEFAULT_TIMEOUT * 3) {
                 if (DEBUG) console.log("no response from DEVICE with id: " + readDeviceIDs[DeviceIdIndex] + " ->stop");
-                throwSerialBadCommunicationError = 1;
+                serialBadError = 1;
                 waitForResponseID = 0;
-                checkESCsStat = 0;
+                checkDEVICEsStats = 0;
                 DeviceIdIndex++;
             }
         }
@@ -2549,7 +2514,7 @@ function ConfigLoop() {
                 return;
             }
 
-            if (checkESCsStat == 0) {
+            if (checkDEVICEsStats == 0) {
                 send_OneWire_package(saveNewSettingsToId, 0, [DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand]);
                 waitForResponseID = saveNewSettingsToId;
                 waitForResponseType = 0;
@@ -2576,7 +2541,7 @@ function ConfigLoop() {
             var responsePackage = checkForRespPackage();
             if (responsePackage) {
                 timeoutDeviceIDs[saveNewSettingsToId] = 0;
-                if (checkESCsStat == 0) {
+                if (checkDEVICEsStats == 0) {
                     var responsePayload = 0;
                     if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 1) {
                         responsePayload = responsePackage[5];
@@ -2588,10 +2553,10 @@ function ConfigLoop() {
                     }
                     if (responsePayload == DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active) {
                         if (DEBUG) console.log("GET response correct");
-                        checkESCsStat++;
+                        checkDEVICEsStats++;
                     } else {
                         if (DEBUG) console.log("SET response not correct (" + responsePayload + ") instead of (" + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active + "). stop");
-                        throwSerialBadCommunicationError = 1;
+                        serialBadError = 1;
                         DeviceSettingIndex++;
                     }
                     waitForResponseID = 0;
@@ -2599,7 +2564,7 @@ function ConfigLoop() {
                     if (responsePackage[5] == OW_OK) {
                         DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].changed = false;
                         DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active = newSettingsValues[readDeviceSettings[DeviceSettingIndex]];
-                        checkESCsStat = 0;
+                        checkDEVICEsStats = 0;
                         if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand == OW_GET_ID) {
                             $("#dialog").text("OneWire ID was changed. GUI must reset! please connect again.");
                             $("#dialog").dialog({
@@ -2617,7 +2582,7 @@ function ConfigLoop() {
                         DeviceSettingIndex++;
                     } else {
                         if (DEBUG) console.log("error while saving..." + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].name);
-                        checkESCsStat = 0;
+                        checkDEVICEsStats = 0;
                         DeviceSettingIndex++;
                     }
                     waitForResponseID = 0;
@@ -2627,9 +2592,9 @@ function ConfigLoop() {
                 if (DEBUG) console.log("no response, retrying");
             } else if (timeoutDeviceIDs[saveNewSettingsToId] > DEFAULT_TIMEOUT * 3) {
                 if (DEBUG) console.log("no response from DEVICE with id: " + saveNewSettingsToId + " ->stop");
-                throwSerialBadCommunicationError = 1;
+                serialBadError = 1;
                 waitForResponseID = 0;
-                checkESCsStat = 0;
+                checkDEVICEsStats = 0;
                 DeviceSettingIndex++;
             }
         }
@@ -2640,7 +2605,7 @@ function checkChangedSettings(ID) {
     var changedSettings = false;
     newSettingsValues = {};
     for (var y in DEVICEs[ID].DeviceSettings) {
-        if ((DEVICEs[ID].DeviceSettings[y].min != 0 || DEVICEs[ID].DeviceSettings[y].max != 0) && DEVICEs[ID].DeviceSettings[y].escTypes.indexOf(DEVICEs[ID].type) != -1) {
+        if ((DEVICEs[ID].DeviceSettings[y].min != 0 || DEVICEs[ID].DeviceSettings[y].max != 0) && DEVICEs[ID].DeviceSettings[y].DeviceTypes.indexOf(DEVICEs[ID].type) != -1) {
             if (DEVICEs[ID].DeviceSettings[y].min == 0 && DEVICEs[ID].DeviceSettings[y].max == 1) { // just active or inactive
                 if (document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID).checked) {
                     newSettingsValues[y] = 1;
@@ -2664,7 +2629,6 @@ function checkChangedSettings(ID) {
     return changedSettings;
 }
 
-
 function SettingsChanged(inputID) {
     var idString = inputID.split("_");
     var ID = parseInt(idString[idString.length - 1]);
@@ -2672,7 +2636,6 @@ function SettingsChanged(inputID) {
     if (changedSettings) document.getElementById("device_save_id_" + ID).className = "settings_save_button_active ui-button";
     else document.getElementById("device_save_id_" + ID).className = "settings_save_button_inactive ui-button";
 }
-
 
 function saveSettingsOfId(ID) {
     //collect Settings-
@@ -2696,7 +2659,7 @@ function saveSettingsOfId(ID) {
         }
     }
     DeviceSettingIndex = 0;
-    checkESCsStat = 0;
+    checkDEVICEsStats = 0;
     for (var IDs in DEVICEs) timeoutDeviceIDs[IDs] = 0;
     if (changedSettings) {
         saveNewSettingsToId = ID; // make the loop save the settings
