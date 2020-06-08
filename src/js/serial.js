@@ -15,7 +15,7 @@ chrome.serial.onReceive.addListener(function RX_data(DataIn) {
             var data = new Uint8Array(DataIn.data);
             if (DEBUG) console.log(data);
             for (var i = 0; i < data.length; i++) {
-                if (OneWire) {
+                if (onewire) {
                     if (ignoreOwnBytesIndex > 0) {
                         ignoreOwnBytesIndex--;
                         continue;
@@ -43,7 +43,7 @@ chrome.serial.onReceiveError.addListener(function check_receive_error(info) {
 
 function sendBytes(bytes, do_not_Ignore_Last_Byte = 0) {
     LastSentData = [];
-    if (OneWire) ignoreOwnBytesIndex = bytes.length - do_not_Ignore_Last_Byte;
+    if (onewire) ignoreOwnBytesIndex = bytes.length - do_not_Ignore_Last_Byte;
     for (var i = 0; i < bytes.length; i++) {
         LastSentData[i] = bytes[i];
         SerialConnection.TXBuffer[SerialConnection.TX_head++] = bytes[i];
@@ -92,7 +92,7 @@ function TX() {
 
 
 function ReconnectOnSend(reconnectState) {
-    if (ConnectionType == VCP) {
+    if (connectionType == VCP) {
         if (reconnectState == 0) { // wait for data to be sent
             if (DEBUG) console.log("reconnect, wait for data to be sent");
             reconnectOnTxDone = 1;
@@ -108,7 +108,7 @@ function ReconnectOnSend(reconnectState) {
             });
         }
     }
-    PT_status = 0;
+    ptStatus = 0;
 }
 
 function ReconnectToOldPort(ports) {

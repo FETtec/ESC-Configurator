@@ -170,104 +170,86 @@ function DEVICE() {
 }
 
 // helper to prevent single arrays in all settings
-var onAllESCs = [];
-for (var i in DEVICE_types) onAllESCs.push(DEVICE_types[i].id);
 
-var ActDeviceFlashPage = 0;
-var ActDeviceFlashStat = 0;
+var actDeviceFlashPage = 0;
+var actDeviceFlashStat = 0;
 var activationActive = 0;
-var address_Counter = 0
+var addressCounter = 0
 var afterFlashedDisplay = 0;
-
-var toolbar = 0;
-var OneWire = 0;
-
-
-var throttleWarningDone = 0;
-var MaxDeviceId = 0;
-var MinDeviceId = 0;
-var DEVICEsReady = 0;
-var DeviceActivateId = 0;
-var FlashDeviceId = 0;
-
-var extraDelay = 1;
-var scanDone = 0;
-var DEVICEsDisplayed = 0;
-var FW_updater_Init_Done = 0;
-
-var loopInterval = 0;
-var interval_Speedup_Done = 0;
-var selectedMenu = 0;
-
-var DEVICEsToBL = 0;
-var menuEnabled = 1;
-
-var SettingsRead = 0;
-var readSetting = 0;
-
-var DeviceIdIndex = 0;
-var DeviceSettingIndex = 0;
-var settings_index_max = 0;
-var saveNewSettingsToId = 0;
-
-var is_USB_only_bootloader = 0
-
 var buttonsDisabled = 0;
-var ConnectionType = KISS_PT;
-var PT_status = 0;
-
+var bytesCount = 1;
 var checkDEVICEsStats = 0;
 var checkDeviceId = 0;
-var serialBadError = 0;
-var switchDeviceId = 0;
-var expectedHeader = 0;
-var SwitchCommand = 0;
-var switchProblem = 0;
+var communicationErrorWarningDone = 0;
+var connectionType = KISS_PT;
+var connection_attempts = 0;
+var deviceActivateId = 0;
+var deviceIdIndex = 0;
+var deviceSettingIndex = 0;
+var devicesDisplayed = 0;
+var devicesReady = 0;
+var devicesToBL = 0;
+var displayTLM = 0;
+var do_not_Update_Progress_Bar = 0;
 var enableButtonsAfterSwitch = 0;
+var expectedHeader = 0;
+var extraDelay = 1;
+var firmwareUpdaterInitDone = 0;
+var flashDeviceId = 0;
+var getLength = 5;
+var interval_Speedup_Done = 0;
+var is_USB_only_bootloader = 0
+var lastCRC = 0;
+var lastRequestedTLM = 0;
+var loopInterval = 0;
+var maxDeviceId = 0;
+var menuEnabled = 1;
+var minDeviceId = 0;
+var newBaud = 0;
+var noLoop = 0;
+var onewire = 0;
+var ptStatus = 0;
+var readSetting = 0;
+var reconnectOnTxDone = 0;
 var refreshVersion = 0;
-var SwitchStatus = 0;
-var waitLoops = 0;
-
+var responseIndex = 0;
+var saveNewSettingsToId = 0;
+var scanDone = 0;
 var scanID = 1;
 var scanStep = 0;
-
-
+var selectedMenu = 0;
+var sentTestPackage = 0;
+var serialBadError = 0;
+var settingsRead = 0;
+var settings_index_max = 0;
+var start_check = 0;
+var switchCommand = 0;
+var switchDeviceId = 0;
+var switchProblem = 0;
+var switchStatus = 0;
+var thrCommandFirstByte = 0;
+var throttleWarningDone = 0;
+var toolbar = 0;
+var use_bit_rate = 2000000;
+var waitForResponseID = 0;
+var waitForResponseLength = 0;
+var waitForResponseType = 0;
+var waitLoops = 0;
+var waitLoops = 0;
 var wait_for_TLM = 0;
 var wait_for_TLM_loops = 0;
-var display_TLM = 0;
-var start_check = 0;
-
-var lastCRC = 0;
-var Throttle_Com_First_Byte = 0;
-var lastRequestedTLM = 0;
-
-var NewBaud = 0;
-var use_bit_rate = 2000000;
-
-var sentTestPackage = 0;
-var bytesCount = 1;
-var waitLoops = 0;
-var noLoop = 0;
-var communicationErrorWarningDone = 0;
-var do_not_Update_Progress_Bar = 0;
-var connection_attempts = 0;
-
-var waitForResponseID = 0;
-var waitForResponseType = 0;
-var waitForResponseLength = 0;
-
-var RespIndex = 0;
-var getLength = 5;
-var reconnectOnTxDone = 0;
 
 var DEVICEs = [];
-var readDeviceIDs = [];
-var readDeviceSettings = [];
 var DevicePackage = [];
 var GraphArr = [];
-var timeoutDeviceIDs = [];
 var LastSentData = [];
 var RespBuf = [];
+var readDeviceIDs = [];
+var readDeviceSettings = [];
+var timeoutDeviceIDs = [];
+
+var onAllESCs = [];
+for (var i in DEVICE_types) onAllESCs.push(DEVICE_types[i].id);
 
 var newSettingsValues = {};
 
@@ -473,36 +455,36 @@ function Gen_Menu_Buttons(active_id, is_disabled) {
 
 function OpenPort(port) {
     UpdateSerialSection("connect");
-    ConnectionType = parseInt(document.getElementById("con_type").value);
+    connectionType = parseInt(document.getElementById("con_type").value);
 
     SerialConnection.Port = port;
 
     use_bit_rate = 2000000;
     if (SerialConnection.pass_through != SerialConnection.Port) {
-        switch (ConnectionType) {
+        switch (connectionType) {
             case KISS_PT:
                 use_bit_rate = 115200;
-                PT_status = 1;
-                OneWire = 0;
+                ptStatus = 1;
+                onewire = 0;
                 break;
             case BF_PT:
                 use_bit_rate = 115200;
-                PT_status = 1;
-                OneWire = 1;
+                ptStatus = 1;
+                onewire = 1;
                 break
             case USB_UART:
                 use_bit_rate = 2000000;
-                PT_status = 0;
-                OneWire = 1;
+                ptStatus = 0;
+                onewire = 1;
                 break;
             case VCP:
                 use_bit_rate = 2000000;
-                PT_status = 1;
-                OneWire = 0;
+                ptStatus = 1;
+                onewire = 0;
                 break;
         }
     } else {
-        switch (ConnectionType) {
+        switch (connectionType) {
             case KISS_PT:
                 use_bit_rate = 921600;
                 break;
@@ -524,7 +506,7 @@ function onPortOpen(cInfo) {
     if (typeof cInfo !== 'undefined') {
         SerialConnection.connection = cInfo;
         SerialConnection.connected = 1;
-        if (ConnectionType == BF_PT) {
+        if (connectionType == BF_PT) {
             sendBytes([0x23]);
             waitLoops = 10;
             if (DEBUG) console.log("Entered BF CLI");
@@ -553,14 +535,14 @@ function onPortOpen(cInfo) {
 }
 
 function changeBaud(changeBaud) {
-    NewBaud = changeBaud;
-    chrome.serial.update(SerialConnection.connection.connectionId, { bitrate: NewBaud }, Reconnect);
+    newBaud = changeBaud;
+    chrome.serial.update(SerialConnection.connection.connectionId, { bitrate: newBaud }, Reconnect);
 }
 
 function Reconnect() {
-    PT_status = 0;
+    ptStatus = 0;
     SerialConnection.pass_through = SerialConnection.Port;
-    if (DEBUG) console.log("changed Baud to: " + NewBaud);
+    if (DEBUG) console.log("changed Baud to: " + newBaud);
 }
 
 function disconnect() {
@@ -574,17 +556,17 @@ function disconnect() {
     SerialConnection.pass_through_fails = 0;
     SerialConnection.connected = false;
     interval_Speedup_Done = 0;
-    PT_status = 0;
+    ptStatus = 0;
     waitLoops = 0;
     is_USB_only_bootloader = 0;
 
     scanDone = 0;
-    DEVICEsDisplayed = 0;
+    devicesDisplayed = 0;
 
     DEVICEs = [];
     timeoutDeviceIDs = [];
 
-    FW_updater_Init_Done = 0;
+    firmwareUpdaterInitDone = 0;
     FW_update.hexString = [];
     FW_update.binaryString = [];
     FW_update.preparedPages = [];
@@ -630,17 +612,17 @@ function disconnect() {
 
 function OW_activate() {
     activationActive = 1;
-    DeviceActivateId = 0;
+    deviceActivateId = 0;
 }
 
 function activationLoop() {
     if (waitForResponseID == 0) {
-        while ((!(DeviceActivateId in DEVICEs)) && DeviceActivateId < 25) DeviceActivateId++;
-        if (DEVICE_types.find(x => x.id === DEVICEs[DeviceActivateId].type).blOnly == true) {
-            if (DEBUG) console.log("Device " + DeviceActivateId + " is blOnly next.");
-            DeviceActivateId++;
+        while ((!(deviceActivateId in DEVICEs)) && deviceActivateId < 25) deviceActivateId++;
+        if (DEVICE_types.find(x => x.id === DEVICEs[deviceActivateId].type).blOnly == true) {
+            if (DEBUG) console.log("Device " + deviceActivateId + " is blOnly next.");
+            deviceActivateId++;
         }
-        if (DeviceActivateId == 25) {
+        if (deviceActivateId == 25) {
             activationActive = 0;
             return;
         }
@@ -665,95 +647,95 @@ function activationLoop() {
                     }
                 }); 
                 */
-        if (SwitchStatus == 0) {
+        if (switchStatus == 0) {
             // request
-            if (DEBUG) console.log("DEVICE " + DeviceActivateId + " send OK_OK cmd");
-            send_OneWire_package(DeviceActivateId, 0, [OW_OK]);
-            waitForResponseID = DeviceActivateId;
+            if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OK_OK cmd");
+            send_OneWire_package(deviceActivateId, 0, [OW_OK]);
+            waitForResponseID = deviceActivateId;
             waitForResponseType = 0;
             waitForResponseLength = 7;
         } else {
-            if (DEBUG) console.log("DEVICE " + DeviceActivateId + " send OW_GET_ACTIVATION cmd");
-            send_OneWire_package(DeviceActivateId, 0, [OW_GET_ACTIVATION]);
-            waitForResponseID = DeviceActivateId;
+            if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OW_GET_ACTIVATION cmd");
+            send_OneWire_package(deviceActivateId, 0, [OW_GET_ACTIVATION]);
+            waitForResponseID = deviceActivateId;
             waitForResponseType = 0;
             waitForResponseLength = 7;
         }
     } else {
         var responsePackage = checkForRespPackage();
         if (responsePackage) {
-            timeoutDeviceIDs[DeviceActivateId] = 0;
-            if (SwitchStatus == 0) {
+            timeoutDeviceIDs[deviceActivateId] = 0;
+            if (switchStatus == 0) {
                 if (responsePackage[0] == OW_RESPONSE_IN_FW) {
-                    SwitchStatus++;
+                    switchStatus++;
                     waitForResponseID = 0;
-                    if (DEBUG) console.log("DEVICE " + DeviceActivateId + " is in firmware");
+                    if (DEBUG) console.log("DEVICE " + deviceActivateId + " is in firmware");
                 } else {
                     if (switchProblem == 0) {
-                        if (DEBUG) console.log("DEVICE " + DeviceActivateId + " send OW_BL_START_FW cmd");
-                        send_OneWire_package(DeviceActivateId, 0, [OW_BL_START_FW]);
-                        if (ConnectionType == VCP) {
+                        if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OW_BL_START_FW cmd");
+                        send_OneWire_package(deviceActivateId, 0, [OW_BL_START_FW]);
+                        if (connectionType == VCP) {
                             if (DEBUG) console.log("starting reconnect procedure 1");
                             ReconnectOnSend(0);
                         }
                         switchProblem++;
                         waitLoops = 20;
                     } else if (switchProblem < 20) {
-                        if (DEBUG) console.log("ESC with id: " + DeviceActivateId + " don't switches ->retry");
-                        send_OneWire_package(DeviceActivateId, 0, [SwitchCommand]);
+                        if (DEBUG) console.log("ESC with id: " + deviceActivateId + " don't switches ->retry");
+                        send_OneWire_package(deviceActivateId, 0, [switchCommand]);
                         switchProblem++;
                         waitLoops = 20;
                     } else {
-                        if (DEBUG) console.log("DEVICE with id: " + DeviceActivateId + " don't switches ->stop");
+                        if (DEBUG) console.log("DEVICE with id: " + deviceActivateId + " don't switches ->stop");
                         serialBadError = 1;
                         switchProblem = 0;
                     }
                 }
-            } else if (SwitchStatus == 1) {
-                DEVICEs[DeviceActivateId].activated = (responsePackage[5]);
-                if (DEBUG) console.log("DEVICE " + DeviceActivateId + " response is " + DEVICEs[DeviceActivateId].activated);
-                SwitchStatus++;
-            } else if (SwitchStatus == 2) {
-                if (DEVICEs[DeviceActivateId].activated == 0) {
-                    if (DEBUG) console.log("Activating DEVICE " + DeviceActivateId + " with key " + DEVICEs[DeviceActivateId].activationkey);
+            } else if (switchStatus == 1) {
+                DEVICEs[deviceActivateId].activated = (responsePackage[5]);
+                if (DEBUG) console.log("DEVICE " + deviceActivateId + " response is " + DEVICEs[deviceActivateId].activated);
+                switchStatus++;
+            } else if (switchStatus == 2) {
+                if (DEVICEs[deviceActivateId].activated == 0) {
+                    if (DEBUG) console.log("Activating DEVICE " + deviceActivateId + " with key " + DEVICEs[deviceActivateId].activationkey);
                     // -6F0A6E67
-                    send_OneWire_package(DeviceActivateId, 0, [OW_SET_ACTIVATION, -0x6F, 0x0A, 0x6E, 0x67]); // need to replace with proper key
-                    waitForResponseID = DeviceActivateId;
+                    send_OneWire_package(deviceActivateId, 0, [OW_SET_ACTIVATION, -0x6F, 0x0A, 0x6E, 0x67]); // need to replace with proper key
+                    waitForResponseID = deviceActivateId;
                     waitForResponseType = 0;
                     waitForResponseLength = 7;
-                    SwitchStatus++;
+                    switchStatus++;
                 } else {
-                    if (DEBUG) console.log("DEVICE " + DeviceActivateId + " is already activated.");
-                    SwitchStatus = 0;
-                    DeviceActivateId++;
+                    if (DEBUG) console.log("DEVICE " + deviceActivateId + " is already activated.");
+                    switchStatus = 0;
+                    deviceActivateId++;
                 }
-            } else if (SwitchStatus == 3) {
+            } else if (switchStatus == 3) {
                 if (responsePackage[5] == OW_OK) {
-                    if (DEBUG) console.log("DEVICE " + DeviceActivateId + " response OK.");
-                    if (DEBUG) console.log("DEVICE " + DeviceActivateId + " send OW_GET_ACTIVATION cmd");
-                    send_OneWire_package(DeviceActivateId, 0, [OW_GET_ACTIVATION]);
-                    waitForResponseID = DeviceActivateId;
+                    if (DEBUG) console.log("DEVICE " + deviceActivateId + " response OK.");
+                    if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OW_GET_ACTIVATION cmd");
+                    send_OneWire_package(deviceActivateId, 0, [OW_GET_ACTIVATION]);
+                    waitForResponseID = deviceActivateId;
                     waitForResponseType = 0;
                     waitForResponseLength = 7;
-                    SwitchStatus++;
+                    switchStatus++;
                 } else {
-                    if (DEBUG) console.log("DEVICE " + DeviceActivateId + " activation wrong response: " + responsePackage[5]);
+                    if (DEBUG) console.log("DEVICE " + deviceActivateId + " activation wrong response: " + responsePackage[5]);
                 }
-                SwitchStatus = 0;
-                DeviceActivateId++;
-            } else if (SwitchStatus == 4) {
+                switchStatus = 0;
+                deviceActivateId++;
+            } else if (switchStatus == 4) {
                 console.log(responsePackage);
-                SwitchStatus = 0;
-                DeviceActivateId++;
+                switchStatus = 0;
+                deviceActivateId++;
             }
-        } else if (++timeoutDeviceIDs[DeviceActivateId] == DEFAULT_TIMEOUT || timeoutDeviceIDs[DeviceActivateId] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[DeviceActivateId] == DEFAULT_TIMEOUT * 3) {
+        } else if (++timeoutDeviceIDs[deviceActivateId] == DEFAULT_TIMEOUT || timeoutDeviceIDs[deviceActivateId] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[deviceActivateId] == DEFAULT_TIMEOUT * 3) {
             sendBytes(LastSentData);
             if (DEBUG) console.log("no response, retrying");
-        } else if (timeoutDeviceIDs[DeviceActivateId] > DEFAULT_TIMEOUT * 3) {
-            if (DEBUG) console.log("no response from DEVICE with id: " + DeviceActivateId + " ->stop");
+        } else if (timeoutDeviceIDs[deviceActivateId] > DEFAULT_TIMEOUT * 3) {
+            if (DEBUG) console.log("no response from DEVICE with id: " + deviceActivateId + " ->stop");
             serialBadError = 1;
             waitForResponseID = 0;
-            DeviceActivateId++;
+            deviceActivateId++;
         }
     }
 }
@@ -786,9 +768,9 @@ function Internal_Loop() {
             checkPorts(ports);
         });
     } else if (SerialConnection.connected == 1) {
-        if (PT_status != 0) {
-            if (PT_status == 1) {
-                switch (ConnectionType) {
+        if (ptStatus != 0) {
+            if (ptStatus == 1) {
+                switch (connectionType) {
                     case KISS_PT:
                         var getPT = kissProtocol_preparePassthrough();
                         sendBytes(getPT);
@@ -814,14 +796,14 @@ function Internal_Loop() {
                         break;
                 }
                 do_not_Update_Progress_Bar = 0;
-                PT_status = 2;
-            } else if (PT_status == 2 && connection_attempts < MAX_TRY) {
+                ptStatus = 2;
+            } else if (ptStatus == 2 && connection_attempts < MAX_TRY) {
                 connection_attempts++;
-                switch (ConnectionType) {
+                switch (connectionType) {
                     case KISS_PT:
                         if (SerialAvailable() < 2) {
                             if (DEBUG) console.log("no response from KISS FC, retry");
-                            PT_status = 1;
+                            ptStatus = 1;
                             do_not_Update_Progress_Bar = 1;
                         } else {
                             var testByte = readBytes(2);
@@ -829,17 +811,17 @@ function Internal_Loop() {
                                 changeBaud(921600);
                                 if (DEBUG) console.log("passthrough active!");
                                 waitLoops = 20;
-                                PT_status = 3;
+                                ptStatus = 3;
                             } else {
                                 if (DEBUG) console.log("wrong response from KISS FC, retry");
-                                PT_status = 1;
+                                ptStatus = 1;
                                 do_not_Update_Progress_Bar = 1;
                             }
                         }
                         break;
                     case BF_PT:
                         if (SerialAvailable()) {
-                            PT_status = 4;
+                            ptStatus = 4;
                             var BF_CLI_answer = "";
                             while (SerialAvailable()) {
                                 BF_CLI_answer += String.fromCharCode(readByte());
@@ -853,11 +835,11 @@ function Internal_Loop() {
                                         changeBaud(115200);
                                         if (DEBUG) console.log("passthrough active!");
                                         waitLoops = 5;
-                                        PT_status = 3;
+                                        ptStatus = 3;
                                     },
                                     Cancel: function () {
                                         $(this).dialog("close");
-                                        PT_status = 0;
+                                        ptStatus = 0;
                                         disconnect();
                                     }
                                 }
@@ -868,7 +850,7 @@ function Internal_Loop() {
                         //
                         break;
                 }
-            } else if (connection_attempts = MAX_TRY && PT_status != 4) {
+            } else if (connection_attempts = MAX_TRY && ptStatus != 4) {
                 noLoop = 1;
                 // Connection failed
                 if (DEBUG) console.log("Connection to FC failed");
@@ -879,18 +861,18 @@ function Internal_Loop() {
                     buttons: {
                         Try: function () {
                             $(this).dialog("close");
-                            switch (ConnectionType) {
+                            switch (connectionType) {
                                 case KISS_PT:
                                     changeBaud(921600);
                                     if (DEBUG) console.log("passthrough active!");
                                     waitLoops = 20;
-                                    PT_status = 3;
+                                    ptStatus = 3;
                                     break;
                                 case BF_PT:
                                     changeBaud(115200);
                                     if (DEBUG) console.log("passthrough active!");
                                     waitLoops = 5;
-                                    PT_status = 3;
+                                    ptStatus = 3;
                                     break;
                             }
                             noLoop = 0;
@@ -906,7 +888,7 @@ function Internal_Loop() {
                 return;
             }
             if (!do_not_Update_Progress_Bar) {
-                var current_progress = Math.round(100 / 4 * (PT_status + 1));
+                var current_progress = Math.round(100 / 4 * (ptStatus + 1));
                 if (current_progress > 100) current_progress = 100;
                 $("#progressbar").progressbar({
                     value: current_progress
@@ -924,19 +906,19 @@ function Internal_Loop() {
             // Disable Disconnect
             Gen_Menu_Buttons(selectedMenu, true);
             ScanForESCs();
-        } else if (!DEVICEsDisplayed) {
+        } else if (!devicesDisplayed) {
             displayDevices(document.getElementById("overview"));
-            DEVICEsDisplayed = 1;
+            devicesDisplayed = 1;
             // Enable Disconnect
             Gen_Menu_Buttons(selectedMenu, false);
-        } else if (!FW_updater_Init_Done) {
+        } else if (!firmwareUpdaterInitDone) {
             initFWUpdater();
             change_Devices_status(0, 1, 0);
-            FW_updater_Init_Done = 1;
+            firmwareUpdaterInitDone = 1;
         }
     }
     if (SerialConnection.connected == 1) {
-        if (DEVICEsToBL) {
+        if (devicesToBL) {
             check_ESCs_In_BL();
         } else {
             if (FW_update.FlashProcessActive == 1) {
@@ -965,15 +947,15 @@ function change_Devices_status(stat, enableButtonsIfDone = 0, refreshVersionIfDo
     refreshVersion = refreshVersionIfDone;
     if (stat == 0) {
         expectedHeader = OW_RESPONSE_IN_BL;
-        SwitchCommand = OW_RESET_TO_BL;
+        switchCommand = OW_RESET_TO_BL;
         if (DEBUG) console.log("changing status to Bootloader");
     } else {
         expectedHeader = OW_RESPONSE_IN_FW;
-        SwitchCommand = OW_BL_START_FW;
+        switchCommand = OW_BL_START_FW;
         if (DEBUG) console.log("changing status to Firmware");
     }
-    SwitchStatus = 0;
-    DEVICEsToBL = 1;
+    switchStatus = 0;
+    devicesToBL = 1;
 }
 
 function check_ESCs_In_BL() {
@@ -981,12 +963,12 @@ function check_ESCs_In_BL() {
         waitLoops--;
         return;
     }
-    if (reconnectOnTxDone != 0 && ConnectionType == VCP) return;
+    if (reconnectOnTxDone != 0 && connectionType == VCP) return;
 
     if (waitForResponseID == 0) {
         while ((!(switchDeviceId in DEVICEs)) && switchDeviceId < 25) switchDeviceId++;
         if (switchDeviceId == 25) {
-            DEVICEsToBL = 0;
+            devicesToBL = 0;
             if (refreshVersion) {
                 refreshVersion = 0;
                 document.getElementById("overview").innerHTML = "";
@@ -1000,12 +982,12 @@ function check_ESCs_In_BL() {
         }
 
         if ((DEVICE_types.find(x => x.id === DEVICEs[switchDeviceId].type)).blOnly == true) {
-            SwitchStatus = 0;
+            switchStatus = 0;
             switchDeviceId++;
             return;
         }
 
-        if (SwitchStatus == 0) {
+        if (switchStatus == 0) {
             send_OneWire_package(switchDeviceId, 0, [OW_OK]);
             waitForResponseID = switchDeviceId;
             waitForResponseType = 0;
@@ -1019,7 +1001,7 @@ function check_ESCs_In_BL() {
                 waitForResponseLength = 8;
                 if (DEBUG) console.log("check FW version with id: " + switchDeviceId + " ");
             } else {
-                SwitchStatus = 0;
+                switchStatus = 0;
                 switchDeviceId++;
             }
         }
@@ -1027,20 +1009,20 @@ function check_ESCs_In_BL() {
         var responsePackage = checkForRespPackage();
         if (responsePackage) {
             timeoutDeviceIDs[switchDeviceId] = 0;
-            if (SwitchStatus == 0) {
+            if (switchStatus == 0) {
                 if (responsePackage[0] == expectedHeader) {
                     if (expectedHeader == OW_RESPONSE_IN_BL) DEVICEs[switchDeviceId].asBL = true;
                     else DEVICEs[switchDeviceId].asBL = false;
                     if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " is ready");
-                    SwitchStatus++;
+                    switchStatus++;
                 } else {
                     if (expectedHeader != OW_RESPONSE_IN_BL) DEVICEs[switchDeviceId].asBL = false;
                     else DEVICEs[switchDeviceId].asBL = true;
                     if (switchProblem == 0) {
                         if (DEVICE_types.find(x => x.id === DEVICEs[switchDeviceId].type).blOnly == true) return
                         if (DEBUG) console.log("switching DEVICE with id: " + switchDeviceId);
-                        send_OneWire_package(switchDeviceId, 0, [SwitchCommand]);
-                        if (ConnectionType == VCP) {
+                        send_OneWire_package(switchDeviceId, 0, [switchCommand]);
+                        if (connectionType == VCP) {
                             if (DEBUG) console.log("starting reconnect procedure 1");
                             ReconnectOnSend(0);
                         }
@@ -1048,7 +1030,7 @@ function check_ESCs_In_BL() {
                         waitLoops = 20;
                     } else if (switchProblem < 20) {
                         if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " don't switches ->retry");
-                        send_OneWire_package(switchDeviceId, 0, [SwitchCommand]);
+                        send_OneWire_package(switchDeviceId, 0, [switchCommand]);
                         switchProblem++;
                         waitLoops = 20;
                     } else {
@@ -1062,7 +1044,7 @@ function check_ESCs_In_BL() {
                 DEVICEs[switchDeviceId].version = (responsePackage[5] / 10);
                 DEVICEs[switchDeviceId].subversion = (responsePackage[6] / 100);
                 if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " software version is: " + DEVICEs[switchDeviceId].version + "." + DEVICEs[switchDeviceId].subversion);
-                SwitchStatus = 0;
+                switchStatus = 0;
                 switchDeviceId++;
             }
         } else if (++timeoutDeviceIDs[switchDeviceId] == DEFAULT_TIMEOUT || timeoutDeviceIDs[switchDeviceId] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[switchDeviceId] == DEFAULT_TIMEOUT * 3) {
@@ -1188,26 +1170,26 @@ function checkForRespPackage() {
     var responsePackage = [];
     while (SerialAvailable()) {
         var testByte = readByte();
-        if (RespIndex == 0 && testByte != 2 && testByte != 3) continue;
-        if (RespIndex == 1 && waitForResponseID != testByte) {
-            RespIndex = 0;
+        if (responseIndex == 0 && testByte != 2 && testByte != 3) continue;
+        if (responseIndex == 1 && waitForResponseID != testByte) {
+            responseIndex = 0;
             continue;
         }
 
-        if (RespIndex == 3 && waitForResponseType != ((testByte << 8) | RespBuf[2])) {
-            RespIndex = 0;
+        if (responseIndex == 3 && waitForResponseType != ((testByte << 8) | RespBuf[2])) {
+            responseIndex = 0;
             continue;
         }
-        if (RespIndex == 4) {
+        if (responseIndex == 4) {
             getLength = testByte;
         }
-        RespBuf[RespIndex++] = testByte;
-        if (RespIndex == getLength && RespIndex > 4) {
+        RespBuf[responseIndex++] = testByte;
+        if (responseIndex == getLength && responseIndex > 4) {
             if (getCRC(RespBuf, getLength - 1) == RespBuf[getLength - 1]) {
                 for (var i = 0; i < getLength; i++) responsePackage[i] = RespBuf[i];
                 if (DEBUG) console.log("valid package with " + getLength + "bytes received");
             }
-            RespIndex = 0;
+            responseIndex = 0;
             getLength = 5;
             waitForResponseID = 0;
             waitForResponseType = 0;
@@ -1906,7 +1888,7 @@ function StartFlashProcess() {
         FW_update.fileUploadInput.disabled = true;
         FW_update.startUpdateInput.disabled = true;
         // Disable disconnect
-        FlashDeviceId = 0;
+        flashDeviceId = 0;
         FW_update.FlashProcessActive = 1;
         afterFlashedDisplay = 0;
         disableButtons();
@@ -1914,55 +1896,55 @@ function StartFlashProcess() {
 }
 
 function FlashProcessLoop() {
-    while ((!(FlashDeviceId in DEVICEs) || !DEVICEs[FlashDeviceId].selected) && FlashDeviceId < 25) FlashDeviceId++;
-    if (FlashDeviceId != 25) {
+    while ((!(flashDeviceId in DEVICEs) || !DEVICEs[flashDeviceId].selected) && flashDeviceId < 25) flashDeviceId++;
+    if (flashDeviceId != 25) {
         if (waitForResponseID == 0) {
-            if (ActDeviceFlashStat < 2) {
-                if (ActDeviceFlashStat == 0) {
-                    if (DEBUG) console.log("Starting to flash DEVICE with ID: " + FlashDeviceId + "...");
-                    if (!DEVICEs[FlashDeviceId].asBL) {
-                        send_OneWire_package(FlashDeviceId, 0, [OW_RESET_TO_BL]);
-                        if (DEBUG) console.log("reset DEVICE with ID: " + FlashDeviceId + " to bootloader");
+            if (actDeviceFlashStat < 2) {
+                if (actDeviceFlashStat == 0) {
+                    if (DEBUG) console.log("Starting to flash DEVICE with ID: " + flashDeviceId + "...");
+                    if (!DEVICEs[flashDeviceId].asBL) {
+                        send_OneWire_package(flashDeviceId, 0, [OW_RESET_TO_BL]);
+                        if (DEBUG) console.log("reset DEVICE with ID: " + flashDeviceId + " to bootloader");
                     }
-                    ActDeviceFlashStat = 1;
+                    actDeviceFlashStat = 1;
                 } else {
-                    send_OneWire_package(FlashDeviceId, 0, [OW_OK]);
-                    waitForResponseID = FlashDeviceId;
+                    send_OneWire_package(flashDeviceId, 0, [OW_OK]);
+                    waitForResponseID = flashDeviceId;
                     waitForResponseType = 0;
                     waitForResponseLength = 7;
-                    if (DEBUG) console.log("check if DEVICE with ID: " + FlashDeviceId + " is in bootloader mode");
+                    if (DEBUG) console.log("check if DEVICE with ID: " + flashDeviceId + " is in bootloader mode");
                 }
-            } else if (ActDeviceFlashStat == 2) {
-                send_OneWire_package(FlashDeviceId, 0, [OW_BL_PAGES_TO_FLASH, (FW_update.pagesCount & 0xFF), (FW_update.pagesCount >> 8)]);
-                ActDeviceFlashPage = FW_update.pagesCount;
-                waitForResponseID = FlashDeviceId;
+            } else if (actDeviceFlashStat == 2) {
+                send_OneWire_package(flashDeviceId, 0, [OW_BL_PAGES_TO_FLASH, (FW_update.pagesCount & 0xFF), (FW_update.pagesCount >> 8)]);
+                actDeviceFlashPage = FW_update.pagesCount;
+                waitForResponseID = flashDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
                 extraDelay = 1;
-                if (DEBUG) console.log("sent to DEVICE with ID: " + FlashDeviceId + " the block count that need to be flashed & erase flash command. ");
-            } else if (ActDeviceFlashStat == 3) {
-                if (ActDeviceFlashPage > 0) {
-                    send_OneWire_package(FlashDeviceId, ActDeviceFlashPage, FW_update.preparedPages[ActDeviceFlashPage - 1]);
-                    if (DEBUG) console.log("sent to DEVICE with ID: " + FlashDeviceId + " flash block number: " + ActDeviceFlashPage);
-                    waitForResponseID = FlashDeviceId;
-                    waitForResponseType = ActDeviceFlashPage;
+                if (DEBUG) console.log("sent to DEVICE with ID: " + flashDeviceId + " the block count that need to be flashed & erase flash command. ");
+            } else if (actDeviceFlashStat == 3) {
+                if (actDeviceFlashPage > 0) {
+                    send_OneWire_package(flashDeviceId, actDeviceFlashPage, FW_update.preparedPages[actDeviceFlashPage - 1]);
+                    if (DEBUG) console.log("sent to DEVICE with ID: " + flashDeviceId + " flash block number: " + actDeviceFlashPage);
+                    waitForResponseID = flashDeviceId;
+                    waitForResponseType = actDeviceFlashPage;
                     waitForResponseLength = 134;
-                    $("#Device_Info_progress_bar_" + FlashDeviceId).progressbar({
-                        value: Math.round((99 - (99 / FW_update.pagesCount * ActDeviceFlashPage)))
+                    $("#Device_Info_progress_bar_" + flashDeviceId).progressbar({
+                        value: Math.round((99 - (99 / FW_update.pagesCount * actDeviceFlashPage)))
                     });
                 } else {
-                    $("#Device_Info_progress_bar_" + FlashDeviceId).progressbar({
+                    $("#Device_Info_progress_bar_" + flashDeviceId).progressbar({
                         value: 100
                     });
-                    if (DEBUG) console.log("DEVICE with ID: " + FlashDeviceId + " update done");
-                    ActDeviceFlashStat = 0;
-                    ActDeviceFlashPage = 0;
-                    DEVICEs[FlashDeviceId].asBL = false;
-                    FlashDeviceId++;
+                    if (DEBUG) console.log("DEVICE with ID: " + flashDeviceId + " update done");
+                    actDeviceFlashStat = 0;
+                    actDeviceFlashPage = 0;
+                    DEVICEs[flashDeviceId].asBL = false;
+                    flashDeviceId++;
                 }
-            } else if (ActDeviceFlashStat == 4) {
-                send_OneWire_package(FlashDeviceId, 0, [OW_BL_PAGE_CORRECT]);
-                waitForResponseID = FlashDeviceId;
+            } else if (actDeviceFlashStat == 4) {
+                send_OneWire_package(flashDeviceId, 0, [OW_BL_PAGE_CORRECT]);
+                waitForResponseID = flashDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
                 if (DEBUG) console.log("verification done, sended write command");
@@ -1970,54 +1952,54 @@ function FlashProcessLoop() {
         } else {
             var responsePackage = checkForRespPackage();
             if (responsePackage) {
-                if (responsePackage[1] == FlashDeviceId) {
-                    timeoutDeviceIDs[FlashDeviceId] = 0;
-                    if (ActDeviceFlashStat == 1) {
+                if (responsePackage[1] == flashDeviceId) {
+                    timeoutDeviceIDs[flashDeviceId] = 0;
+                    if (actDeviceFlashStat == 1) {
                         if (responsePackage[0] == OW_RESPONSE_IN_BL) {
-                            DEVICEs[FlashDeviceId].asBL = true;
-                            if (DEBUG) console.log("DEVICE with ID: " + FlashDeviceId + " is in bootloader mode");
-                            ActDeviceFlashStat = 2;
+                            DEVICEs[flashDeviceId].asBL = true;
+                            if (DEBUG) console.log("DEVICE with ID: " + flashDeviceId + " is in bootloader mode");
+                            actDeviceFlashStat = 2;
                         } else {
-                            if (DEBUG) console.log("DEVICE with ID: " + FlashDeviceId + " don't moves to bootloader!");
-                            send_OneWire_package(FlashDeviceId, 0, [OW_RESET_TO_BL]);
-                            if (DEBUG) console.log("reset DEVICE with ID: " + FlashDeviceId + " to bootloader");
+                            if (DEBUG) console.log("DEVICE with ID: " + flashDeviceId + " don't moves to bootloader!");
+                            send_OneWire_package(flashDeviceId, 0, [OW_RESET_TO_BL]);
+                            if (DEBUG) console.log("reset DEVICE with ID: " + flashDeviceId + " to bootloader");
                         }
-                    } else if (ActDeviceFlashStat == 2) {
+                    } else if (actDeviceFlashStat == 2) {
                         if (responsePackage[5] == 0) {
-                            if (DEBUG) console.log("DEVICE with ID: " + FlashDeviceId + " confirmed flash erase");
-                            ActDeviceFlashStat = 3;
+                            if (DEBUG) console.log("DEVICE with ID: " + flashDeviceId + " confirmed flash erase");
+                            actDeviceFlashStat = 3;
                             extraDelay = is_USB_only_bootloader;
                         } else {
-                            if (DEBUG) console.log("DEVICE with ID: " + FlashDeviceId + " reported error: " + responsePackage[5]);
+                            if (DEBUG) console.log("DEVICE with ID: " + flashDeviceId + " reported error: " + responsePackage[5]);
                         }
-                    } else if (ActDeviceFlashStat == 3) {
-                        if (DEBUG) console.log("received from DEVICE with ID: " + FlashDeviceId + " block number: " + ActDeviceFlashPage + " for verification.");
+                    } else if (actDeviceFlashStat == 3) {
+                        if (DEBUG) console.log("received from DEVICE with ID: " + flashDeviceId + " block number: " + actDeviceFlashPage + " for verification.");
                         var verifyFailed = 0;
                         for (i = 0; i < 128; i++) {
-                            if (FW_update.preparedPages[ActDeviceFlashPage - 1][i] != responsePackage[i + 5]) {
+                            if (FW_update.preparedPages[actDeviceFlashPage - 1][i] != responsePackage[i + 5]) {
                                 verifyFailed = 1;
                                 break;
                             }
                         }
                         if (verifyFailed == 0) {
-                            ActDeviceFlashStat = 4;
+                            actDeviceFlashStat = 4;
                             FlashProcessLoop();
                         } else {
                             if (DEBUG) console.log("verification failed");
                         }
-                    } else if (ActDeviceFlashStat == 4) {
+                    } else if (actDeviceFlashStat == 4) {
                         if (responsePackage[5] == 0) {
                             if (DEBUG) console.log("page written.");
-                            ActDeviceFlashPage--;
-                            ActDeviceFlashStat = 3;
+                            actDeviceFlashPage--;
+                            actDeviceFlashStat = 3;
                             FlashProcessLoop();
                         } else {
                             if (DEBUG) console.log("page could not be written. error: " + responsePackage[5]);
                             // unable to write block 255 (require BL Update)
-                            if (ActDeviceFlashPage == 255 && responsePackage[5] == 2) {
+                            if (actDeviceFlashPage == 255 && responsePackage[5] == 2) {
                                 if (DEBUG) console.log("Bootloader not supporting more than 255 pages ");
                                 $("#dialog").text("This DEVICE doesn't have the latest bootloader and can't support this firmware. Please flash the available bootloader update. Once completed please flash again this version.");
-                                FlashDeviceId = 0;
+                                flashDeviceId = 0;
                                 FW_update.FlashProcessActive = 0;
                                 $("#dialog").dialog({
                                     modal: true,
@@ -2034,22 +2016,22 @@ function FlashProcessLoop() {
                                 });
 
                             }
-                            timeoutDeviceIDs[FlashDeviceId] = 0;
-                            ActDeviceFlashStat = 2;
+                            timeoutDeviceIDs[flashDeviceId] = 0;
+                            actDeviceFlashStat = 2;
                             waitForResponseID = 0;
-                            if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + FlashDeviceId);
+                            if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + flashDeviceId);
                         }
                     }
                 }
-            } else if (++timeoutDeviceIDs[FlashDeviceId] == DEFAULT_TIMEOUT + (350 * extraDelay) || timeoutDeviceIDs[FlashDeviceId] == (DEFAULT_TIMEOUT * 2) + (500 * extraDelay) || timeoutDeviceIDs[FlashDeviceId] == (DEFAULT_TIMEOUT * 3) + (650 * extraDelay)) {
+            } else if (++timeoutDeviceIDs[flashDeviceId] == DEFAULT_TIMEOUT + (350 * extraDelay) || timeoutDeviceIDs[flashDeviceId] == (DEFAULT_TIMEOUT * 2) + (500 * extraDelay) || timeoutDeviceIDs[flashDeviceId] == (DEFAULT_TIMEOUT * 3) + (650 * extraDelay)) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutDeviceIDs[FlashDeviceId] > (DEFAULT_TIMEOUT * 3) + (800 * extraDelay)) {
-                send_OneWire_package(FlashDeviceId, 0xFFFF, [FlashDeviceId + 10, FlashDeviceId + 20]);
-                timeoutDeviceIDs[FlashDeviceId] = 0;
-                ActDeviceFlashStat = 2;
+            } else if (timeoutDeviceIDs[flashDeviceId] > (DEFAULT_TIMEOUT * 3) + (800 * extraDelay)) {
+                send_OneWire_package(flashDeviceId, 0xFFFF, [flashDeviceId + 10, flashDeviceId + 20]);
+                timeoutDeviceIDs[flashDeviceId] = 0;
+                actDeviceFlashStat = 2;
                 waitForResponseID = 0;
-                if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + FlashDeviceId);
+                if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + flashDeviceId);
             }
         }
     } else {
@@ -2085,7 +2067,7 @@ function FlashProcessLoop() {
                     }
                 }
             });
-            FlashDeviceId = 0;
+            flashDeviceId = 0;
             FW_update.FlashProcessActive = 0;
             FW_update.fileUploadInput.disabled = false;
             FW_update.startUpdateInput.disabled = false;
@@ -2100,18 +2082,18 @@ function FlashProcessLoop() {
 
 function initTools() {
     throttleWarningDone = 0;
-    DEVICEsReady = 0;
+    devicesReady = 0;
     checkDEVICEsStats = 0;
     checkDeviceId = 0;
 
     // get max OneWire ID
-    MaxDeviceId = 0;
-    MinDeviceId = 25;
+    maxDeviceId = 0;
+    minDeviceId = 25;
     for (var i in DEVICEs) {
         DEVICEs[i].readyForFastCommand = false;
         DEVICEs[i].commandedThrottle = 0;
-        if (i > MaxDeviceId) MaxDeviceId = i;
-        if (i < MinDeviceId) MinDeviceId = i;
+        if (i > maxDeviceId) maxDeviceId = i;
+        if (i < minDeviceId) minDeviceId = i;
 
         if (DEVICE_types.find(x => x.id === DEVICEs[i].type).blOnly != true) {
             DEVICEs[i].TLMCanvasCTX = DEVICEs[i].TLMCanvasElement.getContext("2d");
@@ -2135,12 +2117,12 @@ function sentFastThrottleSignal() {
             throttle_Values[i - 1] = 1000;
         }
     }
-    var startIndex = MinDeviceId - 1;
+    var startIndex = minDeviceId - 1;
 
     throttleCommand[0] = 128 | (lastRequestedTLM << 4);
     throttleCommand[0] |= ((throttle_Values[startIndex] >> 10) & 0x01) << 3;
     throttleCommand[0] |= 0x01;
-    Throttle_Com_First_Byte = throttleCommand[0];
+    thrCommandFirstByte = throttleCommand[0];
     throttleCommand[1] = (((throttle_Values[startIndex] >> 7) & 0x07)) << 5;
     throttleCommand[1] |= ALL_ID;
 
@@ -2148,7 +2130,7 @@ function sentFastThrottleSignal() {
     var BitsLeftFromCommand = 7;
     var actByte = 2;
     var bitsFromByteLeft = 8;
-    var bitsToAddLeft = (12 + (((MaxDeviceId - MinDeviceId) + 1) * 11)) - 16;
+    var bitsToAddLeft = (12 + (((maxDeviceId - minDeviceId) + 1) * 11)) - 16;
     while (bitsToAddLeft > 0) {
         if (bitsFromByteLeft >= BitsLeftFromCommand) {
             throttleCommand[actByte] |= (throttle_Values[actThrottleCommand] & ((1 << BitsLeftFromCommand) - 1)) << (bitsFromByteLeft - BitsLeftFromCommand);
@@ -2172,7 +2154,7 @@ function sentFastThrottleSignal() {
             }
         }
     }
-    var commandLength = Math.ceil((12 + (((MaxDeviceId - MinDeviceId) + 1) * 11)) / 8);
+    var commandLength = Math.ceil((12 + (((maxDeviceId - minDeviceId) + 1) * 11)) / 8);
     lastCRC = getCRC(throttleCommand, commandLength);
     throttleCommand[commandLength] = lastCRC;
     sendBytes(throttleCommand, 1);
@@ -2180,17 +2162,17 @@ function sentFastThrottleSignal() {
 
 function ToolProcessLoop() {
     var blProblem = 0;
-    if (DEVICEsReady) {
+    if (devicesReady) {
         if (buttonsDisabled) enableButtons();
-        var waitForTlmCount = (((MaxDeviceId - MinDeviceId) + 1) * 2) + OneWire;
+        var waitForTlmCount = (((maxDeviceId - minDeviceId) + 1) * 2) + onewire;
         if (SerialAvailable() == waitForTlmCount) {
             var last_CRC_byte_Valid = 1;
-            if (OneWire) {
+            if (onewire) {
                 var last_CRC_byte = readByte();
                 if (last_CRC_byte != lastCRC) last_CRC_byte_Valid = 0;
             }
-            var TLM_bytes = readBytes(waitForTlmCount - OneWire);
-            if (last_CRC_byte_Valid && TLM_bytes[0] != lastCRC && TLM_bytes[waitForTlmCount - 1] != Throttle_Com_First_Byte) {
+            var TLM_bytes = readBytes(waitForTlmCount - onewire);
+            if (last_CRC_byte_Valid && TLM_bytes[0] != lastCRC && TLM_bytes[waitForTlmCount - 1] != thrCommandFirstByte) {
                 var readTlmByte = 0;
                 for (var i in DEVICEs) {
                     DEVICEs[i].TLMValues[lastRequestedTLM] = (TLM_bytes[readTlmByte++] << 8) | TLM_bytes[readTlmByte++];
@@ -2246,9 +2228,9 @@ function ToolProcessLoop() {
             }
         }
 
-        displayTLMValues(display_TLM++);
-        if (display_TLM == 8) {
-            display_TLM = 0;
+        displayTLMValues(displayTLM++);
+        if (displayTLM == 8) {
+            displayTLM = 0;
         }
         start_check++;
         if (wait_for_TLM_loops == 0) {
@@ -2260,7 +2242,7 @@ function ToolProcessLoop() {
             while ((!(checkDeviceId in DEVICEs)) && checkDeviceId < 25) checkDeviceId++;
 
             if (checkDeviceId == 25) {
-                DEVICEsReady = 1;
+                devicesReady = 1;
                 return;
             }
             if (DEVICE_types.find(x => x.id === DEVICEs[checkDeviceId].type).blOnly == true) {
@@ -2275,7 +2257,7 @@ function ToolProcessLoop() {
                 waitForResponseLength = 7;
                 if (DEBUG) console.log("check with id: " + checkDeviceId + " ");
             } else {
-                send_OneWire_package(checkDeviceId, 0, [OW_SET_FAST_COM_LENGTH, (Math.ceil((12 + (((MaxDeviceId - MinDeviceId) + 1) * 11)) / 8) + 1), MinDeviceId, (MaxDeviceId - MinDeviceId) + 1]);
+                send_OneWire_package(checkDeviceId, 0, [OW_SET_FAST_COM_LENGTH, (Math.ceil((12 + (((maxDeviceId - minDeviceId) + 1) * 11)) / 8) + 1), minDeviceId, (maxDeviceId - minDeviceId) + 1]);
                 waitForResponseID = checkDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
@@ -2407,11 +2389,11 @@ function colorFromCSSClass(className) {
 
 function initConfig() {
     change_Devices_status(1);
-    SettingsRead = 0;
+    settingsRead = 0;
     readDeviceIDs = [];
     readDeviceSettings = [];
-    DeviceIdIndex = 0;
-    DeviceSettingIndex = 0;
+    deviceIdIndex = 0;
+    deviceSettingIndex = 0;
     checkDEVICEsStats = 0;
     for (var IDs in DEVICEs) {
         if (DEVICE_types.find(x => x.id === DEVICEs[IDs].type).blOnly != true) {
@@ -2426,88 +2408,88 @@ function initConfig() {
 
 function ConfigLoop() {
     var blProblem = 0;
-    if (!SettingsRead) {
+    if (!settingsRead) {
         if (waitForResponseID == 0) {
 
-            if (DeviceSettingIndex == readDeviceSettings.length) {
-                DeviceSettingIndex = 0;
-                DeviceIdIndex++;
+            if (deviceSettingIndex == readDeviceSettings.length) {
+                deviceSettingIndex = 0;
+                deviceIdIndex++;
                 checkDEVICEsStats = 0;
             }
-            if (DeviceIdIndex == readDeviceIDs.length) {
-                SettingsRead = 1;
+            if (deviceIdIndex == readDeviceIDs.length) {
+                settingsRead = 1;
                 document.getElementById("overview").innerHTML = "";
                 displayDevices(document.getElementById("overview"));
                 if (buttonsDisabled) enableButtons();
                 return;
             }
-            if ((DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].eever != 0 && DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].eever > DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[0].active) || DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].DeviceTypes.indexOf(DEVICEs[readDeviceIDs[DeviceIdIndex]].type) == -1) {
-                DeviceSettingIndex++;
+            if ((DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].eever != 0 && DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].eever > DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[0].active) || DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].DeviceTypes.indexOf(DEVICEs[readDeviceIDs[deviceIdIndex]].type) == -1) {
+                deviceSettingIndex++;
                 checkDEVICEsStats = 0;
                 return;
             }
             if (checkDEVICEsStats == 0) {
-                send_OneWire_package(readDeviceIDs[DeviceIdIndex], 0, [OW_OK]);
-                waitForResponseID = readDeviceIDs[DeviceIdIndex];
+                send_OneWire_package(readDeviceIDs[deviceIdIndex], 0, [OW_OK]);
+                waitForResponseID = readDeviceIDs[deviceIdIndex];
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("check with id: " + readDeviceIDs[DeviceIdIndex] + " ");
+                if (DEBUG) console.log("check with id: " + readDeviceIDs[deviceIdIndex] + " ");
             } else {
-                send_OneWire_package(readDeviceIDs[DeviceIdIndex], 0, [DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand]);
-                waitForResponseID = readDeviceIDs[DeviceIdIndex];
+                send_OneWire_package(readDeviceIDs[deviceIdIndex], 0, [DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand]);
+                waitForResponseID = readDeviceIDs[deviceIdIndex];
                 waitForResponseType = 0;
-                waitForResponseLength = 6 + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount;
-                if (DEBUG) console.log("requesting Setting " + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].name + " with command " + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand + " from DEVICE with id: " + readDeviceIDs[DeviceIdIndex] + " ");
+                waitForResponseLength = 6 + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount;
+                if (DEBUG) console.log("requesting Setting " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].name + " with command " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand + " from DEVICE with id: " + readDeviceIDs[deviceIdIndex] + " ");
             }
         } else {
             var responsePackage = checkForRespPackage();
             if (responsePackage) {
-                timeoutDeviceIDs[readDeviceIDs[DeviceIdIndex]] = 0;
+                timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] = 0;
                 if (checkDEVICEsStats == 0) {
                     if ((responsePackage[0] & 0x07) == OW_RESPONSE_IN_FW) {
-                        DEVICEs[readDeviceIDs[DeviceIdIndex]].asBL = false;
+                        DEVICEs[readDeviceIDs[deviceIdIndex]].asBL = false;
                         checkDEVICEsStats++;
                     } else {
-                        DEVICEs[readDeviceIDs[DeviceIdIndex]].asBL = true;
+                        DEVICEs[readDeviceIDs[deviceIdIndex]].asBL = true;
                         if (blProblem == 0) {
-                            if (DEBUG) console.log("DEVICE with id: " + readDeviceIDs[DeviceIdIndex] + " remains in bootloader mode ->retry");
-                            send_OneWire_package(readDeviceIDs[DeviceIdIndex], 0, [OW_BL_START_FW]);
+                            if (DEBUG) console.log("DEVICE with id: " + readDeviceIDs[deviceIdIndex] + " remains in bootloader mode ->retry");
+                            send_OneWire_package(readDeviceIDs[deviceIdIndex], 0, [OW_BL_START_FW]);
                             blProblem = 1;
                         } else {
-                            if (DEBUG) console.log("DEVICE with id: " + readDeviceIDs[DeviceIdIndex] + " remains in bootloader mode ->stop");
+                            if (DEBUG) console.log("DEVICE with id: " + readDeviceIDs[deviceIdIndex] + " remains in bootloader mode ->stop");
                             serialBadError = 1;
                             checkDeviceId++;
                             blProblem = 0;
                         }
                     }
                 } else {
-                    if (DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 1) {
-                        DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active = responsePackage[5];
-                    } else if (DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 2) {
-                        DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active = (responsePackage[5] << 8) | responsePackage[6];
-                    } else if (DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 4) {
-                        DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
+                    if (DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 1) {
+                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active = responsePackage[5];
+                    } else if (DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 2) {
+                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active = (responsePackage[5] << 8) | responsePackage[6];
+                    } else if (DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 4) {
+                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
                     }
                     checkDEVICEsStats = 0;
-                    if (DEBUG) console.log("Setting " + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].name + " from DEVICE with id: " + readDeviceIDs[DeviceIdIndex] + " is " + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active + " bytecound: " + DEVICEs[readDeviceIDs[DeviceIdIndex]].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount);
-                    DeviceSettingIndex++;
+                    if (DEBUG) console.log("Setting " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].name + " from DEVICE with id: " + readDeviceIDs[deviceIdIndex] + " is " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active + " bytecound: " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount);
+                    deviceSettingIndex++;
                 }
-            } else if (++timeoutDeviceIDs[readDeviceIDs[DeviceIdIndex]] == DEFAULT_TIMEOUT || timeoutDeviceIDs[readDeviceIDs[DeviceIdIndex]] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[readDeviceIDs[DeviceIdIndex]] == DEFAULT_TIMEOUT * 3) {
+            } else if (++timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] == DEFAULT_TIMEOUT || timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] == DEFAULT_TIMEOUT * 3) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutDeviceIDs[readDeviceIDs[DeviceIdIndex]] > DEFAULT_TIMEOUT * 3) {
-                if (DEBUG) console.log("no response from DEVICE with id: " + readDeviceIDs[DeviceIdIndex] + " ->stop");
+            } else if (timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] > DEFAULT_TIMEOUT * 3) {
+                if (DEBUG) console.log("no response from DEVICE with id: " + readDeviceIDs[deviceIdIndex] + " ->stop");
                 serialBadError = 1;
                 waitForResponseID = 0;
                 checkDEVICEsStats = 0;
-                DeviceIdIndex++;
+                deviceIdIndex++;
             }
         }
         // save settings
     } else if (saveNewSettingsToId) {
         if (waitForResponseID == 0) {
-            while (DeviceSettingIndex < readDeviceSettings.length && DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].changed == false) DeviceSettingIndex++;
-            if (DeviceSettingIndex >= readDeviceSettings.length) {
+            while (deviceSettingIndex < readDeviceSettings.length && DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].changed == false) deviceSettingIndex++;
+            if (deviceSettingIndex >= readDeviceSettings.length) {
                 if (DEBUG) console.log("allChanges saved");
                 document.getElementById("device_save_id_" + saveNewSettingsToId).className = "settings_save_button_inactive ui-button";
                 saveNewSettingsToId = 0;
@@ -2515,27 +2497,27 @@ function ConfigLoop() {
             }
 
             if (checkDEVICEsStats == 0) {
-                send_OneWire_package(saveNewSettingsToId, 0, [DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand]);
+                send_OneWire_package(saveNewSettingsToId, 0, [DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand]);
                 waitForResponseID = saveNewSettingsToId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("GET Setting " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].name + " with command " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand + " from DEVICE with id: " + saveNewSettingsToId + " ");
+                if (DEBUG) console.log("GET Setting " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].name + " with command " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand + " from DEVICE with id: " + saveNewSettingsToId + " ");
             } else {
-                if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 1) {
-                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].setCommand), newSettingsValues[readDeviceSettings[DeviceSettingIndex]]]);
-                } else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 2) {
-                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].setCommand), (newSettingsValues[readDeviceSettings[DeviceSettingIndex]] >> 8), (newSettingsValues[readDeviceSettings[DeviceSettingIndex]] & 0xFF)]);
-                } else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 4) {
-                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].setCommand), (newSettingsValues[readDeviceSettings[DeviceSettingIndex]] >> 24), (newSettingsValues[readDeviceSettings[DeviceSettingIndex]] >> 16) & 0xFF, (newSettingsValues[readDeviceSettings[DeviceSettingIndex]] >> 8) & 0xFF, (newSettingsValues[readDeviceSettings[DeviceSettingIndex]] & 0xFF)]);
+                if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 1) {
+                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].setCommand), newSettingsValues[readDeviceSettings[deviceSettingIndex]]]);
+                } else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 2) {
+                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].setCommand), (newSettingsValues[readDeviceSettings[deviceSettingIndex]] >> 8), (newSettingsValues[readDeviceSettings[deviceSettingIndex]] & 0xFF)]);
+                } else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 4) {
+                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].setCommand), (newSettingsValues[readDeviceSettings[deviceSettingIndex]] >> 24), (newSettingsValues[readDeviceSettings[deviceSettingIndex]] >> 16) & 0xFF, (newSettingsValues[readDeviceSettings[deviceSettingIndex]] >> 8) & 0xFF, (newSettingsValues[readDeviceSettings[deviceSettingIndex]] & 0xFF)]);
                 }
-                if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand == OW_GET_ID) {
-                    waitForResponseID = newSettingsValues[readDeviceSettings[DeviceSettingIndex]];
+                if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand == OW_GET_ID) {
+                    waitForResponseID = newSettingsValues[readDeviceSettings[deviceSettingIndex]];
                 } else {
                     waitForResponseID = saveNewSettingsToId;
                 }
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("SET Setting " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].name + " with command " + (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand + 1) + " to:" + newSettingsValues[readDeviceSettings[DeviceSettingIndex]] + " at DEVICE with id: " + saveNewSettingsToId + " ");
+                if (DEBUG) console.log("SET Setting " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].name + " with command " + (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand + 1) + " to:" + newSettingsValues[readDeviceSettings[deviceSettingIndex]] + " at DEVICE with id: " + saveNewSettingsToId + " ");
             }
         } else {
             var responsePackage = checkForRespPackage();
@@ -2543,29 +2525,29 @@ function ConfigLoop() {
                 timeoutDeviceIDs[saveNewSettingsToId] = 0;
                 if (checkDEVICEsStats == 0) {
                     var responsePayload = 0;
-                    if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 1) {
+                    if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 1) {
                         responsePayload = responsePackage[5];
-                    } else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 2) {
+                    } else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 2) {
                         responsePayload = (responsePackage[5] << 8) | responsePackage[6];
                     }
-                    else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].byteCount == 4) {
+                    else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 4) {
                         responsePayload = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
                     }
-                    if (responsePayload == DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active) {
+                    if (responsePayload == DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active) {
                         if (DEBUG) console.log("GET response correct");
                         checkDEVICEsStats++;
                     } else {
-                        if (DEBUG) console.log("SET response not correct (" + responsePayload + ") instead of (" + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active + "). stop");
+                        if (DEBUG) console.log("SET response not correct (" + responsePayload + ") instead of (" + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active + "). stop");
                         serialBadError = 1;
-                        DeviceSettingIndex++;
+                        deviceSettingIndex++;
                     }
                     waitForResponseID = 0;
                 } else {
                     if (responsePackage[5] == OW_OK) {
-                        DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].changed = false;
-                        DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].active = newSettingsValues[readDeviceSettings[DeviceSettingIndex]];
+                        DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].changed = false;
+                        DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active = newSettingsValues[readDeviceSettings[deviceSettingIndex]];
                         checkDEVICEsStats = 0;
-                        if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].getCommand == OW_GET_ID) {
+                        if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand == OW_GET_ID) {
                             $("#dialog").text("OneWire ID was changed. GUI must reset! please connect again.");
                             $("#dialog").dialog({
                                 modal: true,
@@ -2578,12 +2560,12 @@ function ConfigLoop() {
                             disconnect();
                             return;
                         }
-                        if (DEBUG) console.log("saved setting: " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].name);
-                        DeviceSettingIndex++;
+                        if (DEBUG) console.log("saved setting: " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].name);
+                        deviceSettingIndex++;
                     } else {
-                        if (DEBUG) console.log("error while saving..." + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[DeviceSettingIndex]].name);
+                        if (DEBUG) console.log("error while saving..." + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].name);
                         checkDEVICEsStats = 0;
-                        DeviceSettingIndex++;
+                        deviceSettingIndex++;
                     }
                     waitForResponseID = 0;
                 }
@@ -2595,7 +2577,7 @@ function ConfigLoop() {
                 serialBadError = 1;
                 waitForResponseID = 0;
                 checkDEVICEsStats = 0;
-                DeviceSettingIndex++;
+                deviceSettingIndex++;
             }
         }
     }
@@ -2658,7 +2640,7 @@ function saveSettingsOfId(ID) {
             return;
         }
     }
-    DeviceSettingIndex = 0;
+    deviceSettingIndex = 0;
     checkDEVICEsStats = 0;
     for (var IDs in DEVICEs) timeoutDeviceIDs[IDs] = 0;
     if (changedSettings) {

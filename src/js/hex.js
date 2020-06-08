@@ -43,9 +43,9 @@ function parseHexFile(hexData) {
         var hex_Line_Address = parseInt('0x' + lineArr[2] + '' + lineArr[3] + '' + lineArr[4] + '' + lineArr[5]);
         if ((i == 2 && hexStartFound == 0) || (i == 1 && parseInt(lineArr[1]) != 2)) {
             hexStartFound = 1;
-            address_Counter = parseInt(hex_Line_Address);
+            addressCounter = parseInt(hex_Line_Address);
             FW_update.startAddr = parseInt(hex_Line_Address)
-            if (DEBUG) console.log('hex start at: ' + (address_Counter));
+            if (DEBUG) console.log('hex start at: ' + (addressCounter));
         }
         if (i == 3) {
             if (((parseInt(lineArr[2]) == 1 && parseInt(lineArr[3])) == 0) || ((parseInt(lineArr[2]) == 1 && parseInt(lineArr[3])) == 8) || ((parseInt(lineArr[2]) == 3 && parseInt(lineArr[3])) == 8) || parseInt(lineArr[2]) == 4) {
@@ -61,13 +61,13 @@ function parseHexFile(hexData) {
             }
         }
         if (parseInt('0x' + lineArr[6] + lineArr[7]) == 0) {
-            if (hex_Line_Address < address_Counter) hex_Line_Address = address_Counter;
-            while (address_Counter < hex_Line_Address) {
+            if (hex_Line_Address < addressCounter) hex_Line_Address = addressCounter;
+            while (addressCounter < hex_Line_Address) {
                 FW_update.binaryString.push(255);
-                address_Counter++;
+                addressCounter++;
             }
             for (var y = 8; y < lineArr.length - 2; y += 2) {
-                address_Counter++;
+                addressCounter++;
                 FW_update.binaryString.push(parseInt('0x' + lineArr[y] + lineArr[y + 1]));
             }
         }
