@@ -6,6 +6,40 @@ var TX_busy = 0;
 
 // Begin functions
 
+
+    // Serial listener
+    chrome.serial.onReceive.addListener(function RX_data(DataIn) {
+        if (DataIn) {
+            if (DataIn.data.byteLength > 0) {
+                var data = new Uint8Array(DataIn.data);
+                if (DEBUG) console.log(data);
+                for (var i = 0; i < data.length; i++) {
+                    if (OneWire) {
+                        if (ignoreOwnBytesIndex > 0) {
+                            ignoreOwnBytesIndex--;
+                            continue;
+                        }
+                    }
+                    SerialConnection.RXBuffer[SerialConnection.RX_head++] = data[i];
+                }
+            }
+        }
+    });
+
+    chrome.serial.onReceiveError.addListener(function check_receive_error(info) {
+        switch (info.error) {
+            case 'device_lost':
+                disconnect();
+                break;
+            case 'disconnected':
+                break;
+            default:
+                console.log(info.error)
+                break;
+
+        }
+    });
+
 function sendBytes(bytes, do_not_Ignore_Last_Byte = 0) {
     LastSentData = [];
     if (OneWire) ignoreOwnBytesIndex = bytes.length - do_not_Ignore_Last_Byte;
@@ -103,6 +137,14 @@ function TX_done() {
     }
 }
 
+function checkPorts(ports, force) {
+    // check if not connected and if serial port count change
+    if ((SerialConnection.connected == 0 && ports.length != SerialConnection.FoundPorts.length) || typeof (force) !== 'undefined') {
+        SerialConnection.FoundPorts = ports;
+        GenSerialDropdown(SerialConnection.FoundPorts);
+    }
+}
+
 var str2ab = function (arr) {
     var buf = new ArrayBuffer(arr.length);
     var bufView = new Uint8Array(buf);
@@ -111,3 +153,4 @@ var str2ab = function (arr) {
     }
     return buf;
 };
+

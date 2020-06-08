@@ -295,34 +295,6 @@ onload = function () {
 
     loopInterval = setInterval(function () { Internal_Loop(); }, 50);
 
-    // Serial listener
-    chrome.serial.onReceive.addListener(function RX_data(DataIn) {
-        if (DataIn) {
-            if (DataIn.data.byteLength > 0) {
-                var data = new Uint8Array(DataIn.data);
-                if (DEBUG) console.log(data);
-                for (var i = 0; i < data.length; i++) {
-                    if (OneWire) {
-                        if (ignoreOwnBytesIndex > 0) {
-                            ignoreOwnBytesIndex--;
-                            continue;
-                        }
-                    }
-                    SerialConnection.RXBuffer[SerialConnection.RX_head++] = data[i];
-                }
-            }
-        }
-    });
-
-    chrome.serial.onReceiveError.addListener(function check_receive_error(info) {
-        console.error(info);
-        switch (info.error) {
-            case 'device_lost':
-                disconnect();
-                break;
-        }
-    });
-
     // Check for latest version
     var versionCheck = checkGithubRelease('https://api.github.com/repos/FETtec/ESC-Configurator/releases', chrome.runtime.getManifest().version);
 
@@ -374,13 +346,6 @@ onclose = function () {
 }
 
 //===================================================================================== port handling
-function checkPorts(ports, force) {
-    // check if not connected and if serial port count change
-    if ((SerialConnection.connected == 0 && ports.length != SerialConnection.FoundPorts.length) || typeof (force) !== 'undefined') {
-        SerialConnection.FoundPorts = ports;
-        GenSerialDropdown(SerialConnection.FoundPorts);
-    }
-}
 
 function UpdateSerialSection(status) {
     if (status === "connect") {
@@ -493,7 +458,7 @@ function OpenPort(port) {
                 break;
             case VCP:
                 use_bit_rate = 2000000;
-                PT_status = 0;
+                PT_status = 1;
                 OneWire = 0;
                 break;
         }
@@ -822,8 +787,9 @@ function Internal_Loop() {
                         if (DEBUG) console.log("UART connected");
                         break;
                     case VCP:
-                        //var getPT = usb_prepareReset();
-                        //sendBytes(getPT);
+                        var getPT = usb_prepareReset();
+                        sendBytes(getPT);
+                        ReconnectOnSend(0);
                         if (DEBUG) console.log("VCP requested reset ");
                         waitLoops = 40;
                         break;
@@ -1211,15 +1177,6 @@ function ChangeDisplay(displayType) {
 }
 
 //===================================================================================== DEVICE communication
-
-function send_OneWire_package(id, type, bytes) {
-    var B_length = bytes.length + 6;
-    DevicePackage = [0x01, id, type, ((type >> 8) & 0xFF), B_length];
-    for (var i = 0; i < bytes.length; i++) DevicePackage.push(bytes[i]);
-    DevicePackage.push(getCRC(DevicePackage, B_length - 1));
-    sendBytes(DevicePackage);
-    if (SERIALDEBUG) console.log("SND: " + DevicePackage)
-}
 
 var waitForResponseID = 0;
 var waitForResponseType = 0;
@@ -1801,7 +1758,7 @@ function initFWUpdater() {
             return function (e) {
                 FW_update.hexString = e.target.result;
                 parseHexFile(FW_update.hexString);
-                
+
                 PrepareUpdate();
                 $("#remoteFWSelect").remove()
             };
