@@ -359,7 +359,7 @@ onload = function () {
             console.log("DEBUG");
             console.log(FW_update);
             //OW_activate();
-            //showLogoEditor();
+            showLogoEditor(startLogoWidth, startLogoHeight, FW_update.WhiteStartLogoArr, FW_update.BlackStartLogoArr, FW_update.WhiteStartLogoPos, FW_update.BlackStartLogoPos);
             return
         });
     }

@@ -1,6 +1,8 @@
 "user strict";
 // Begin const and local var
 var logeditorActive = 0;
+var img_x = 0;
+var img_y = 0;
 
 // logo consts
 const pilotLogoWidth = 130;
@@ -15,6 +17,8 @@ function showLogoEditor(width, height, WhiteLogoArr, BlackLogoArr, WhiteLogoPos,
     if (logeditorActive == 1) return;
 
     logeditorActive = 1;
+    img_x = 0;
+    img_y = 0;
     $("#logoeditor").css("visibility", "visible");
 
     var LogoCanvas = $('<canvas/>', {
@@ -63,11 +67,71 @@ function showLogoEditor(width, height, WhiteLogoArr, BlackLogoArr, WhiteLogoPos,
 
     $("#logoeditor").append(
         $('<button/>')
+            .attr({ id: 'imgUp' })
+            .button()
+            .click(function () {
+                img_y--;
+                loadCanvas("canvasLogo", width, height);
+            }))
+        ;
+    $("#imgUp").append().html("Up");
+
+    $("#logoeditor").append(
+        $('<button/>')
+            .attr({ id: 'imgDn' })
+            .button()
+            .click(function () {
+                img_y++;
+                loadCanvas("canvasLogo", width, height);
+            }))
+        ;
+    $("#imgDn").append().html("Down");
+
+    $("#logoeditor").append(
+        $('<button/>')
+            .attr({ id: 'imgLf' })
+            .button()
+            .click(function () {
+                img_x--;
+                loadCanvas("canvasLogo", width, height);
+
+            }))
+        ;
+    $("#imgLf").append().html("Left");
+
+    $("#logoeditor").append(
+        $('<button/>')
+            .attr({ id: 'imgRt' })
+            .button()
+            .click(function () {
+                img_x++;
+                loadCanvas("canvasLogo", width, height);
+
+            }))
+        ;
+    $("#imgRt").append().html("Right");
+
+    $("#logoeditor").append(
+        $('<button/>')
+            .attr({ id: 'imgCntr' })
+            .button()
+            .click(function () {
+                img_x = 0;
+                img_y = 0;
+                loadCanvas("canvasLogo", width, height);
+
+            }))
+        ;
+    $("#imgCntr").append().html("Reset");
+
+
+    $("#logoeditor").append(
+        $('<button/>')
             .attr({ id: 'updateLogo' })
             .button()
             .click(function () {
 
-                convertImgCanvas("canvasLogo",WhiteLogoArr, BlackLogoArr);
+                convertImgCanvas("canvasLogo", WhiteLogoArr, BlackLogoArr);
                 Array.prototype.splice.apply(
                     FW_update.binaryString,
                     [BlackLogoPos, BlackLogoArr.length].concat(BlackLogoArr)
@@ -253,12 +317,12 @@ function loadCanvas(obj, width, height) {
     image.onload = function () {
         ctx.fillStyle = "#00ff00";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(image, 0, 0);
+        ctx.drawImage(image, img_x, img_y);
     };
     image.src = img_data;
 }
 
-function convertImgCanvas(obj, WhiteArr, BlackArr ) {
+function convertImgCanvas(obj, WhiteArr, BlackArr) {
     // clear some variables
     BlackArr.length = 0;
     WhiteArr.length = 0;
