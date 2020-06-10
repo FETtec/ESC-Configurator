@@ -905,7 +905,7 @@ function Internal_Loop() {
         if (!scanDone) {
             // Disable Disconnect
             Gen_Menu_Buttons(selectedMenu, true);
-            ScanForESCs();
+            ScanForDevices();
         } else if (!devicesDisplayed) {
             displayDevices(document.getElementById("overview"));
             devicesDisplayed = 1;
@@ -1203,7 +1203,7 @@ function checkForRespPackage() {
     else return false;
 }
 
-function ScanForESCs() {
+function ScanForDevices() {
     var current_progress = Math.round(100 / 24 * scanID);
     $("#progressbar").progressbar({
         value: current_progress
@@ -1251,7 +1251,7 @@ function ScanForESCs() {
                     DEVICEs[scanID].asBL = (responsePackage[0] == OW_RESPONSE_IN_BL);
                     if (DEBUG) console.log("found ID: " + DEVICEs[scanID].id + ", is a bootloader: " + DEVICEs[scanID].asBL);
                     scanStep = 1;
-                    ScanForESCs();
+                    ScanForDevices();
                 } else if (scanStep == 1) {
 
                     DEVICEs[scanID].type = responsePackage[5];
@@ -1262,7 +1262,7 @@ function ScanForESCs() {
 
                     if (DEBUG) console.log("DEVICE with id: " + scanID + " is from type: " + DEVICEs[scanID].type);
                     scanStep = 2;
-                    ScanForESCs();
+                    ScanForDevices();
                 } else if (scanStep == 2) {
 
                     DEVICEs[scanID].version = (responsePackage[5] / 10);
@@ -1270,7 +1270,7 @@ function ScanForESCs() {
 
                     if (DEBUG) console.log("DEVICE with id: " + scanID + " software version is: " + DEVICEs[scanID].version + "." + DEVICEs[scanID].subversion);
                     scanStep = 3;
-                    ScanForESCs();
+                    ScanForDevices();
                 } else if (scanStep == 3) {
 
                     for (var i = 0; i < 12; i++) DEVICEs[scanID].SN[i] = responsePackage[i + 5];
@@ -1280,14 +1280,14 @@ function ScanForESCs() {
                         console.log(DEVICEs[scanID].SN);
                     }
                     scanStep = 0;
-                    if (++scanID == 25 || is_USB_only_bootloader == 1) {
+                    if (++scanID == 25) {
                         $("#progressbar").hide();
                         scanDone = 1;
                         scanID = 1;
                         enableButtons();
                         return;
                     }
-                    ScanForESCs();
+                    ScanForDevices();
                 }
             }
         } else if (++timeoutDeviceIDs[scanID] > 0) {
@@ -1315,7 +1315,7 @@ function ScanForESCs() {
                         });
                         disconnect();
                     }
-                } else ScanForESCs();
+                } else ScanForDevices();
             }
         }
     }
