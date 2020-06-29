@@ -160,7 +160,7 @@ img {
 }
 
 [id*='Device_Info_progress_bar'] {
-    height: 10px;
+    height: 8px;
     width: 90%;
     margin-left: 10.4%;
     margin-top: 40px;

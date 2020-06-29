@@ -3,6 +3,7 @@
 var logeditorActive = 0;
 var img_x = 0;
 var img_y = 0;
+var inverted = 0;
 
 // logo consts
 const pilotLogoWidth = 130;
@@ -32,6 +33,9 @@ function showLogoEditor(width, height, WhiteLogoArr, BlackLogoArr, WhiteLogoPos,
 
     initializeCanvas("canvasLogo", width, height)
     drawLogo("canvasLogo", WhiteLogoArr, BlackLogoArr, width, height)
+    canvas2imgdata("canvasLogo", width, height);
+
+    //    convertImgCanvas("canvasLogo", WhiteLogoArr, BlackLogoArr);
 
     $("#logoeditor").append($('<div/>').text("The Logo needs to be " + width + " x " + height + "px and the only recognized colors are black and white."))
 
@@ -57,7 +61,7 @@ function showLogoEditor(width, height, WhiteLogoArr, BlackLogoArr, WhiteLogoPos,
         var reader = new FileReader();
         reader.onloadend = function () {
             img_data = reader.result;
-            loadCanvas("canvasLogo", width, height);
+            loadCanvas("canvasLogo", width, height, inverted);
         };
         reader.readAsDataURL(file);
 
@@ -65,64 +69,79 @@ function showLogoEditor(width, height, WhiteLogoArr, BlackLogoArr, WhiteLogoPos,
     toolbar.appendChild(fileUploadInput);
     // end load file
 
-    $("#logoeditor").append(
-        $('<button/>')
-            .attr({ id: 'imgUp' })
-            .button()
-            .click(function () {
-                img_y--;
-                loadCanvas("canvasLogo", width, height);
-            }))
-        ;
-    $("#imgUp").append().html("Up");
+    if (DEBUG) {
+        $("#logoeditor").append(
+            $('<div/>').attr({ id: 'imgMovr' }));
 
-    $("#logoeditor").append(
-        $('<button/>')
-            .attr({ id: 'imgDn' })
-            .button()
-            .click(function () {
-                img_y++;
-                loadCanvas("canvasLogo", width, height);
-            }))
-        ;
-    $("#imgDn").append().html("Down");
+        $("#imgMovr").append(
+            $('<button/>')
+                .attr({ id: 'imgUp' })
+                .button()
+                .click(function () {
+                    img_y--;
+                    loadCanvas("canvasLogo", width, height, inverted);
+                }))
+            ;
+        $("#imgUp").append().html("Up");
 
-    $("#logoeditor").append(
-        $('<button/>')
-            .attr({ id: 'imgLf' })
-            .button()
-            .click(function () {
-                img_x--;
-                loadCanvas("canvasLogo", width, height);
+        $("#imgMovr").append(
+            $('<button/>')
+                .attr({ id: 'imgDn' })
+                .button()
+                .click(function () {
+                    img_y++;
+                    loadCanvas("canvasLogo", width, height, inverted);
+                }));
+        $("#imgDn").append().html("Down");
 
-            }))
-        ;
-    $("#imgLf").append().html("Left");
+        $("#imgMovr").append(
+            $('<button/>')
+                .attr({ id: 'imgLf' })
+                .button()
+                .click(function () {
+                    img_x--;
+                    loadCanvas("canvasLogo", width, height, inverted);
 
-    $("#logoeditor").append(
-        $('<button/>')
-            .attr({ id: 'imgRt' })
-            .button()
-            .click(function () {
-                img_x++;
-                loadCanvas("canvasLogo", width, height);
+                }));
+        $("#imgLf").append().html("&#8249;"); // left
 
-            }))
-        ;
-    $("#imgRt").append().html("Right");
+        $("#imgMovr").append(
+            $('<button/>')
+                .attr({ id: 'imgRt' })
+                .button()
+                .click(function () {
+                    img_x++;
+                    loadCanvas("canvasLogo", width, height, inverted);
+                }));
+        $("#imgRt").append().html("&#8250;"); // right
 
-    $("#logoeditor").append(
-        $('<button/>')
-            .attr({ id: 'imgCntr' })
-            .button()
-            .click(function () {
-                img_x = 0;
-                img_y = 0;
-                loadCanvas("canvasLogo", width, height);
+        $("#imgMovr").append(
+            $('<button/>')
+                .attr({ id: 'imgCntr' })
+                .button()
+                .click(function () {
+                    img_x = 0;
+                    img_y = 0;
+                    loadCanvas("canvasLogo", width, height, inverted);
 
-            }))
-        ;
-    $("#imgCntr").append().html("Reset");
+                }));
+        $("#imgCntr").append().html("Reset Pos");
+
+        $("#imgMovr").append(
+            $('<button/>')
+                .attr({ id: 'imgInvert' })
+                .button()
+                .click(function () {
+                    if (inverted == 0)
+                        inverted = 1;
+                    else
+                        inverted = 0;
+                    loadCanvas("canvasLogo", width, height, inverted);
+                }))
+            ;
+        $("#imgInvert").append().html("Invert");
+
+    }
 
 
     $("#logoeditor").append(
@@ -308,11 +327,20 @@ function initializeCanvas(obj, width, height) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-function loadCanvas(obj, width, height) {
+function canvas2imgdata(obj, width, height) {
+    var canvas = document.getElementById(obj);
+    var ctx = canvas.getContext("2d");
+    var img_data = ctx.getImageData(0, 0, width, height);
+}
+
+function loadCanvas(obj, width, height, invert) {
     var canvas = document.getElementById(obj);
     canvas.width = width;
     canvas.height = height;
     var ctx = canvas.getContext("2d");
+    if (invert == 1)
+        ctx.globalCompositeOperation = "difference";
+
     var image = new Image();
     image.onload = function () {
         ctx.fillStyle = "#00ff00";
