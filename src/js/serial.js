@@ -142,7 +142,9 @@ function TX_done() {
 
 function checkPorts(ports, force) {
     // check if not connected and if serial port count change
+    //    if ((SerialConnection.connected == 0 && arr_diff(SerialConnection.FoundPorts, ports).length != 0) || typeof (force) !== 'undefined') {
     if ((SerialConnection.connected == 0 && ports.length != SerialConnection.FoundPorts.length) || typeof (force) !== 'undefined') {
+
         SerialConnection.FoundPorts = ports;
         GenSerialDropdown(SerialConnection.FoundPorts);
     }

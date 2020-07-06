@@ -303,7 +303,7 @@ onload = function () {
 
     // Check for serial ports and build options
     chrome.serial.getDevices(function (ports) {
-        checkPorts(ports);
+        checkPorts(ports, true);
     });
 
     $("#con_button").click(function () {
@@ -388,11 +388,11 @@ function UpdateSerialSection(status) {
 function GenSerialDropdown(ports) {
     $('#con_port').empty()
     for (var i in ports) {
-        if (ports[i].path.toLowerCase().indexOf("/dev/cu.") === -1) // ignore cu. interfaces
-            $('#con_port').append($("<option/>", {
-                value: ports[i].path,
-                text: ports[i].path
-            }));
+       if (ports[i].path.toLowerCase().indexOf("/dev/cu.") === -1) // ignore cu. interfaces
+        $('#con_port').append($("<option/>", {
+            value: ports[i].path,
+            text: ports[i].path
+        }));
     }
     // selecting last entry
     $('#con_port').val($('#con_port option:last-child').val());
