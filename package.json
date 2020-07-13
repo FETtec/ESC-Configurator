@@ -1,7 +1,7 @@
 {
   "name": "fettec-esc-config",
-  "version": "0.1.10",
-  "description": "Configuration tool for FETtec ESC",
+  "version": "0.1.22",
+  "description": "Configuration tool for FETtec devices",
   "main": "src/js/launcher_nw.js",
   "single-instance": true,
   "scripts": {
@@ -12,7 +12,7 @@
     "build_all": "gulp release --osx64 --win32 --win64 --linux64 --chromeos"
   },
   "window": {
-    "title": "FETtec ESC Configurator",
+    "title": "FETtec Configurator",
     "icon": "src/images/fettec-256x256.png",
     "min_width": 900,
     "min_height": 650,

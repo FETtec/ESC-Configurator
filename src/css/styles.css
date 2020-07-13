@@ -47,6 +47,46 @@ img {
     height: 10px;
     display: none;
 }
+#logoeditor {
+    visibility: hidden;
+    position: absolute;
+    min-width: 400px;
+    min-height: 150px;
+    top: 25%;
+    border: 2px solid #6180A3;
+    left: 25%;
+    background-color: #B4C0D8;
+    padding: 10px;
+}
+
+#localPilotImage {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+}
+
+#updatePilotLogo {
+    position: absolute;
+    bottom: 10px;
+    left: 110px;
+}
+
+#cancelPilotLogo {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+.logocanvas {
+    outline: #3A3A3A 2px solid;
+    background: #00FF00;
+    margin: 5px;
+}
+.logospan {
+    display: inline-block;
+    width: 60px;
+    margin: 3px;
+    vertical-align: top;
+}
 
 [id*='SE_'] {
     height: 20px;
@@ -60,30 +100,31 @@ img {
     color: #FFF;
 }
 
-[id*='ESC_container_'] {
+[id*='Device_container_'] {
     border: 1px;
     border-style: solid;
     border-color: #c0c0c0;
     margin-top: 10px;
     margin-left: 10px;
     margin-right: 10px;
-    height: 55px;
+    min-height: 50px; /* height: 55px */
     padding: 10px;
     border-radius: 3px;
+    overflow: auto;
 }
 
-[class*='esc_info_'] {
+[class*='Device_Info_'] {
     font-size: 14px;
     color: #050505;
     float: left;
 }
 
-.esc_info_id {
+.Device_Info_id {
     font-size: 18px;
     width: 10%;
-    line-height: 75px;
+    line-height: 50px;
     text-align: center;
-    height: 75px;
+    min-height: 50px;
     margin-top: -10px;
     margin-left: -10px;
     border-right: 1px solid #c0c0c0;
@@ -91,46 +132,46 @@ img {
     color: #FFF;
 }
 
-.esc_info_div {
+.Device_Info_div {
     width: 90%;
-    line-height: 75px;
+    line-height: 50px;
     text-align: center;
-    height: 75px;
+    min-height: 50px;
     margin-top: -10px;
     margin-left: -10px;
     float: left;
 }
 
-.esc_info_type {
+.Device_Info_type {
     width: 160px;
 }
 
-.esc_info_version {
+.Device_Info_version {
     width: 200px;
 }
 
-.esc_info_sn {
+.Device_Info_sn {
     width: 270px;
 }
 
-.esc_info_select {
+.Device_Info_select {
     width: 50px;
     padding-top: 10px;
 }
 
-[id*='esc_info_progress_bar'] {
-    height: 10px;
+[id*='Device_Info_progress_bar'] {
+    height: 8px;
     width: 90%;
     margin-left: 10.4%;
     margin-top: 40px;
     overflow: visible;
 }
 
-[id*='esc_info_progress_bar']>.ui-widget-header {
+[id*='Device_Info_progress_bar']>.ui-widget-header {
     background: #98e698;
 }
 
-[id*='ESC_Canvas_Container_'] {
+[id*='Device_Canvas_Container_'] {
     border: 1px;
     border-style: solid;
     border-color: #c0c0c0;
@@ -146,11 +187,11 @@ img {
     border-color: #E31121;
 }
 
-.esc_active {
+.Device_active {
     background-color: #F5F5F5;
 }
 
-.esc_inactive {
+.Device_inactive {
     background-color: #FDFDFD;
 }
 
@@ -187,7 +228,7 @@ img {
     color: #050505;
 }
 
-.canvas_esc_name {
+.canvas_Device_name {
     font-size: 14px;
     float: left;
     margin-left: -10px;
@@ -308,13 +349,14 @@ img {
     margin-right: 3px;
 }
 
-.esc_settings_div {
+.Device_settings_div {
     width: 80%;
-    height: 55px;
+    min-height: 50px;
     margin-left: 10px;
     margin-top: -6px;
     float: left;
     padding: auto;
+    overflow: auto;
 }
 
 .setting_container {
@@ -341,6 +383,40 @@ img {
     padding-left: 2px;
     color: #606060;
 }
+
+.settings_rangeSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 80px;
+    height: 12px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.settings_rangeSlider:hover {
+    opacity: 1;
+}
+
+
+.settings_rangeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 7px;
+    height: 12px;
+    background: #6180A3;
+    cursor: pointer;
+}
+
+.settings_rangeSlider::-moz-range-thumb {
+    width: 7px;
+    height: 12px;
+    background: #6180A3;
+    cursor: pointer;
+}
+
 
 .settings_save_button_active {
     position: absolute;
@@ -382,18 +458,37 @@ img {
     margin-left: 61px;
 }
 
-.throttle_stick_div {
-    border: 1px solid #CCC;
+.ThrottleSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 99%;
+    height: 20px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.ThrottleSlider:hover {
+    opacity: 1;
+}
+
+
+.ThrottleSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
     background: #6180A3;
-    color: #FFF;
-    height: 24px;
-    line-height: 24px;
-    font-size: 14px;
-    width: 40px;
-    text-align: center;
     cursor: pointer;
-    cursor: hand;
-    border-radius: 3px;
+}
+
+.ThrottleSlider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #6180A3;
+    cursor: pointer;
 }
 
 textarea:focus, input:focus {
@@ -432,6 +527,12 @@ input[type="checkbox"]:checked+label {
 .setting_text {
     padding: 2px;
     float: left;
+}
+
+.setting_value {
+    width: 40px;
+    text-align: center;
+    display: inline-block;
 }
 
 .checkmark {

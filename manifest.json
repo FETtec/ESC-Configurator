@@ -1,12 +1,12 @@
 {
-    "name": "FETtec ESC Configurator",
+    "name": "FETtec Configurator",
     "short_name": "FETtecESCConfig",
-    "description": "Configuration tool for FETtec ESC",
+    "description": "Configuration tool for FETtec devices",
     "offline_enabled": true,
     "author": "FETtec",
-    "version": "0.1.10",
+    "version": "0.1.22",
     "manifest_version": 2,
-    "minimum_chrome_version": "36",
+    "minimum_chrome_version": "40",
     "permissions": [
         "serial",
         "usb",
