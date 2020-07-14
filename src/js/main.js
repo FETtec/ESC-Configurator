@@ -150,21 +150,21 @@ function DEVICE() {
     // end ESC specific settings
     this.DeviceSettings = {
         0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "readonly", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, DeviceTypes: onAllESCs }, // must always be 0
-        40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse rotation direction", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
+        40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse motor direction", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
         41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
-        42: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, DeviceTypes: onAllESCs },
-        43: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
-        44: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min. Signal", type: "slider", feature: "advanced", min: 1000, max: 1400, active: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
-        45: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max. Signal", type: "slider", feature: "advanced", min: 1600, max: 2000, active: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
-        46: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
+        42: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
+        43: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min.", type: "slider", feature: "advanced", min: 1000, max: 1400, active: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
+        44: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max.", type: "slider", feature: "advanced", min: 1600, max: 2000, active: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
+        45: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, DeviceTypes: onAllESCs },
+        46: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, DeviceTypes: onAllESCs },
         47: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, active: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
-        48: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
-        49: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
-        50: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, DeviceTypes: onAllESCs },
-        51: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, DeviceTypes: onAllESCs },
-
-        56: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, DeviceTypes: onAllESCs },
-
+/*
+        48: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
+        49: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
+        50: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
+        51: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, DeviceTypes: onAllESCs },
+        52: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, DeviceTypes: onAllESCs },
+*/
         99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs } // must always be 99 and the last one
     };
 }
