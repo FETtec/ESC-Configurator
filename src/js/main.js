@@ -230,6 +230,7 @@ var switchStatus = 0;
 var thrCommandFirstByte = 0;
 var throttleWarningDone = 0;
 var toolbar = 0;
+var timeout_delay = DEFAULT_TIMEOUT;
 var use_bit_rate = 2000000;
 var waitForResponseID = 0;
 var waitForResponseLength = 0;
@@ -728,10 +729,10 @@ function activationLoop() {
                 switchStatus = 0;
                 deviceActivateId++;
             }
-        } else if (++timeoutDeviceIDs[deviceActivateId] == DEFAULT_TIMEOUT || timeoutDeviceIDs[deviceActivateId] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[deviceActivateId] == DEFAULT_TIMEOUT * 3) {
+        } else if (++timeoutDeviceIDs[deviceActivateId] == timeout_delay || timeoutDeviceIDs[deviceActivateId] == timeout_delay * 2 || timeoutDeviceIDs[deviceActivateId] == timeout_delay * 3) {
             sendBytes(LastSentData);
             if (DEBUG) console.log("no response, retrying");
-        } else if (timeoutDeviceIDs[deviceActivateId] > DEFAULT_TIMEOUT * 3) {
+        } else if (timeoutDeviceIDs[deviceActivateId] > timeout_delay * 3) {
             if (DEBUG) console.log("no response from DEVICE with id: " + deviceActivateId + " ->stop");
             serialBadError = 1;
             waitForResponseID = 0;
@@ -780,6 +781,7 @@ function Internal_Loop() {
                     case BF_PT:
                         SerialConnection.RX_tail = SerialConnection.RX_head;
                         var getPT = bfProtocol_preparePassthrough();
+                        timeout_delay = DEFAULT_TIMEOUT * 2;
                         sendBytes(getPT);
                         if (DEBUG) console.log("Requested BF passthrough");
                         waitLoops = 40;
@@ -1047,10 +1049,10 @@ function check_ESCs_In_BL() {
                 switchStatus = 0;
                 switchDeviceId++;
             }
-        } else if (++timeoutDeviceIDs[switchDeviceId] == DEFAULT_TIMEOUT || timeoutDeviceIDs[switchDeviceId] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[switchDeviceId] == DEFAULT_TIMEOUT * 3) {
+        } else if (++timeoutDeviceIDs[switchDeviceId] == timeout_delay || timeoutDeviceIDs[switchDeviceId] == timeout_delay * 2 || timeoutDeviceIDs[switchDeviceId] == timeout_delay * 3) {
             sendBytes(LastSentData);
             if (DEBUG) console.log("no response, retrying");
-        } else if (timeoutDeviceIDs[switchDeviceId] > DEFAULT_TIMEOUT * 3) {
+        } else if (timeoutDeviceIDs[switchDeviceId] > timeout_delay * 3) {
             if (DEBUG) console.log("no response from DEVICE with id: " + switchDeviceId + " ->stop");
             serialBadError = 1;
             waitForResponseID = 0;
@@ -2026,10 +2028,10 @@ function FlashProcessLoop() {
                         }
                     }
                 }
-            } else if (++timeoutDeviceIDs[flashDeviceId] == DEFAULT_TIMEOUT + (350 * extraDelay) || timeoutDeviceIDs[flashDeviceId] == (DEFAULT_TIMEOUT * 2) + (500 * extraDelay) || timeoutDeviceIDs[flashDeviceId] == (DEFAULT_TIMEOUT * 3) + (650 * extraDelay)) {
+            } else if (++timeoutDeviceIDs[flashDeviceId] == timeout_delay + (350 * extraDelay) || timeoutDeviceIDs[flashDeviceId] == (timeout_delay * 2) + (500 * extraDelay) || timeoutDeviceIDs[flashDeviceId] == (timeout_delay * 3) + (650 * extraDelay)) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutDeviceIDs[flashDeviceId] > (DEFAULT_TIMEOUT * 3) + (800 * extraDelay)) {
+            } else if (timeoutDeviceIDs[flashDeviceId] > (timeout_delay * 3) + (800 * extraDelay)) {
                 send_OneWire_package(flashDeviceId, 0xFFFF, [flashDeviceId + 10, flashDeviceId + 20]);
                 timeoutDeviceIDs[flashDeviceId] = 0;
                 actDeviceFlashStat = 2;
@@ -2294,10 +2296,10 @@ function ToolProcessLoop() {
                         checkDeviceId++;
                     }
                 }
-            } else if (++timeoutDeviceIDs[checkDeviceId] == DEFAULT_TIMEOUT || timeoutDeviceIDs[checkDeviceId] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[checkDeviceId] == DEFAULT_TIMEOUT * 3) {
+            } else if (++timeoutDeviceIDs[checkDeviceId] == timeout_delay || timeoutDeviceIDs[checkDeviceId] == timeout_delay * 2 || timeoutDeviceIDs[checkDeviceId] == timeout_delay * 3) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutDeviceIDs[checkDeviceId] > DEFAULT_TIMEOUT * 3) {
+            } else if (timeoutDeviceIDs[checkDeviceId] > timeout_delay * 3) {
                 if (DEBUG) console.log("no response from DEVICE with id: " + checkDeviceId + " ->stop");
                 serialBadError = 1;
                 waitForResponseID = 0;
@@ -2477,10 +2479,10 @@ function ConfigLoop() {
                     if (DEBUG) console.log("Setting " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].name + " from DEVICE with id: " + readDeviceIDs[deviceIdIndex] + " is " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active + " bytecound: " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount);
                     deviceSettingIndex++;
                 }
-            } else if (++timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] == DEFAULT_TIMEOUT || timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] == DEFAULT_TIMEOUT * 3) {
+            } else if (++timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] == timeout_delay || timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] == timeout_delay * 2 || timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] == timeout_delay * 3) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] > DEFAULT_TIMEOUT * 3) {
+            } else if (timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] > timeout_delay * 3) {
                 if (DEBUG) console.log("no response from DEVICE with id: " + readDeviceIDs[deviceIdIndex] + " ->stop");
                 serialBadError = 1;
                 waitForResponseID = 0;
@@ -2572,10 +2574,10 @@ function ConfigLoop() {
                     }
                     waitForResponseID = 0;
                 }
-            } else if (++timeoutDeviceIDs[saveNewSettingsToId] == DEFAULT_TIMEOUT || timeoutDeviceIDs[saveNewSettingsToId] == DEFAULT_TIMEOUT * 2 || timeoutDeviceIDs[saveNewSettingsToId] == DEFAULT_TIMEOUT * 3) {
+            } else if (++timeoutDeviceIDs[saveNewSettingsToId] == timeout_delay || timeoutDeviceIDs[saveNewSettingsToId] == timeout_delay * 2 || timeoutDeviceIDs[saveNewSettingsToId] == timeout_delay * 3) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutDeviceIDs[saveNewSettingsToId] > DEFAULT_TIMEOUT * 3) {
+            } else if (timeoutDeviceIDs[saveNewSettingsToId] > timeout_delay * 3) {
                 if (DEBUG) console.log("no response from DEVICE with id: " + saveNewSettingsToId + " ->stop");
                 serialBadError = 1;
                 waitForResponseID = 0;
