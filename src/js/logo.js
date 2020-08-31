@@ -9,7 +9,7 @@ var inverted = 0;
 const pilotLogoWidth = 130;
 const pilotLogoHeight = 66;
 
-const startLogoWidth = 416;
+const startLogoWidth = 400;
 const startLogoHeight = 280;
 
 // Begin functions
