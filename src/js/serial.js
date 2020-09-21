@@ -112,6 +112,7 @@ function ReconnectOnSend(reconnectState) {
 }
 
 function ReconnectToOldPort(ports) {
+    reconnectTry++;
     if (DEBUG) console.log("reconnect, search new port");
     //var foundPort;
     if (DEBUG) console.log("reconnect, oldPortPath = " + oldPortPath);
@@ -124,7 +125,10 @@ function ReconnectToOldPort(ports) {
             return;
         }
     }
-    if (DEBUG) console.log("reconnect, port not found");
+    if (DEBUG) console.log("reconnect, port not found - try " + reconnectTry);
+    if (reconnectTry > 2000)
+        return;
+
     ReconnectOnSend(3);
 }
 

@@ -19,11 +19,12 @@ const DEVICE_types = [
     { id: 1, name: "FETtec ESC 35A", filename: 'FETTEC_35A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 2, name: "FETtec ESC 50A", filename: 'FETTEC_50A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 3, name: "FETtec ESC 7A", filename: 'FETTEC_7A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 4, name: "G4_ESC", filename: '' },
+    { id: 4, name: "FETtec PRO ESC 80A", filename: 'FETTEC_PRO_80A_ESC_G4_', start_addr: 3800, blOnly: false },
     { id: 5, name: "FETtec PRO ESC 60A", filename: 'FETTEC_PRO_60A_ESC_S32K_', start_addr: 4000, blOnly: false },
     { id: 6, name: "FETtec ESC 45A", filename: 'FETTEC_45A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 9, name: "FETtec PRO ESC 45A", filename: 'FETTEC_PRO_45A_ESC_G4_', start_addr: 3800, blOnly: false },
     { id: 64, name: "ESC 15A", filename: 'ESC_DEF_GD_15A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 65, name: "ESC 15A", filename: 'ESC_ADV_GD_15A_ESC_G0_', start_addr: 1800, blOnly: false },
     //    { id: 66, name: "ESC 15A", filename: '' },
@@ -34,14 +35,14 @@ const DEVICE_types = [
     //    { id: 71, name: "ESC 25A", filename: '' },
     { id: 72, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 73, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 74, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G4_', start_addr: 1800, blOnly: false },
-    { id: 75, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G4_', start_addr: 1800, blOnly: false },
+    { id: 74, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G4_', start_addr: 3800, blOnly: false },
+    { id: 75, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G4_', start_addr: 3800, blOnly: false },
     //    { id: 76, name: "ESC 35A", filename: '' },
     //    { id: 77, name: "ESC 35A", filename: '' },
     { id: 78, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false },
     { id: 79, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 80, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 1800, blOnly: false },
-    { id: 81, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 1800, blOnly: false },
+    { id: 80, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 3800, blOnly: false },
+    { id: 81, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 3800, blOnly: false },
     { id: 82, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false },
     { id: 83, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false },
     //    { id: 84, name: "ESC 45A", filename: '' },
@@ -74,8 +75,9 @@ const DEVICE_types = [
     { id: 105, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false },
     //    { id: 106, name: "ESC 100A", filename: '' },
     //    { id: 107, name: "ESC 100A", filename: '' },
-    { id: 128, name: "FETtec G4-FC", filename: 'FETTEC_FC_G4-', start_addr: 3800, blOnly: true },
-    { id: 129, name: "FETtec G0-OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true }
+    { id: 127, name: "FETtec F3 NANO-FC", filename: 'FETTEC_FC_NANO-', start_addr: 3800, blOnly: true },
+    { id: 128, name: "FETtec G4 FC", filename: 'FETTEC_FC_G4-', start_addr: 3800, blOnly: true },
+    { id: 129, name: "FETtec G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true }
 ];
 
 const Serial_Options = [
@@ -158,13 +160,23 @@ function DEVICE() {
         45: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, DeviceTypes: onAllESCs },
         46: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, DeviceTypes: onAllESCs },
         47: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, active: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
-        /*
-                48: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
-                49: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
-                50: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
-                51: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, DeviceTypes: onAllESCs },
-                52: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, DeviceTypes: onAllESCs },
-        */
+
+        52: { getCommand: OW_GET_HALL_SENSOR_USAGE, setCommand: OW_SET_HALL_SENSOR_USAGE, name: "Hall Sensors", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        53: { getCommand: OW_GET_CURRENT_LIMIT, setCommand: OW_SET_CURRENT_LIMIT, name: "Current limit", feature: "advanced", type: "value", min: 100, max: 12000, active: 0, changed: false, eever: 27, byteCount: 2, DeviceTypes: [4, 5, 9] },
+        54: { getCommand: OW_GET_NO_ACTIVE_START, setCommand: OW_SET_NO_ACTIVE_START, name: "No Active Start", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        55: { getCommand: OW_GET_ANALOG_THROTTLE, setCommand: OW_SET_ANALOG_THROTTLE, name: "Analog Throttle", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 9] },
+        56: { getCommand: OW_GET_CELL_COUNT, setCommand: OW_SET_CELL_COUNT, name: "Battery Cell count", feature: "advanced", type: "value", min: 1, max: 255, active: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        57: { getCommand: OW_GET_TURNOFF_VOLTAGE, setCommand: OW_SET_TURNOFF_VOLTAGE, name: "Turn Off Cell Voltage", feature: "advanced", type: "value", min: 0, max: 1000, active: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 5, 9] },
+        58: { getCommand: OW_GET_CELL_MAX_VOLTAGE, setCommand: OW_SET_CELL_MAX_VOLTAGE, name: "Max Cell Voltage", feature: "advanced", type: "value", min: 0, max: 1000, active: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 5, 9] },
+        59: { getCommand: OW_GET_CM_PER_ERPM, setCommand: OW_SET_CM_PER_ERPM, name: "mm per Erpm", feature: "advanced", type: "value", min: 0, max: 10000, active: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
+        60: { getCommand: OW_GET_BRAKE_ACTIVE, setCommand: OW_SET_BRAKE_ACTIVE, name: "Motor brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        61: { getCommand: OW_GET_ANALOG_BRAKE, setCommand: OW_SET_ANALOG_BRAKE, name: "Use analog brake signal", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 9] },
+        62: { getCommand: OW_GET_BEC_VOLTAGE, setCommand: OW_SET_BEC_VOLTAGE, name: "BEC output Voltage", feature: "advanced", type: "value", min: 0, max: 2000, active: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
+        63: { getCommand: OW_GET_MAX_OUTPUT_CURRENT_LIMIT, setCommand: OW_SET_MAX_OUTPUT_CURRENT_LIMIT, name: "Motor Current Limit", feature: "advanced", type: "value", min: 200, max: 14000, active: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
+        64: { getCommand: OW_GET_HALL_SENSORS_LEVELS, setCommand: OW_SET_HALL_SENSORS_LEVELS, name: "Hall Sensor Output Levels", feature: "advanced", type: "value", min: 0, max: 100, active: 0, changed: false, eever: 35, byteCount: 1, DeviceTypes: [4, 5, 9] },
+
+        65: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, DeviceTypes: onAllESCs },
+
         99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs } // must always be 99 and the last one
     };
 }
@@ -211,6 +223,7 @@ var onewire = 0;
 var ptStatus = 0;
 var readSetting = 0;
 var reconnectOnTxDone = 0;
+var reconnectTry = 0;
 var refreshVersion = 0;
 var responseIndex = 0;
 var saveNewSettingsToId = 0;
@@ -1414,6 +1427,7 @@ function displayDevices(ParentElement) {
             // ---------------------------------------------------------------------------------------------------// settings
             // DeviceSettings
             if (DEVICE_types.find(x => x.id === DEVICEs[i].type).blOnly == true) break;
+
             DeviceDiv.id = "Device_container_" + i;
 
             DeviceDiv.className = "settings_container";
@@ -1428,125 +1442,131 @@ function displayDevices(ParentElement) {
             DeviceDiv.appendChild(DeviceInfoDiv);
 
             for (var y in DEVICEs[i].DeviceSettings) {
-                // Type decision
-                switch (DEVICEs[i].DeviceSettings[y].type) {
-                    case "checkbox":
-                        var DeviceSetting = document.createElement('div');
-                        DeviceSetting.className = "setting_container";
-                        if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].active) DeviceSetting.style.display = "none";
 
-                        DeviceSettingText = document.createElement('div')
-                        DeviceSettingText.className = "setting_text";
+                if (DEVICEs[i].DeviceSettings[y].DeviceTypes.indexOf(DEVICEs[i].type) == -1) {
+                    if (DEBUG) console.log(" Ignore DeviceID: " + i + " - CmdID: " + y);
+                } else {
+                    // Type decision
+                    switch (DEVICEs[i].DeviceSettings[y].type) {
+                        case "checkbox":
+                            var DeviceSetting = document.createElement('div');
+                            DeviceSetting.className = "setting_container";
+                            if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].active) DeviceSetting.style.display = "none";
 
-                        DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
+                            DeviceSettingText = document.createElement('div')
+                            DeviceSettingText.className = "setting_text";
 
-                        DeviceSetting.appendChild(DeviceSettingText);
-                        DeviceInfoDiv.appendChild(DeviceSetting);
-                        settingCheckbox = document.createElement('input');
-                        settingCheckbox.type = "checkbox";
-                        settingCheckbox.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
-                        settingCheckbox.onchange = function () {
-                            SettingsChanged(this.id);
-                        }
-                        if (DEVICEs[i].DeviceSettings[y].active) {
-                            settingCheckbox.checked = true;
-                            DeviceSetting.className += " setting_container_active";
-                        } else {
-                            DeviceSetting.className += " setting_container_inactive";
-                        }
-                        DeviceSetting.appendChild(settingCheckbox);
-                        setting_Checkbox_label = document.createElement('label');
-                        setting_Checkbox_label.htmlFor = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
-                        setting_Checkbox_label.className = "checklabel";
+                            DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
 
-                        checkmark_div = document.createElement('div');
-                        checkmark_div.className = "checkmark";
+                            DeviceSetting.appendChild(DeviceSettingText);
+                            DeviceInfoDiv.appendChild(DeviceSetting);
+                            settingCheckbox = document.createElement('input');
+                            settingCheckbox.type = "checkbox";
+                            settingCheckbox.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
+                            settingCheckbox.onchange = function () {
+                                SettingsChanged(this.id);
+                            }
+                            if (DEVICEs[i].DeviceSettings[y].active) {
+                                settingCheckbox.checked = true;
+                                DeviceSetting.className += " setting_container_active";
+                            } else {
+                                DeviceSetting.className += " setting_container_inactive";
+                            }
+                            DeviceSetting.appendChild(settingCheckbox);
+                            setting_Checkbox_label = document.createElement('label');
+                            setting_Checkbox_label.htmlFor = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
+                            setting_Checkbox_label.className = "checklabel";
 
-                        checkmark_stem = document.createElement('div');
-                        checkmark_stem.className = "checkmark_stem";
-                        checkmark_div.appendChild(checkmark_stem);
+                            checkmark_div = document.createElement('div');
+                            checkmark_div.className = "checkmark";
 
-                        checkmark_kick = document.createElement('div');
-                        checkmark_kick.className = "checkmark_kick";
-                        checkmark_div.appendChild(checkmark_kick);
+                            checkmark_stem = document.createElement('div');
+                            checkmark_stem.className = "checkmark_stem";
+                            checkmark_div.appendChild(checkmark_stem);
 
-                        setting_Checkbox_label.appendChild(checkmark_div);
+                            checkmark_kick = document.createElement('div');
+                            checkmark_kick.className = "checkmark_kick";
+                            checkmark_div.appendChild(checkmark_kick);
 
-                        DeviceSetting.appendChild(setting_Checkbox_label);
-                        break
-                    case "slider":
-                        var DeviceSetting = document.createElement('div');
-                        DeviceSetting.className = "setting_container";
-                        if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].active) DeviceSetting.style.display = "none";
-                        DeviceSettingText = document.createElement('div')
-                        DeviceSettingText.className = "setting_text";
-                        DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
-                        DeviceSetting.appendChild(DeviceSettingText);
-                        DeviceInfoDiv.appendChild(DeviceSetting);
-                        settingSlider = document.createElement('input');
-                        settingSlider.type = "range";
-                        settingSlider.min = DEVICEs[i].DeviceSettings[y].min
-                        settingSlider.max = DEVICEs[i].DeviceSettings[y].max
-                        settingSlider.className = "settings_rangeSlider"; //  ui-corner-all
-                        settingSlider.value = DEVICEs[i].DeviceSettings[y].active;
-                        settingSlider.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
-                        settingSlider.onchange = function () {
-                            SettingsChanged(this.id);
-                        }
-                        settingSlider.oninput = function () {
-                            var tmpid = this.id.replace(/setting_id_/, "setting_id_value_")
-                            document.getElementById(tmpid).value = document.getElementById(this.id).value
-                        }
-                        DeviceSetting.appendChild(settingSlider);
-                        settingNumber = document.createElement('output');
-                        settingNumber.className = "setting_value";
-                        settingNumber.type = "hidden"
-                        settingNumber.value = DEVICEs[i].DeviceSettings[y].active;
-                        settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_value_" + i;
-                        DeviceSetting.appendChild(settingNumber);
+                            setting_Checkbox_label.appendChild(checkmark_div);
 
-                        break
-                    case "colorpick":
-                        break
-                    case "value":
-                        var DeviceSetting = document.createElement('div');
-                        DeviceSetting.className = "setting_container";
-                        if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].active) DeviceSetting.style.display = "none";
-                        DeviceSettingText = document.createElement('div')
-                        DeviceSettingText.className = "setting_text";
-                        DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
-                        DeviceSetting.appendChild(DeviceSettingText);
-                        DeviceInfoDiv.appendChild(DeviceSetting);
-                        settingNumber = document.createElement('input');
-                        settingNumber.type = "number";
-                        settingNumber.style.width = ((DEVICEs[i].DeviceSettings[y].max.toString(10).length * 12) + 5) + "px";
-                        settingNumber.className = "settings_numberBox"; //  ui-corner-all
-                        settingNumber.value = DEVICEs[i].DeviceSettings[y].active;
-                        settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
-                        settingNumber.onchange = function () {
-                            SettingsChanged(this.id);
-                        }
-                        DeviceSetting.appendChild(settingNumber);
-                        break
-                    case "readonly":
-                        var DeviceSetting = document.createElement('div');
-                        DeviceSetting.className = "setting_container";
-                        DeviceSetting.style.display = "none";
-                        DeviceSettingText = document.createElement('div')
-                        DeviceSettingText.className = "setting_text";
-                        DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
-                        DeviceSetting.appendChild(DeviceSettingText);
-                        DeviceInfoDiv.appendChild(DeviceSetting);
-                        settingNumber = document.createElement('input');
-                        settingNumber.type = "number";
-                        settingNumber.readOnly = true;
-                        settingNumber.style.width = ((DEVICEs[i].DeviceSettings[y].max.toString(10).length * 12) + 20) + "px";
-                        settingNumber.className = "settings_numberBox"; //  ui-corner-all
-                        settingNumber.value = DEVICEs[i].DeviceSettings[y].active;
-                        settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
-                        DeviceSetting.appendChild(settingNumber);
-                        break;
-                    default:
+                            DeviceSetting.appendChild(setting_Checkbox_label);
+                            break
+                        case "slider":
+                            var DeviceSetting = document.createElement('div');
+                            DeviceSetting.className = "setting_container";
+                            if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].active) DeviceSetting.style.display = "none";
+                            DeviceSettingText = document.createElement('div')
+                            DeviceSettingText.className = "setting_text";
+                            DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
+                            DeviceSetting.appendChild(DeviceSettingText);
+                            DeviceInfoDiv.appendChild(DeviceSetting);
+                            settingSlider = document.createElement('input');
+                            settingSlider.type = "range";
+                            settingSlider.min = DEVICEs[i].DeviceSettings[y].min
+                            settingSlider.max = DEVICEs[i].DeviceSettings[y].max
+                            settingSlider.className = "settings_rangeSlider"; //  ui-corner-all
+                            settingSlider.value = DEVICEs[i].DeviceSettings[y].active;
+                            settingSlider.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
+                            settingSlider.onchange = function () {
+                                SettingsChanged(this.id);
+                            }
+                            settingSlider.oninput = function () {
+                                var tmpid = this.id.replace(/setting_id_/, "setting_id_value_")
+                                document.getElementById(tmpid).value = document.getElementById(this.id).value
+                            }
+                            DeviceSetting.appendChild(settingSlider);
+                            settingNumber = document.createElement('output');
+                            settingNumber.className = "setting_value";
+                            settingNumber.type = "hidden"
+                            settingNumber.value = DEVICEs[i].DeviceSettings[y].active;
+                            settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_value_" + i;
+                            DeviceSetting.appendChild(settingNumber);
+
+                            break
+                        case "colorpick":
+                            break
+                        case "value":
+                            var DeviceSetting = document.createElement('div');
+                            DeviceSetting.className = "setting_container";
+                            if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].active) DeviceSetting.style.display = "none";
+                            DeviceSettingText = document.createElement('div')
+                            DeviceSettingText.className = "setting_text";
+                            DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
+                            DeviceSetting.appendChild(DeviceSettingText);
+                            DeviceInfoDiv.appendChild(DeviceSetting);
+                            settingNumber = document.createElement('input');
+                            settingNumber.type = "number";
+                            settingNumber.style.width = ((DEVICEs[i].DeviceSettings[y].max.toString(10).length * 12) + 5) + "px";
+                            settingNumber.className = "settings_numberBox"; //  ui-corner-all
+                            settingNumber.value = DEVICEs[i].DeviceSettings[y].active;
+                            settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
+                            settingNumber.onchange = function () {
+                                SettingsChanged(this.id);
+                            }
+                            DeviceSetting.appendChild(settingNumber);
+                            break
+                        case "readonly":
+                            var DeviceSetting = document.createElement('div');
+                            DeviceSetting.className = "setting_container";
+                            //if (!DEBUG)
+                            //DeviceSetting.style.display = "none";
+                            DeviceSettingText = document.createElement('div')
+                            DeviceSettingText.className = "setting_text";
+                            DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
+                            DeviceSetting.appendChild(DeviceSettingText);
+                            DeviceInfoDiv.appendChild(DeviceSetting);
+                            settingNumber = document.createElement('input');
+                            settingNumber.type = "number";
+                            settingNumber.readOnly = true;
+                            settingNumber.style.width = ((DEVICEs[i].DeviceSettings[y].max.toString(10).length * 12) + 20) + "px";
+                            settingNumber.className = "settings_numberBox"; //  ui-corner-all
+                            settingNumber.value = DEVICEs[i].DeviceSettings[y].active;
+                            settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
+                            DeviceSetting.appendChild(settingNumber);
+                            break;
+                        default:
+                    }
                 }
             }
 
