@@ -1,7 +1,7 @@
 "user strict";
 
-const DEBUG = 0;
-const SERIALDEBUG = 0; // show send/receive
+const DEBUG = 1;
+const SERIALDEBUG = 1; // show send/receive
 
 const MAX_TRY = 2;
 const DEFAULT_TIMEOUT = 215;
@@ -16,68 +16,68 @@ const VCP = 3;
 
 const DEVICE_types = [
     { id: 0, name: "none", filename: '' },
-    { id: 1, name: "FETtec ESC 35A", filename: 'FETTEC_35A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 2, name: "FETtec ESC 50A", filename: 'FETTEC_50A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 3, name: "FETtec ESC 7A", filename: 'FETTEC_7A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 4, name: "FETtec PRO ESC 80A", filename: 'FETTEC_PRO_80A_ESC_G4_', start_addr: 3800, blOnly: false },
-    { id: 5, name: "FETtec PRO ESC 60A", filename: 'FETTEC_PRO_60A_ESC_S32K_', start_addr: 4000, blOnly: false },
-    { id: 6, name: "FETtec ESC 45A", filename: 'FETTEC_45A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 9, name: "FETtec PRO ESC 45A", filename: 'FETTEC_PRO_45A_ESC_G4_', start_addr: 3800, blOnly: false },
-    { id: 64, name: "ESC 15A", filename: 'ESC_DEF_GD_15A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 65, name: "ESC 15A", filename: 'ESC_ADV_GD_15A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 1, name: "FETtec ESC 35A", filename: 'FETTEC_35A_ESC_G0_', start_addr: 1800, blOnly: false, activation: false },
+    { id: 2, name: "FETtec ESC 50A", filename: 'FETTEC_50A_ESC_G0_', start_addr: 1800, blOnly: false, activation: false },
+    { id: 3, name: "FETtec ESC 7A", filename: 'FETTEC_7A_ESC_G0_', start_addr: 1800, blOnly: false, activation: false },
+    { id: 4, name: "FETtec PRO ESC 80A", filename: 'FETTEC_PRO_80A_ESC_G4_', start_addr: 3800, blOnly: false, activation: false },
+    { id: 5, name: "FETtec PRO ESC 60A", filename: 'FETTEC_PRO_60A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: false },
+    { id: 6, name: "FETtec ESC 45A", filename: 'FETTEC_45A_ESC_G0_', start_addr: 1800, blOnly: false, activation: false },
+    { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_', start_addr: 1800, blOnly: false, activation: false },
+    { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 9, name: "FETtec PRO ESC 45A", filename: 'FETTEC_PRO_45A_ESC_G4_', start_addr: 3800, blOnly: false, activation: false },
+    { id: 64, name: "ESC 15A", filename: 'ESC_DEF_GD_15A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 65, name: "ESC 15A", filename: 'ESC_ADV_GD_15A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
     //    { id: 66, name: "ESC 15A", filename: '' },
     //    { id: 67, name: "ESC 15A", filename: '' },
-    { id: 68, name: "ESC 25A", filename: 'ESC_DEF_GD_25A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 69, name: "ESC 25A", filename: 'ESC_ADV_GD_25A_ESC_G0_', start_addr: 1800, blOnly: false },
+    { id: 68, name: "ESC 25A", filename: 'ESC_DEF_GD_25A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 69, name: "ESC 25A", filename: 'ESC_ADV_GD_25A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
     //    { id: 70, name: "ESC 25A", filename: '' },
     //    { id: 71, name: "ESC 25A", filename: '' },
-    { id: 72, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 73, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 74, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G4_', start_addr: 3800, blOnly: false },
-    { id: 75, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G4_', start_addr: 3800, blOnly: false },
+    { id: 72, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 73, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 74, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 75, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
     //    { id: 76, name: "ESC 35A", filename: '' },
     //    { id: 77, name: "ESC 35A", filename: '' },
-    { id: 78, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 79, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 80, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 3800, blOnly: false },
-    { id: 81, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 3800, blOnly: false },
-    { id: 82, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false },
-    { id: 83, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false },
+    { id: 78, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 79, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 80, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 81, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 82, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 83, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
     //    { id: 84, name: "ESC 45A", filename: '' },
     //    { id: 85, name: "ESC 45A", filename: '' },
-    { id: 86, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 87, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 88, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_', start_addr: 3800, blOnly: false },
-    { id: 89, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_', start_addr: 3800, blOnly: false },
-    { id: 90, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_', start_addr: 4000, blOnly: false },
-    { id: 91, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_', start_addr: 4000, blOnly: false },
+    { id: 86, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 87, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 88, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 89, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 90, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 91, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
     //    { id: 92, name: "ESC 55A", filename: '' },
     //    { id: 93, name: "ESC 55A", filename: '' },
-    { id: 94, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 95, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_', start_addr: 1800, blOnly: false },
-    { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_', start_addr: 3800, blOnly: false },
-    { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_', start_addr: 3800, blOnly: false },
-    { id: 98, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_', start_addr: 4000, blOnly: false },
-    { id: 99, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_', start_addr: 4000, blOnly: false },
+    { id: 94, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 95, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 98, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 99, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
     //    { id: 100, name: "ESC 65A", filename: '' },
     //    { id: 101, name: "ESC 65A", filename: '' },
-    { id: 102, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_', start_addr: 3800, blOnly: false },
-    { id: 103, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_', start_addr: 3800, blOnly: false },
-    { id: 104, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_', start_addr: 4000, blOnly: false },
-    { id: 105, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_', start_addr: 4000, blOnly: false },
+    { id: 102, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 103, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 104, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 105, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
     //    { id: 106, name: "ESC 80A", filename: '' },
     //    { id: 107, name: "ESC 80A", filename: '' },
-    { id: 102, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, blOnly: false },
-    { id: 103, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, blOnly: false },
-    { id: 104, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false },
-    { id: 105, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false },
+    { id: 102, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 103, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 104, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 105, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
     //    { id: 106, name: "ESC 100A", filename: '' },
     //    { id: 107, name: "ESC 100A", filename: '' },
-    { id: 127, name: "FETtec F3 NANO-FC", filename: 'FETTEC_FC_NANO-', start_addr: 3800, blOnly: true },
-    { id: 128, name: "FETtec G4 FC", filename: 'FETTEC_FC_G4-', start_addr: 3800, blOnly: true },
-    { id: 129, name: "FETtec G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true }
+    { id: 127, name: "FETtec F3 NANO-FC", filename: 'FETTEC_FC_NANO-', start_addr: 3800, blOnly: true, activation: false },
+    { id: 128, name: "FETtec G4 FC", filename: 'FETTEC_FC_G4-', start_addr: 3800, blOnly: true, activation: false },
+    { id: 129, name: "FETtec G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true, activation: false }
 ];
 
 const Serial_Options = [
@@ -136,7 +136,7 @@ function DEVICE() {
     this.version = 0;
     this.subversion = 0;
     this.activated = 0;
-    this.activationkey = 0;
+    this.activationkey = [];
     this.Device_select_Input = 0;
     this.selected = true;
     this.loadingBar = 0;
@@ -186,6 +186,8 @@ function DEVICE() {
 var actDeviceFlashPage = 0;
 var actDeviceFlashStat = 0;
 var activationActive = 0;
+var activationRequired = 0;
+var keycollectActive = 0;
 var addressCounter = 0
 var afterFlashedDisplay = 0;
 var buttonsDisabled = 0;
@@ -196,6 +198,7 @@ var communicationErrorWarningDone = 0;
 var connectionType = KISS_PT;
 var connection_attempts = 0;
 var deviceActivateId = 0;
+var deviceKeyId = 0;
 var deviceIdIndex = 0;
 var deviceSettingIndex = 0;
 var devicesDisplayed = 0;
@@ -363,16 +366,18 @@ onload = function () {
         $('#con_area').append('<button id="debug_button">Debug</button>');
         $('#debug_button').button().click(function () {
             // return debug to console
+            change_Devices_status(0, 1, 1);
             console.log('ESCs[]');
             console.dir(DEVICEs);
-            console.log('SerialConnection[]');
-            console.dir(SerialConnection);
-            console.log('Version: ' + chrome.runtime.getManifest().version);
-            console.log('Update details');
-            console.dir(versionCheck);
-            console.log("DEBUG");
-            console.log(FW_update);
+            //console.log('SerialConnection[]');
+            //console.dir(SerialConnection);
+            //console.log('Version: ' + chrome.runtime.getManifest().version);
+            //console.log('Update details');
+            //console.dir(versionCheck);
+            //console.log("DEBUG");
+            //console.log(FW_update);
             //OW_activate();
+            keyCollect_activate();
             //showLogoEditor(startLogoWidth, startLogoHeight, FW_update.WhiteStartLogoArr, FW_update.BlackStartLogoArr, FW_update.WhiteStartLogoPos, FW_update.BlackStartLogoPos);
             return
         });
@@ -562,6 +567,8 @@ function Reconnect() {
 function disconnect() {
     selectedMenu = 0;
     activationActive = 0;
+    keycollectActive = 0;
+    activationRequired = 0;
     bytesCount = 1;
     connection_attempts = 0;
 
@@ -624,11 +631,75 @@ function disconnect() {
     Gen_Menu_Buttons(-1, true);
 }
 
-function OW_activate() {
-    activationActive = 1;
-    deviceActivateId = 0;
+function keyCollect_activate() {
+    keycollectActive = 1;
+    deviceKeyId = 0;
 }
 
+function OW_activate() {
+    if (activationRequired == 1) {
+        activationActive = 1;
+        deviceActivateId = 0;
+    }
+}
+
+var tmpkey = [];
+
+function keycollectLoop() {
+    while ((!(deviceKeyId in DEVICEs)) && deviceKeyId < 25) deviceKeyId++;
+    if (DEVICE_types.find(x => x.id === DEVICEs[deviceKeyId].type).blOnly == true || DEVICE_types.find(x => x.id === DEVICEs[deviceKeyId].type).activation == false) {
+        if (DEBUG) console.log("Device " + deviceKeyId + " is blOnly or already activated next.");
+        deviceKeyId++;
+    }
+    if (deviceKeyId >= 25) {
+        console.log("Key collect completed")
+        console.log(DEVICEs)
+        keycollectActive = 0;
+        OW_activate();
+        return;
+    } else {
+
+        if (DEVICEs[deviceKeyId].activated == 1) {
+            console.log("Device " + deviceKeyId + " already actiated.")
+        } else {
+            if (activationRequired == 0) activationRequired = 1;
+            if (DEVICEs[deviceKeyId].activationkey != null && DEVICEs[deviceKeyId].activationkey.length != null && DEVICEs[deviceKeyId].activationkey.length > 0 && DEVICEs[deviceKeyId].activationkey[0] >= 0) {
+                // array exists and is not empty
+                console.log("Key for device " + deviceKeyId + " already collected.")
+            } else {
+                console.log("Key collect for device " + deviceKeyId)
+
+                var tmpSN = "";
+                var tmpEPROM = DEVICEs[deviceKeyId].DeviceSettings[0].active;
+                var tmpID = deviceKeyId;
+                for (var y = 0; y < 12; y++)
+                    tmpSN += dec2hex(DEVICEs[deviceKeyId].SN[y]);
+
+                DEVICEs[deviceKeyId].activationkey = [-2, -2, -2, -2]; // -2 means to be collected
+
+                $.ajax({
+                    url: "https://licensing.fettec.net/activation.php?id=" + tmpSN + "&ver=" + tmpEPROM,
+                    type: 'GET',
+                    crossDomain: true,
+                    success: function (data) {
+                        if (DEBUG) console.log("Collect key '" + data + "' for SN: " + tmpSN);
+                        DEVICEs[tmpID].activationkey = data.split(",");
+                    },
+                    error: function (data) {
+                        if (DEBUG) console.log("ERROR on collect key")
+                        $(".ui-notification-container").notification("create", {
+                            title: "Unable to activate",
+                            content: "Activation require internet connection.",
+                        });
+                        DEVICEs[tmpID].activationkey = [-1, -1, -1, -1] // -1 connectivty
+                    }
+                });
+                waitLoops = 200;
+            }
+        }
+        deviceKeyId++;
+    }
+}
 function activationLoop() {
     if (waitForResponseID == 0) {
         while ((!(deviceActivateId in DEVICEs)) && deviceActivateId < 25) deviceActivateId++;
@@ -638,29 +709,11 @@ function activationLoop() {
         }
         if (deviceActivateId == 25) {
             activationActive = 0;
+            activationRequired = 0;
             return;
         }
-        // collect activationkey //  DEVICEs[DEVICE_activate_ID].activationkey
-        // 66007e000d50363146353920
-        /*
-                $.ajax({
-                    url: "",
-                    type: 'GET',
-                    crossDomain: true,
-                    success: function (data) {
-                        if (DEBUG) console.log("Collect key from ");
-                        //DEVICEs[ESCactivateID].activationkey = data;
-                    },
-                    error: function (data) {
-                        if (DEBUG) console.log("ERROR on collect key")
-                        $(".ui-notification-container").notification("create", {
-                            title: "Unable to activate",
-                            content: "Activation require internet connection.",
-                        });
-        
-                    }
-                }); 
-                */
+        // TODO
+
         if (switchStatus == 0) {
             // request
             if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OK_OK cmd");
@@ -711,9 +764,21 @@ function activationLoop() {
                 switchStatus++;
             } else if (switchStatus == 2) {
                 if (DEVICEs[deviceActivateId].activated == 0) {
-                    if (DEBUG) console.log("Activating DEVICE " + deviceActivateId + " with key " + DEVICEs[deviceActivateId].activationkey);
-                    // -6F0A6E67
-                    send_OneWire_package(deviceActivateId, 0, [OW_SET_ACTIVATION, -0x6F, 0x0A, 0x6E, 0x67]); // need to replace with proper key
+                    if (DEBUG) console.log("Activating DEVICE " + deviceActivateId + " with key ") 
+                    if (DEBUG) console.log (DEVICEs[deviceActivateId].activationkey);
+
+                    // TODO
+                    // HEX URL - https://licensing.fettec.net/activation.php?id=630085001450363148303920&ver=35
+                    // SN HEX - 630085001450363148303920
+                    // EEPROM - 35
+                    //KEY0 DEC - 159
+                    //KEY1 DEC - 148
+                    //KEY2 DEC - 252
+                    //KEY3 DEC - 156
+                    // Activation DEC - 2633798815
+                    //send_OneWire_package(deviceActivateId, 0, [OW_SET_ACTIVATION, 159, 148, 252, 156]);
+
+                    send_OneWire_package(deviceActivateId, 0, [OW_SET_ACTIVATION, DEVICEs[deviceActivateId].activationkey[0], DEVICEs[deviceActivateId].activationkey[1], DEVICEs[deviceActivateId].activationkey[2], DEVICEs[deviceActivateId].activationkey[3]]);
                     waitForResponseID = deviceActivateId;
                     waitForResponseType = 0;
                     waitForResponseLength = 7;
@@ -739,6 +804,7 @@ function activationLoop() {
                 deviceActivateId++;
             } else if (switchStatus == 4) {
                 console.log(responsePackage);
+                if (DEBUG) console.log("DEVICE " + deviceActivateId + " activation done. Next device.");
                 switchStatus = 0;
                 deviceActivateId++;
             }
@@ -948,6 +1014,9 @@ function Internal_Loop() {
             if (activationActive == 1) {
                 activationLoop();
             }
+            if (keycollectActive == 1) {
+                keycollectLoop();
+            }
         }
     }
 }
@@ -1072,9 +1141,6 @@ function check_ESCs_In_BL() {
             switchDeviceId++;
         }
     }
-}
-
-function refresh_displayed_version() {
 }
 
 //===================================================================================== Display handling
@@ -1771,8 +1837,6 @@ function initFWUpdater() {
             .button()
             .click(function () {
                 if (DEBUG) console.log("check for remote firmware");
-                // TODO
-                //loadGithubReleases("https://api.github.com/repos/lichtl/test/releases", function (data) {
                 loadGithubReleases("https://api.github.com/repos/FETtec/ESC-Firmware/releases", function (data) {
                     if ($('#remoteFWSelect').length == 0) {
                         $("#toolbar").append($('<select/>').attr({ id: 'remoteFWSelect' }));
