@@ -3,8 +3,8 @@
 const DEBUG = 0;
 const SERIALDEBUG = 0; // show send/receive
 
-const APIKEY = 0;
-const USEAPI = 1;
+const APIKEY = "";
+const USEAPI = 0;
 
 const MAX_TRY = 2;
 const DEFAULT_TIMEOUT = 215;
@@ -43,41 +43,41 @@ const DEVICE_types = [
     //    { id: 76, name: "ESC 35A", filename: '' },
     //    { id: 77, name: "ESC 35A", filename: '' },
     { id: 78, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
-    { id: 79, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 79, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
     { id: 80, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 81, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 81, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
     { id: 82, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
-    { id: 83, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 83, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
     //    { id: 84, name: "ESC 45A", filename: '' },
     //    { id: 85, name: "ESC 45A", filename: '' },
     { id: 86, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
-    { id: 87, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 87, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
     { id: 88, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 89, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 89, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
     { id: 90, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
-    { id: 91, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 91, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
     //    { id: 92, name: "ESC 55A", filename: '' },
     //    { id: 93, name: "ESC 55A", filename: '' },
     { id: 94, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
-    { id: 95, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 95, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
     { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 97, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
     { id: 98, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
-    { id: 99, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 99, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
     //    { id: 100, name: "ESC 65A", filename: '' },
     //    { id: 101, name: "ESC 65A", filename: '' },
     { id: 102, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 103, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 103, name: "ESC 80A", filename: 'ESC_ADV_GD_80A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
     { id: 104, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
-    { id: 105, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 105, name: "ESC 80A", filename: 'ESC_ADV_GD_80A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
     //    { id: 106, name: "ESC 80A", filename: '' },
     //    { id: 107, name: "ESC 80A", filename: '' },
-    { id: 102, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 103, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 104, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
-    { id: 105, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
-    //    { id: 106, name: "ESC 100A", filename: '' },
-    //    { id: 107, name: "ESC 100A", filename: '' },
+    { id: 108, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 109, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 110, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 111, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    //    { id: 112, name: "ESC 100A", filename: '' },
+    //    { id: 113, name: "ESC 100A", filename: '' },
     { id: 127, name: "FETtec F3 NANO-FC", filename: 'FETTEC_FC_NANO-', start_addr: 3800, blOnly: true, activation: false },
     { id: 128, name: "FETtec G4 FC", filename: 'FETTEC_FC_G4-', start_addr: 3800, blOnly: true, activation: false },
     { id: 129, name: "FETtec G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true, activation: false }
@@ -1065,7 +1065,8 @@ function check_ESCs_In_BL() {
             }
             if (checkActivation) {
                 checkActivation = 0;
-                if (DEBUG) console.log("All ESC in Firmware ready for activation")
+                if (DEBUG) console.log("All devices in Firmware ready for activation")
+                keyCollect_activate();
             }
             if (enableButtonsAfterSwitch) {
                 enableButtons();
