@@ -1,7 +1,7 @@
 "user strict";
 
 const DEBUG = 1;
-const SERIALDEBUG = 1; // show send/receive
+const SERIALDEBUG = 0; // show send/receive
 
 const MAX_TRY = 2;
 const DEFAULT_TIMEOUT = 215;
@@ -228,6 +228,7 @@ var readSetting = 0;
 var reconnectOnTxDone = 0;
 var reconnectTry = 0;
 var refreshVersion = 0;
+var checkActivation = 0;
 var responseIndex = 0;
 var saveNewSettingsToId = 0;
 var scanDone = 0;
@@ -366,9 +367,9 @@ onload = function () {
         $('#con_area').append('<button id="debug_button">Debug</button>');
         $('#debug_button').button().click(function () {
             // return debug to console
-            change_Devices_status(0, 1, 1);
-            console.log('ESCs[]');
-            console.dir(DEVICEs);
+            //change_Devices_status(0, 1, 1);
+            //console.log('ESCs[]');
+            //console.dir(DEVICEs);
             //console.log('SerialConnection[]');
             //console.dir(SerialConnection);
             //console.log('Version: ' + chrome.runtime.getManifest().version);
@@ -652,31 +653,26 @@ function keycollectLoop() {
         deviceKeyId++;
     }
     if (deviceKeyId >= 25) {
-        console.log("Key collect completed")
-        console.log(DEVICEs)
+        if (DEBUG) console.log("Key collect completed")
         keycollectActive = 0;
         OW_activate();
         return;
     } else {
 
         if (DEVICEs[deviceKeyId].activated == 1) {
-            console.log("Device " + deviceKeyId + " already actiated.")
+            if (DEBUG) console.log("Device " + deviceKeyId + " already actiated skip key collection.")
         } else {
             if (activationRequired == 0) activationRequired = 1;
             if (DEVICEs[deviceKeyId].activationkey != null && DEVICEs[deviceKeyId].activationkey.length != null && DEVICEs[deviceKeyId].activationkey.length > 0 && DEVICEs[deviceKeyId].activationkey[0] >= 0) {
-                // array exists and is not empty
-                console.log("Key for device " + deviceKeyId + " already collected.")
+                if (DEBUG) console.log("Key for device " + deviceKeyId + " already collected.")
             } else {
-                console.log("Key collect for device " + deviceKeyId)
-
+                if (DEBUG) console.log("Key collect for device " + deviceKeyId)
                 var tmpSN = "";
                 var tmpEPROM = DEVICEs[deviceKeyId].DeviceSettings[0].active;
                 var tmpID = deviceKeyId;
                 for (var y = 0; y < 12; y++)
                     tmpSN += dec2hex(DEVICEs[deviceKeyId].SN[y]);
-
                 DEVICEs[deviceKeyId].activationkey = [-2, -2, -2, -2]; // -2 means to be collected
-
                 $.ajax({
                     url: "https://licensing.fettec.net/activation.php?id=" + tmpSN + "&ver=" + tmpEPROM,
                     type: 'GET',
@@ -712,8 +708,6 @@ function activationLoop() {
             activationRequired = 0;
             return;
         }
-        // TODO
-
         if (switchStatus == 0) {
             // request
             if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OK_OK cmd");
@@ -721,7 +715,19 @@ function activationLoop() {
             waitForResponseID = deviceActivateId;
             waitForResponseType = 0;
             waitForResponseLength = 7;
-        } else {
+        } else if (switchStatus == 1) {
+            if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OW_GET_ACTIVATION cmd");
+            send_OneWire_package(deviceActivateId, 0, [OW_GET_ACTIVATION]);
+            waitForResponseID = deviceActivateId;
+            waitForResponseType = 0;
+            waitForResponseLength = 7;
+        } else if (switchStatus == 2) {
+            if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OW_SET_ACTIVATION cmd '" + DEVICEs[deviceActivateId].activationkey.join() + "'");
+            send_OneWire_package(deviceActivateId, 0, [OW_SET_ACTIVATION, DEVICEs[deviceActivateId].activationkey[0], DEVICEs[deviceActivateId].activationkey[1], DEVICEs[deviceActivateId].activationkey[2], DEVICEs[deviceActivateId].activationkey[3]]);
+            waitForResponseID = deviceActivateId;
+            waitForResponseType = 0;
+            waitForResponseLength = 7;
+        } else if (switchStatus == 3) {
             if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OW_GET_ACTIVATION cmd");
             send_OneWire_package(deviceActivateId, 0, [OW_GET_ACTIVATION]);
             waitForResponseID = deviceActivateId;
@@ -738,6 +744,8 @@ function activationLoop() {
                     waitForResponseID = 0;
                     if (DEBUG) console.log("DEVICE " + deviceActivateId + " is in firmware");
                 } else {
+
+
                     if (switchProblem == 0) {
                         if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OW_BL_START_FW cmd");
                         send_OneWire_package(deviceActivateId, 0, [OW_BL_START_FW]);
@@ -749,7 +757,7 @@ function activationLoop() {
                         waitLoops = 20;
                     } else if (switchProblem < 20) {
                         if (DEBUG) console.log("ESC with id: " + deviceActivateId + " don't switches ->retry");
-                        send_OneWire_package(deviceActivateId, 0, [switchCommand]);
+                        send_OneWire_package(deviceActivateId, 0, [OW_BL_START_FW]);
                         switchProblem++;
                         waitLoops = 20;
                     } else {
@@ -761,50 +769,28 @@ function activationLoop() {
             } else if (switchStatus == 1) {
                 DEVICEs[deviceActivateId].activated = (responsePackage[5]);
                 if (DEBUG) console.log("DEVICE " + deviceActivateId + " response is " + DEVICEs[deviceActivateId].activated);
-                switchStatus++;
-            } else if (switchStatus == 2) {
-                if (DEVICEs[deviceActivateId].activated == 0) {
-                    if (DEBUG) console.log("Activating DEVICE " + deviceActivateId + " with key ") 
-                    if (DEBUG) console.log (DEVICEs[deviceActivateId].activationkey);
-
-                    // TODO
-                    // HEX URL - https://licensing.fettec.net/activation.php?id=630085001450363148303920&ver=35
-                    // SN HEX - 630085001450363148303920
-                    // EEPROM - 35
-                    //KEY0 DEC - 159
-                    //KEY1 DEC - 148
-                    //KEY2 DEC - 252
-                    //KEY3 DEC - 156
-                    // Activation DEC - 2633798815
-                    //send_OneWire_package(deviceActivateId, 0, [OW_SET_ACTIVATION, 159, 148, 252, 156]);
-
-                    send_OneWire_package(deviceActivateId, 0, [OW_SET_ACTIVATION, DEVICEs[deviceActivateId].activationkey[0], DEVICEs[deviceActivateId].activationkey[1], DEVICEs[deviceActivateId].activationkey[2], DEVICEs[deviceActivateId].activationkey[3]]);
-                    waitForResponseID = deviceActivateId;
-                    waitForResponseType = 0;
-                    waitForResponseLength = 7;
-                    switchStatus++;
-                } else {
-                    if (DEBUG) console.log("DEVICE " + deviceActivateId + " is already activated.");
+                if (responsePackage[5] == 1) {
+                    if (DEBUG) console.log("DEVICE " + deviceActivateId + " is already activated. Next.");
                     switchStatus = 0;
                     deviceActivateId++;
+                } else {
+                    switchStatus++;
                 }
-            } else if (switchStatus == 3) {
+            } else if (switchStatus == 2) {
                 if (responsePackage[5] == OW_OK) {
                     if (DEBUG) console.log("DEVICE " + deviceActivateId + " response OK.");
-                    if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OW_GET_ACTIVATION cmd");
-                    send_OneWire_package(deviceActivateId, 0, [OW_GET_ACTIVATION]);
-                    waitForResponseID = deviceActivateId;
-                    waitForResponseType = 0;
-                    waitForResponseLength = 7;
-                    switchStatus++;
+                    //switchStatus++;
                 } else {
                     if (DEBUG) console.log("DEVICE " + deviceActivateId + " activation wrong response: " + responsePackage[5]);
+                    $(".ui-notification-container").notification("create", {
+                        title: "Unable to activate device " + deviceActivateId,
+                        content: "Activation failed. Serial number not in database.",
+                    });
                 }
-                switchStatus = 0;
-                deviceActivateId++;
-            } else if (switchStatus == 4) {
-                console.log(responsePackage);
-                if (DEBUG) console.log("DEVICE " + deviceActivateId + " activation done. Next device.");
+                switchStatus++;
+            } else if (switchStatus == 3) {
+                DEVICEs[deviceActivateId].activated = (responsePackage[5]);
+                if (DEBUG) console.log("DEVICE " + deviceActivateId + " response is " + DEVICEs[deviceActivateId].activated);
                 switchStatus = 0;
                 deviceActivateId++;
             }
@@ -994,7 +980,7 @@ function Internal_Loop() {
             Gen_Menu_Buttons(selectedMenu, false);
         } else if (!firmwareUpdaterInitDone) {
             initFWUpdater();
-            change_Devices_status(0, 1, 0);
+            change_Devices_status(1, 1, 0, 1);
             firmwareUpdaterInitDone = 1;
         }
     }
@@ -1023,12 +1009,13 @@ function Internal_Loop() {
 
 //===================================================================================== Switch from Bootloader to Firmware and back
 
-function change_Devices_status(stat, enableButtonsIfDone = 0, refreshVersionIfDone = 0) {
+function change_Devices_status(stat, enableButtonsIfDone = 0, refreshVersionIfDone = 0, checkActivationIfDone = 0) {
     disableButtons();
     switchDeviceId = 0;
     switchProblem = 0;
     enableButtonsAfterSwitch = enableButtonsIfDone;
     refreshVersion = refreshVersionIfDone;
+    checkActivation = checkActivationIfDone;
     if (stat == 0) {
         expectedHeader = OW_RESPONSE_IN_BL;
         switchCommand = OW_RESET_TO_BL;
@@ -1058,6 +1045,10 @@ function check_ESCs_In_BL() {
                 document.getElementById("overview").innerHTML = "";
                 displayDevices(document.getElementById("overview"));
             }
+            if (checkActivation) {
+                checkActivation = 0;
+                if (DEBUG) console.log("All ESC in Firmware ready for activation")
+            }
             if (enableButtonsAfterSwitch) {
                 enableButtons();
                 enableButtonsAfterSwitch = 0;
@@ -1077,7 +1068,7 @@ function check_ESCs_In_BL() {
             waitForResponseType = 0;
             waitForResponseLength = 7;
             if (DEBUG) console.log("check with id: " + switchDeviceId + " ");
-        } else {
+        } else if (switchStatus == 1) {
             if (refreshVersion) {
                 send_OneWire_package(switchDeviceId, 0, [OW_REQ_SW_VER]);
                 waitForResponseID = switchDeviceId;
@@ -1085,10 +1076,32 @@ function check_ESCs_In_BL() {
                 waitForResponseLength = 8;
                 if (DEBUG) console.log("check FW version with id: " + switchDeviceId + " ");
             } else {
+                switchStatus++;
+            }
+        } else if (switchStatus == 2) {
+            if (checkActivation) {
+                send_OneWire_package(switchDeviceId, 0, [OW_GET_ACTIVATION]);
+                waitForResponseID = switchDeviceId;
+                waitForResponseType = 0;
+                waitForResponseLength = 7;
+                if (DEBUG) console.log("check Activation of id: " + switchDeviceId + " ");
+            } else {
+                switchStatus++;
+            }
+        } else if (switchStatus == 3) {
+            if (checkActivation) {
+                send_OneWire_package(switchDeviceId, 0, [OW_GET_EEVER]);
+                waitForResponseID = switchDeviceId;
+                waitForResponseType = 0;
+                waitForResponseLength = 7;
+                if (DEBUG) console.log("check EEPROM VERSION of id: " + switchDeviceId + " ");
+            } else {
                 switchStatus = 0;
                 switchDeviceId++;
             }
         }
+
+
     } else {
         var responsePackage = checkForRespPackage();
         if (responsePackage) {
@@ -1124,17 +1137,26 @@ function check_ESCs_In_BL() {
                         switchProblem = 0;
                     }
                 }
-            } else {
+            } else if (switchStatus == 1) {
                 DEVICEs[switchDeviceId].version = (responsePackage[5] / 10);
                 DEVICEs[switchDeviceId].subversion = (responsePackage[6] / 100);
                 if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " software version is: " + DEVICEs[switchDeviceId].version + "." + DEVICEs[switchDeviceId].subversion);
+                switchStatus++;
+            } else if (switchStatus == 2) {
+                DEVICEs[switchDeviceId].activated = responsePackage[5];
+                if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " activation status is: " + DEVICEs[switchDeviceId].activated);
+                switchStatus++;
+            }
+            else if (switchStatus == 3) {
+                DEVICEs[switchDeviceId].DeviceSettings[0].active = responsePackage[5];
+                if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " eeprom version status is: " + responsePackage[5]);
                 switchStatus = 0;
                 switchDeviceId++;
             }
-        } else if (++timeoutDeviceIDs[switchDeviceId] == timeout_delay || timeoutDeviceIDs[switchDeviceId] == timeout_delay * 2 || timeoutDeviceIDs[switchDeviceId] == timeout_delay * 3) {
+        } else if (++timeoutDeviceIDs[switchDeviceId] == timeout_delay || timeoutDeviceIDs[switchDeviceId] == timeout_delay * 3 || timeoutDeviceIDs[switchDeviceId] == timeout_delay * 5) {
             sendBytes(LastSentData);
             if (DEBUG) console.log("no response, retrying");
-        } else if (timeoutDeviceIDs[switchDeviceId] > timeout_delay * 3) {
+        } else if (timeoutDeviceIDs[switchDeviceId] > timeout_delay * 5) {
             if (DEBUG) console.log("no response from DEVICE with id: " + switchDeviceId + " ->stop");
             serialBadError = 1;
             waitForResponseID = 0;
@@ -1232,7 +1254,7 @@ function ChangeDisplay(displayType) {
         switch (displayType) {
             case 0:
                 initFWUpdater();
-                change_Devices_status(0, 1, 0);
+                change_Devices_status(1, 1, 0);
                 break;
             case 1:
                 initConfig();
@@ -1244,7 +1266,6 @@ function ChangeDisplay(displayType) {
 
     }
 }
-
 //===================================================================================== DEVICE communication
 
 function checkForRespPackage() {
@@ -2125,7 +2146,7 @@ function FlashProcessLoop() {
     } else {
         if (afterFlashedDisplay == 0) {
             if (is_USB_only_bootloader == 0) {
-                change_Devices_status(1);
+                change_Devices_status(1, 0, 1);
             } else {
                 $("#dialog").text("Firmware update done! Please power cycle board.");
                 $("#dialog").dialog({
@@ -2159,7 +2180,7 @@ function FlashProcessLoop() {
             FW_update.FlashProcessActive = 0;
             FW_update.fileUploadInput.disabled = false;
             FW_update.startUpdateInput.disabled = false;
-            if (is_USB_only_bootloader == 0) change_Devices_status(0, 1, 1);
+            if (is_USB_only_bootloader == 0) change_Devices_status(1, 1, 1, 1);
             $('#toolbar').empty();
             initFWUpdater(); //lets reset the
         }
