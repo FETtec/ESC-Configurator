@@ -1,7 +1,10 @@
 "user strict";
 
-const DEBUG = 1;
+const DEBUG = 0;
 const SERIALDEBUG = 0; // show send/receive
+
+const APIKEY = 0;
+const USEAPI = 1;
 
 const MAX_TRY = 2;
 const DEFAULT_TIMEOUT = 215;
@@ -151,7 +154,7 @@ function DEVICE() {
     this.TLMCanvasCTX;
     // end ESC specific settings
     this.DeviceSettings = {
-        0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "readonly", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, DeviceTypes: onAllESCs }, // must always be 0
+        0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "hidden", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, DeviceTypes: onAllESCs }, // must always be 0
         40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse motor direction", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
         41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
         42: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
@@ -378,12 +381,20 @@ onload = function () {
             //console.log("DEBUG");
             //console.log(FW_update);
             //OW_activate();
-            keyCollect_activate();
+            //keyCollect_activate();
             //showLogoEditor(startLogoWidth, startLogoHeight, FW_update.WhiteStartLogoArr, FW_update.BlackStartLogoArr, FW_update.WhiteStartLogoPos, FW_update.BlackStartLogoPos);
             return
         });
     }
+    if (USEAPI) {
+        $('#con_area').append('<button id="activate_button">Activate</button>');
+        $('#activate_button').button().click(function () {
+            keyCollect_activate();
+            return
+        });
+    }
 }
+
 onclose = function () {
     chrome.serial.disconnect(connection.connectionId, function () { });
 }
@@ -673,8 +684,11 @@ function keycollectLoop() {
                 for (var y = 0; y < 12; y++)
                     tmpSN += dec2hex(DEVICEs[deviceKeyId].SN[y]);
                 DEVICEs[deviceKeyId].activationkey = [-2, -2, -2, -2]; // -2 means to be collected
+                var tmpURL = "https://licensing.fettec.net/activation.php?id=" + tmpSN + "&ver=" + tmpEPROM;
+                if (USEAPI) tmpURL += "&api=" + APIKEY + "&type=" + DEVICEs[deviceKeyId].type;
+                console.log(tmpURL);
                 $.ajax({
-                    url: "https://licensing.fettec.net/activation.php?id=" + tmpSN + "&ver=" + tmpEPROM,
+                    url: tmpURL,
                     type: 'GET',
                     crossDomain: true,
                     success: function (data) {
@@ -690,7 +704,7 @@ function keycollectLoop() {
                         DEVICEs[tmpID].activationkey = [-1, -1, -1, -1] // -1 connectivty
                     }
                 });
-                waitLoops = 200;
+                waitLoops = 120;
             }
         }
         deviceKeyId++;
@@ -785,7 +799,11 @@ function activationLoop() {
                     $(".ui-notification-container").notification("create", {
                         title: "Unable to activate device " + deviceActivateId,
                         content: "Activation failed. Serial number not in database.",
-                    });
+                    },
+                        {
+                            sticky: true
+                        }
+                    );
                 }
                 switchStatus++;
             } else if (switchStatus == 3) {
@@ -1633,10 +1651,27 @@ function displayDevices(ParentElement) {
                             }
                             DeviceSetting.appendChild(settingNumber);
                             break
+                        case "hidden":
+                            var DeviceSetting = document.createElement('div');
+                            DeviceSetting.className = "setting_container";
+                            DeviceSetting.style.display = "none";
+                            DeviceSettingText = document.createElement('div')
+                            DeviceSettingText.className = "setting_text";
+                            DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
+                            DeviceSetting.appendChild(DeviceSettingText);
+                            DeviceInfoDiv.appendChild(DeviceSetting);
+                            settingNumber = document.createElement('input');
+                            settingNumber.type = "number";
+                            settingNumber.readOnly = true;
+                            settingNumber.style.width = ((DEVICEs[i].DeviceSettings[y].max.toString(10).length * 12) + 20) + "px";
+                            settingNumber.className = "settings_numberBox"; //  ui-corner-all
+                            settingNumber.value = DEVICEs[i].DeviceSettings[y].active;
+                            settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
+                            DeviceSetting.appendChild(settingNumber);
+                            break;
                         case "readonly":
                             var DeviceSetting = document.createElement('div');
                             DeviceSetting.className = "setting_container";
-                            //if (!DEBUG)
                             //DeviceSetting.style.display = "none";
                             DeviceSettingText = document.createElement('div')
                             DeviceSettingText.className = "setting_text";
