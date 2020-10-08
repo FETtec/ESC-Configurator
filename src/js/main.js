@@ -18,7 +18,7 @@ const USB_UART = 2;
 const VCP = 3;
 
 const DEVICE_types = [
-    { id: 0, name: "none", filename: '' },
+    { id: 0, name: "none", filename: '', blOnly: false, activation: false },
     { id: 1, name: "FETtec ESC 35A", filename: 'FETTEC_35A_ESC_G0_', start_addr: 1800, blOnly: false, activation: false },
     { id: 2, name: "FETtec ESC 50A", filename: 'FETTEC_50A_ESC_G0_', start_addr: 1800, blOnly: false, activation: false },
     { id: 3, name: "FETtec ESC 7A", filename: 'FETTEC_7A_ESC_G0_', start_addr: 1800, blOnly: false, activation: false },
@@ -386,13 +386,15 @@ onload = function () {
             return
         });
     }
-    if (USEAPI) {
-        $('#con_area').append('<button id="activate_button">Activate</button>');
-        $('#activate_button').button().click(function () {
-            keyCollect_activate();
-            return
-        });
-    }
+    /*
+        if (USEAPI) {
+            $('#con_area').append('<button id="activate_button">Activate</button>');
+            $('#activate_button').button().click(function () {
+                keyCollect_activate();
+                return
+            });
+        }
+    */
 }
 
 onclose = function () {
@@ -659,11 +661,17 @@ var tmpkey = [];
 
 function keycollectLoop() {
     while ((!(deviceKeyId in DEVICEs)) && deviceKeyId < 25) deviceKeyId++;
+    if (deviceKeyId == 25) {
+        if (DEBUG) console.log("Key collect completed")
+        keycollectActive = 0;
+        OW_activate();
+        return;
+    }
     if (DEVICE_types.find(x => x.id === DEVICEs[deviceKeyId].type).blOnly == true || DEVICE_types.find(x => x.id === DEVICEs[deviceKeyId].type).activation == false) {
         if (DEBUG) console.log("Device " + deviceKeyId + " is blOnly or already activated next.");
         deviceKeyId++;
     }
-    if (deviceKeyId >= 25) {
+    if (deviceKeyId == 25) {
         if (DEBUG) console.log("Key collect completed")
         keycollectActive = 0;
         OW_activate();
@@ -686,7 +694,6 @@ function keycollectLoop() {
                 DEVICEs[deviceKeyId].activationkey = [-2, -2, -2, -2]; // -2 means to be collected
                 var tmpURL = "https://licensing.fettec.net/activation.php?id=" + tmpSN + "&ver=" + tmpEPROM;
                 if (USEAPI) tmpURL += "&api=" + APIKEY + "&type=" + DEVICEs[deviceKeyId].type;
-                console.log(tmpURL);
                 $.ajax({
                     url: tmpURL,
                     type: 'GET',
@@ -713,7 +720,12 @@ function keycollectLoop() {
 function activationLoop() {
     if (waitForResponseID == 0) {
         while ((!(deviceActivateId in DEVICEs)) && deviceActivateId < 25) deviceActivateId++;
-        if (DEVICE_types.find(x => x.id === DEVICEs[deviceActivateId].type).blOnly == true) {
+        if (deviceActivateId == 25) {
+            activationActive = 0;
+            activationRequired = 0;
+            return;
+        }
+        if (DEVICE_types.find(x => x.id === DEVICEs[deviceActivateId].type).blOnly == true || DEVICE_types.find(x => x.id === DEVICEs[deviceActivateId].type).activation == false) {
             if (DEBUG) console.log("Device " + deviceActivateId + " is blOnly next.");
             deviceActivateId++;
         }
@@ -722,6 +734,7 @@ function activationLoop() {
             activationRequired = 0;
             return;
         }
+
         if (switchStatus == 0) {
             // request
             if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OK_OK cmd");
