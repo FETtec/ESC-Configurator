@@ -163,6 +163,12 @@ function DEVICE() {
         45: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, DeviceTypes: onAllESCs },
         46: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, DeviceTypes: onAllESCs },
         47: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, active: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
+/*
+        48: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
+        49: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
+        50: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
+        51: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, DeviceTypes: onAllESCs },
+*/
         52: { getCommand: OW_GET_HALL_SENSOR_USAGE, setCommand: OW_SET_HALL_SENSOR_USAGE, name: "Hall Sensors", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
         53: { getCommand: OW_GET_CURRENT_LIMIT, setCommand: OW_SET_CURRENT_LIMIT, name: "Current limit", feature: "advanced", type: "value", min: 100, max: 12000, active: 0, changed: false, eever: 27, byteCount: 2, DeviceTypes: [4, 5, 9] },
         54: { getCommand: OW_GET_NO_ACTIVE_START, setCommand: OW_SET_NO_ACTIVE_START, name: "No Active Start", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
@@ -565,6 +571,7 @@ function disconnect() {
     activationRequired = 0;
     bytesCount = 1;
     connection_attempts = 0;
+    loopDeviceId = 0;
 
     sentTestPackage = 0;
     SerialConnection.pass_through = 0;
@@ -630,21 +637,19 @@ function keyCollect_activate() {
     loopDeviceId = 0;
 }
 
-function OW_activate() {
+function Activation_activate() {
     if (activationRequired == 1) {
         activationActive = 1;
         loopDeviceId = 0;
     }
 }
 
-var tmpkey = [];
-
 function keycollectLoop() {
     while ((!(loopDeviceId in DEVICEs)) && loopDeviceId < 25) loopDeviceId++;
     if (loopDeviceId == 25) {
         if (DEBUG) console.log("Key collect completed")
         keycollectActive = 0;
-        OW_activate();
+        Activation_activate();
         return;
     } else if (DEVICE_types.find(x => x.id === DEVICEs[loopDeviceId].type).blOnly == true || DEVICE_types.find(x => x.id === DEVICEs[loopDeviceId].type).activation == false) {
         if (DEBUG) console.log("Device " + loopDeviceId + " is blOnly or already activated next.");
@@ -840,7 +845,7 @@ function Internal_Loop() {
                     case BF_PT:
                         SerialConnection.RX_tail = SerialConnection.RX_head;
                         var getPT = bfProtocol_preparePassthrough();
-                        timeout_delay = DEFAULT_TIMEOUT * 2;
+                        timeout_delay = DEFAULT_TIMEOUT * 3;
                         sendBytes(getPT);
                         if (DEBUG) console.log("Requested BF passthrough");
                         waitLoops = 40;
