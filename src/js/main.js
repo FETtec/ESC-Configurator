@@ -212,7 +212,6 @@ var enableButtonsAfterSwitch = 0;
 var expectedHeader = 0;
 var extraDelay = 1;
 var firmwareUpdaterInitDone = 0;
-var flashDeviceId = 0;
 var getLength = 5;
 var interval_Speedup_Done = 0;
 var is_USB_only_bootloader = 0
@@ -2017,7 +2016,7 @@ function StartFlashProcess() {
         FW_update.fileUploadInput.disabled = true;
         FW_update.startUpdateInput.disabled = true;
         // Disable disconnect
-        flashDeviceId = 0;
+        loopDeviceId = 0;
         FW_update.FlashProcessActive = 1;
         afterFlashedDisplay = 0;
         disableButtons();
@@ -2025,55 +2024,55 @@ function StartFlashProcess() {
 }
 
 function FlashProcessLoop() {
-    while ((!(flashDeviceId in DEVICEs) || !DEVICEs[flashDeviceId].selected) && flashDeviceId < 25) flashDeviceId++;
-    if (flashDeviceId != 25) {
+    while ((!(loopDeviceId in DEVICEs) || !DEVICEs[loopDeviceId].selected) && loopDeviceId < 25) loopDeviceId++;
+    if (loopDeviceId != 25) {
         if (waitForResponseID == 0) {
             if (actDeviceFlashStat < 2) {
                 if (actDeviceFlashStat == 0) {
-                    if (DEBUG) console.log("Starting to flash DEVICE with ID: " + flashDeviceId + "...");
-                    if (!DEVICEs[flashDeviceId].asBL) {
-                        send_OneWire_package(flashDeviceId, 0, [OW_RESET_TO_BL]);
-                        if (DEBUG) console.log("reset DEVICE with ID: " + flashDeviceId + " to bootloader");
+                    if (DEBUG) console.log("Starting to flash DEVICE with ID: " + loopDeviceId + "...");
+                    if (!DEVICEs[loopDeviceId].asBL) {
+                        send_OneWire_package(loopDeviceId, 0, [OW_RESET_TO_BL]);
+                        if (DEBUG) console.log("reset DEVICE with ID: " + loopDeviceId + " to bootloader");
                     }
                     actDeviceFlashStat = 1;
                 } else {
-                    send_OneWire_package(flashDeviceId, 0, [OW_OK]);
-                    waitForResponseID = flashDeviceId;
+                    send_OneWire_package(loopDeviceId, 0, [OW_OK]);
+                    waitForResponseID = loopDeviceId;
                     waitForResponseType = 0;
                     waitForResponseLength = 7;
-                    if (DEBUG) console.log("check if DEVICE with ID: " + flashDeviceId + " is in bootloader mode");
+                    if (DEBUG) console.log("check if DEVICE with ID: " + loopDeviceId + " is in bootloader mode");
                 }
             } else if (actDeviceFlashStat == 2) {
-                send_OneWire_package(flashDeviceId, 0, [OW_BL_PAGES_TO_FLASH, (FW_update.pagesCount & 0xFF), (FW_update.pagesCount >> 8)]);
+                send_OneWire_package(loopDeviceId, 0, [OW_BL_PAGES_TO_FLASH, (FW_update.pagesCount & 0xFF), (FW_update.pagesCount >> 8)]);
                 actDeviceFlashPage = FW_update.pagesCount;
-                waitForResponseID = flashDeviceId;
+                waitForResponseID = loopDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
                 extraDelay = 1;
-                if (DEBUG) console.log("sent to DEVICE with ID: " + flashDeviceId + " the block count that need to be flashed & erase flash command. ");
+                if (DEBUG) console.log("sent to DEVICE with ID: " + loopDeviceId + " the block count that need to be flashed & erase flash command. ");
             } else if (actDeviceFlashStat == 3) {
                 if (actDeviceFlashPage > 0) {
-                    send_OneWire_package(flashDeviceId, actDeviceFlashPage, FW_update.preparedPages[actDeviceFlashPage - 1]);
-                    if (DEBUG) console.log("sent to DEVICE with ID: " + flashDeviceId + " flash block number: " + actDeviceFlashPage);
-                    waitForResponseID = flashDeviceId;
+                    send_OneWire_package(loopDeviceId, actDeviceFlashPage, FW_update.preparedPages[actDeviceFlashPage - 1]);
+                    if (DEBUG) console.log("sent to DEVICE with ID: " + loopDeviceId + " flash block number: " + actDeviceFlashPage);
+                    waitForResponseID = loopDeviceId;
                     waitForResponseType = actDeviceFlashPage;
                     waitForResponseLength = 134;
-                    $("#Device_Info_progress_bar_" + flashDeviceId).progressbar({
+                    $("#Device_Info_progress_bar_" + loopDeviceId).progressbar({
                         value: Math.round((99 - (99 / FW_update.pagesCount * actDeviceFlashPage)))
                     });
                 } else {
-                    $("#Device_Info_progress_bar_" + flashDeviceId).progressbar({
+                    $("#Device_Info_progress_bar_" + loopDeviceId).progressbar({
                         value: 100
                     });
-                    if (DEBUG) console.log("DEVICE with ID: " + flashDeviceId + " update done");
+                    if (DEBUG) console.log("DEVICE with ID: " + loopDeviceId + " update done");
                     actDeviceFlashStat = 0;
                     actDeviceFlashPage = 0;
-                    DEVICEs[flashDeviceId].asBL = false;
-                    flashDeviceId++;
+                    DEVICEs[loopDeviceId].asBL = false;
+                    loopDeviceId++;
                 }
             } else if (actDeviceFlashStat == 4) {
-                send_OneWire_package(flashDeviceId, 0, [OW_BL_PAGE_CORRECT]);
-                waitForResponseID = flashDeviceId;
+                send_OneWire_package(loopDeviceId, 0, [OW_BL_PAGE_CORRECT]);
+                waitForResponseID = loopDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
                 if (DEBUG) console.log("verification done, sended write command");
@@ -2081,28 +2080,28 @@ function FlashProcessLoop() {
         } else {
             var responsePackage = checkForRespPackage();
             if (responsePackage) {
-                if (responsePackage[1] == flashDeviceId) {
-                    timeoutDeviceIDs[flashDeviceId] = 0;
+                if (responsePackage[1] == loopDeviceId) {
+                    timeoutDeviceIDs[loopDeviceId] = 0;
                     if (actDeviceFlashStat == 1) {
                         if (responsePackage[0] == OW_RESPONSE_IN_BL) {
-                            DEVICEs[flashDeviceId].asBL = true;
-                            if (DEBUG) console.log("DEVICE with ID: " + flashDeviceId + " is in bootloader mode");
+                            DEVICEs[loopDeviceId].asBL = true;
+                            if (DEBUG) console.log("DEVICE with ID: " + loopDeviceId + " is in bootloader mode");
                             actDeviceFlashStat = 2;
                         } else {
-                            if (DEBUG) console.log("DEVICE with ID: " + flashDeviceId + " don't moves to bootloader!");
-                            send_OneWire_package(flashDeviceId, 0, [OW_RESET_TO_BL]);
-                            if (DEBUG) console.log("reset DEVICE with ID: " + flashDeviceId + " to bootloader");
+                            if (DEBUG) console.log("DEVICE with ID: " + loopDeviceId + " don't moves to bootloader!");
+                            send_OneWire_package(loopDeviceId, 0, [OW_RESET_TO_BL]);
+                            if (DEBUG) console.log("reset DEVICE with ID: " + loopDeviceId + " to bootloader");
                         }
                     } else if (actDeviceFlashStat == 2) {
                         if (responsePackage[5] == 0) {
-                            if (DEBUG) console.log("DEVICE with ID: " + flashDeviceId + " confirmed flash erase");
+                            if (DEBUG) console.log("DEVICE with ID: " + loopDeviceId + " confirmed flash erase");
                             actDeviceFlashStat = 3;
                             extraDelay = is_USB_only_bootloader;
                         } else {
-                            if (DEBUG) console.log("DEVICE with ID: " + flashDeviceId + " reported error: " + responsePackage[5]);
+                            if (DEBUG) console.log("DEVICE with ID: " + loopDeviceId + " reported error: " + responsePackage[5]);
                         }
                     } else if (actDeviceFlashStat == 3) {
-                        if (DEBUG) console.log("received from DEVICE with ID: " + flashDeviceId + " block number: " + actDeviceFlashPage + " for verification.");
+                        if (DEBUG) console.log("received from DEVICE with ID: " + loopDeviceId + " block number: " + actDeviceFlashPage + " for verification.");
                         var verifyFailed = 0;
                         for (i = 0; i < 128; i++) {
                             if (FW_update.preparedPages[actDeviceFlashPage - 1][i] != responsePackage[i + 5]) {
@@ -2128,7 +2127,7 @@ function FlashProcessLoop() {
                             if (actDeviceFlashPage == 255 && responsePackage[5] == 2) {
                                 if (DEBUG) console.log("Bootloader not supporting more than 255 pages ");
                                 $("#dialog").text("This DEVICE doesn't have the latest bootloader and can't support this firmware. Please flash the available bootloader update. Once completed please flash again this version.");
-                                flashDeviceId = 0;
+                                loopDeviceId = 0;
                                 FW_update.FlashProcessActive = 0;
                                 $("#dialog").dialog({
                                     modal: true,
@@ -2145,22 +2144,22 @@ function FlashProcessLoop() {
                                 });
 
                             }
-                            timeoutDeviceIDs[flashDeviceId] = 0;
+                            timeoutDeviceIDs[loopDeviceId] = 0;
                             actDeviceFlashStat = 2;
                             waitForResponseID = 0;
-                            if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + flashDeviceId);
+                            if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + loopDeviceId);
                         }
                     }
                 }
-            } else if (++timeoutDeviceIDs[flashDeviceId] == timeout_delay + (350 * extraDelay) || timeoutDeviceIDs[flashDeviceId] == (timeout_delay * 2) + (500 * extraDelay) || timeoutDeviceIDs[flashDeviceId] == (timeout_delay * 3) + (650 * extraDelay)) {
+            } else if (++timeoutDeviceIDs[loopDeviceId] == timeout_delay + (350 * extraDelay) || timeoutDeviceIDs[loopDeviceId] == (timeout_delay * 2) + (500 * extraDelay) || timeoutDeviceIDs[loopDeviceId] == (timeout_delay * 3) + (650 * extraDelay)) {
                 sendBytes(LastSentData);
                 if (DEBUG) console.log("no response, retrying");
-            } else if (timeoutDeviceIDs[flashDeviceId] > (timeout_delay * 3) + (800 * extraDelay)) {
-                send_OneWire_package(flashDeviceId, 0xFFFF, [flashDeviceId + 10, flashDeviceId + 20]);
-                timeoutDeviceIDs[flashDeviceId] = 0;
+            } else if (timeoutDeviceIDs[loopDeviceId] > (timeout_delay * 3) + (800 * extraDelay)) {
+                send_OneWire_package(loopDeviceId, 0xFFFF, [loopDeviceId + 10, loopDeviceId + 20]);
+                timeoutDeviceIDs[loopDeviceId] = 0;
                 actDeviceFlashStat = 2;
                 waitForResponseID = 0;
-                if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + flashDeviceId);
+                if (DEBUG) console.log("restarting flash process for DEVICE with ID :" + loopDeviceId);
             }
         }
     } else {
@@ -2196,7 +2195,7 @@ function FlashProcessLoop() {
                     }
                 }
             });
-            flashDeviceId = 0;
+            loopDeviceId = 0;
             FW_update.FlashProcessActive = 0;
             FW_update.fileUploadInput.disabled = false;
             FW_update.startUpdateInput.disabled = false;
