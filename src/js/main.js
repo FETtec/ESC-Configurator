@@ -1,7 +1,7 @@
 "user strict";
 
 const DEBUG = 0;
-const SERIALDEBUG = 0; // show send/receive
+const SERIALDEBUG = 0; /* show send/receive */
 
 const APIKEY = "";
 const USEAPI = 0;
@@ -163,12 +163,12 @@ function DEVICE() {
         45: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 23, byteCount: 1, DeviceTypes: onAllESCs },
         46: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 1, byteCount: 1, DeviceTypes: onAllESCs },
         47: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, value: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
-/*
-        48: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
-        49: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
-        50: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
-        51: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, value: 1, changed: false, eever: 22, byteCount: 4, DeviceTypes: onAllESCs },
-*/
+        /*
+                48: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
+                49: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
+                50: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
+                51: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, value: 1, changed: false, eever: 22, byteCount: 4, DeviceTypes: onAllESCs },
+        */
         52: { getCommand: OW_GET_HALL_SENSOR_USAGE, setCommand: OW_SET_HALL_SENSOR_USAGE, name: "Hall Sensors", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
         53: { getCommand: OW_GET_CURRENT_LIMIT, setCommand: OW_SET_CURRENT_LIMIT, name: "Current limit", feature: "advanced", type: "value", min: 100, max: 12000, value: 0, changed: false, eever: 27, byteCount: 2, DeviceTypes: [4, 5, 9] },
         54: { getCommand: OW_GET_NO_ACTIVE_START, setCommand: OW_SET_NO_ACTIVE_START, name: "No Active Start", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
@@ -320,10 +320,9 @@ onload = function () {
         stack: "above"
     });
 
-    Gen_Menu_Buttons(-1, true); // Generate Menu Button
-    Gen_Types_Dropdown(Serial_Options); // Generate Serial Options
+    Gen_Menu_Buttons(-1, true);
+    Gen_Types_Dropdown(Serial_Options);
 
-    // Check for serial ports and build options
     chrome.serial.getDevices(function (ports) {
         checkPorts(ports, true);
     });
@@ -335,19 +334,16 @@ onload = function () {
         } else if (el.text() === 'Disconnect') {
             disconnect();
         } else {
-            // do nothing
         }
     });
 
     loopInterval = setInterval(function () { Internal_Loop(); }, 50);
 
-    // Check for latest version
+    /* Check for latest version */
     var versionCheck = checkGithubRelease('https://api.github.com/repos/FETtec/ESC-Configurator/releases', chrome.runtime.getManifest().version);
 
     setTimeout(function () {
-        //do what you need here
         if (Object.keys(versionCheck).length > 0) {
-            // stuff to show outdated app
             var updateText = 'There is a new version of the GUI available.<br/><br/>';
             updateText += 'Get it <a href="' + versionCheck[0].html_url + '" target="_blank">here</a>';
 
@@ -366,7 +362,7 @@ onload = function () {
         }
     }, 1000);
 
-    // Debug output
+    /* Debug output */
     if (DEBUG) {
         $('#con_area').append('<button id="debug_button">Debug</button>');
         $('#debug_button').button().click(function () {
@@ -707,7 +703,6 @@ function activationLoop() {
             loopDeviceId++;
         } else {
             if (switchStatus == 0) {
-                // request
                 if (DEBUG) console.log("DEVICE " + loopDeviceId + " send OK_OK cmd");
                 send_OneWire_package(loopDeviceId, 0, [OW_OK]);
                 waitForResponseID = loopDeviceId;
@@ -918,9 +913,7 @@ function Internal_Loop() {
                 }
             } else if (connection_attempts = MAX_TRY && ptStatus != 4) {
                 noLoop = 1;
-                // Connection failed
                 if (DEBUG) console.log("Connection to FC failed");
-                // display dialog
                 $("#dialog").text("Unable to active FC passthrough mode. Maybe the FC is already in passthrough mode, or the FC FW version don't supports it.");
                 $("#dialog").dialog({
                     modal: true,
@@ -1685,7 +1678,7 @@ function displayDevices(ParentElement) {
             DeviceDiv.appendChild(DeviceSaveInput);
 
         } else if (selectedMenu == 2) {
-            // ---------------------------------------------------------------------------------------------------// tools
+            /* Tools */
             if (DEVICE_types.find(x => x.id === DEVICEs[i].type).blOnly == true) break;
             DeviceDiv.id = "Device_Canvas_Container_" + i;
 
@@ -2721,7 +2714,7 @@ function checkChangedSettings(ID) {
                     newSettingsValues[y] = 0;
                     document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID).parentElement.className = "setting_container setting_container_inactive";
                 }
-            } else { // value
+            } else { /* value */
                 newSettingsValues[y] = parseInt(document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID).value);
                 if (newSettingsValues[y] > DEVICEs[ID].DeviceSettings[y].max) newSettingsValues[y] = DEVICEs[ID].DeviceSettings[y].max;
                 if (newSettingsValues[y] < DEVICEs[ID].DeviceSettings[y].min) newSettingsValues[y] = DEVICEs[ID].DeviceSettings[y].min;
@@ -2745,7 +2738,7 @@ function SettingsChanged(inputID) {
 }
 
 function saveSettingsOfId(ID) {
-    //collect Settings-
+    /* collect Settings-  */
     var changedSettings = checkChangedSettings(ID);
     if (DEVICEs[ID].DeviceSettings[99].changed) {
         var ID_is_free = 1;
@@ -2769,7 +2762,6 @@ function saveSettingsOfId(ID) {
     checkDEVICEsStats = 0;
     for (var IDs in DEVICEs) timeoutDeviceIDs[IDs] = 0;
     if (changedSettings) {
-        saveNewSettingsToId = ID; // make the loop save the settings
+        saveNewSettingsToId = ID;
     }
-    //OW_activate();
 }
