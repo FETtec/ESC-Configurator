@@ -154,36 +154,36 @@ function DEVICE() {
     this.TLMCanvasCTX;
     // end ESC specific settings
     this.DeviceSettings = {
-        0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "hidden", min: 0, max: 0, active: 0, changed: false, eever: 0, byteCount: 1, DeviceTypes: onAllESCs }, // must always be 0
-        40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse motor direction", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
-        41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
-        42: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
-        43: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min.", type: "slider", feature: "advanced", min: 1000, max: 1400, active: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
-        44: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max.", type: "slider", feature: "advanced", min: 1600, max: 2000, active: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
-        45: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 23, byteCount: 1, DeviceTypes: onAllESCs },
-        46: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: 1, DeviceTypes: onAllESCs },
-        47: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, active: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
+        0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "hidden", min: 0, max: 0, value: 0, changed: false, eever: 0, byteCount: 1, DeviceTypes: onAllESCs }, // must always be 0
+        40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse motor direction", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
+        41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
+        42: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
+        43: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min.", type: "slider", feature: "advanced", min: 1000, max: 1400, value: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
+        44: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max.", type: "slider", feature: "advanced", min: 1600, max: 2000, value: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
+        45: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 23, byteCount: 1, DeviceTypes: onAllESCs },
+        46: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 1, byteCount: 1, DeviceTypes: onAllESCs },
+        47: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, value: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
 /*
-        48: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
-        49: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
-        50: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, active: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
-        51: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, active: 1, changed: false, eever: 22, byteCount: 4, DeviceTypes: onAllESCs },
+        48: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
+        49: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
+        50: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
+        51: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, value: 1, changed: false, eever: 22, byteCount: 4, DeviceTypes: onAllESCs },
 */
-        52: { getCommand: OW_GET_HALL_SENSOR_USAGE, setCommand: OW_SET_HALL_SENSOR_USAGE, name: "Hall Sensors", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        53: { getCommand: OW_GET_CURRENT_LIMIT, setCommand: OW_SET_CURRENT_LIMIT, name: "Current limit", feature: "advanced", type: "value", min: 100, max: 12000, active: 0, changed: false, eever: 27, byteCount: 2, DeviceTypes: [4, 5, 9] },
-        54: { getCommand: OW_GET_NO_ACTIVE_START, setCommand: OW_SET_NO_ACTIVE_START, name: "No Active Start", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        55: { getCommand: OW_GET_ANALOG_THROTTLE, setCommand: OW_SET_ANALOG_THROTTLE, name: "Analog Throttle", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 9] },
-        56: { getCommand: OW_GET_CELL_COUNT, setCommand: OW_SET_CELL_COUNT, name: "Battery Cell count", feature: "advanced", type: "value", min: 1, max: 255, active: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        57: { getCommand: OW_GET_TURNOFF_VOLTAGE, setCommand: OW_SET_TURNOFF_VOLTAGE, name: "Turn Off Cell Voltage", feature: "advanced", type: "value", min: 0, max: 1000, active: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 5, 9] },
-        58: { getCommand: OW_GET_CELL_MAX_VOLTAGE, setCommand: OW_SET_CELL_MAX_VOLTAGE, name: "Max Cell Voltage", feature: "advanced", type: "value", min: 0, max: 1000, active: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 5, 9] },
-        59: { getCommand: OW_GET_CM_PER_ERPM, setCommand: OW_SET_CM_PER_ERPM, name: "mm per Erpm", feature: "advanced", type: "value", min: 0, max: 10000, active: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
-        60: { getCommand: OW_GET_BRAKE_ACTIVE, setCommand: OW_SET_BRAKE_ACTIVE, name: "Motor brake", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        61: { getCommand: OW_GET_ANALOG_BRAKE, setCommand: OW_SET_ANALOG_BRAKE, name: "Use analog brake signal", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 9] },
-        62: { getCommand: OW_GET_BEC_VOLTAGE, setCommand: OW_SET_BEC_VOLTAGE, name: "BEC output Voltage", feature: "advanced", type: "value", min: 0, max: 2000, active: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
-        63: { getCommand: OW_GET_MAX_OUTPUT_CURRENT_LIMIT, setCommand: OW_SET_MAX_OUTPUT_CURRENT_LIMIT, name: "Motor Current Limit", feature: "advanced", type: "value", min: 200, max: 14000, active: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
-        64: { getCommand: OW_GET_HALL_SENSORS_LEVELS, setCommand: OW_SET_HALL_SENSORS_LEVELS, name: "Hall Sensor Output Levels", feature: "advanced", type: "value", min: 0, max: 100, active: 0, changed: false, eever: 35, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        65: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, active: 0, changed: false, eever: 25, byteCount: 1, DeviceTypes: onAllESCs },
-        99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, active: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs } // must always be 99 and the last one
+        52: { getCommand: OW_GET_HALL_SENSOR_USAGE, setCommand: OW_SET_HALL_SENSOR_USAGE, name: "Hall Sensors", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        53: { getCommand: OW_GET_CURRENT_LIMIT, setCommand: OW_SET_CURRENT_LIMIT, name: "Current limit", feature: "advanced", type: "value", min: 100, max: 12000, value: 0, changed: false, eever: 27, byteCount: 2, DeviceTypes: [4, 5, 9] },
+        54: { getCommand: OW_GET_NO_ACTIVE_START, setCommand: OW_SET_NO_ACTIVE_START, name: "No Active Start", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        55: { getCommand: OW_GET_ANALOG_THROTTLE, setCommand: OW_SET_ANALOG_THROTTLE, name: "Analog Throttle", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 9] },
+        56: { getCommand: OW_GET_CELL_COUNT, setCommand: OW_SET_CELL_COUNT, name: "Battery Cell count", feature: "advanced", type: "value", min: 1, max: 255, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        57: { getCommand: OW_GET_TURNOFF_VOLTAGE, setCommand: OW_SET_TURNOFF_VOLTAGE, name: "Turn Off Cell Voltage", feature: "advanced", type: "value", min: 0, max: 1000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 5, 9] },
+        58: { getCommand: OW_GET_CELL_MAX_VOLTAGE, setCommand: OW_SET_CELL_MAX_VOLTAGE, name: "Max Cell Voltage", feature: "advanced", type: "value", min: 0, max: 1000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 5, 9] },
+        59: { getCommand: OW_GET_CM_PER_ERPM, setCommand: OW_SET_CM_PER_ERPM, name: "mm per Erpm", feature: "advanced", type: "value", min: 0, max: 10000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
+        60: { getCommand: OW_GET_BRAKE_ACTIVE, setCommand: OW_SET_BRAKE_ACTIVE, name: "Motor brake", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        61: { getCommand: OW_GET_ANALOG_BRAKE, setCommand: OW_SET_ANALOG_BRAKE, name: "Use analog brake signal", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 9] },
+        62: { getCommand: OW_GET_BEC_VOLTAGE, setCommand: OW_SET_BEC_VOLTAGE, name: "BEC output Voltage", feature: "advanced", type: "value", min: 0, max: 2000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
+        63: { getCommand: OW_GET_MAX_OUTPUT_CURRENT_LIMIT, setCommand: OW_SET_MAX_OUTPUT_CURRENT_LIMIT, name: "Motor Current Limit", feature: "advanced", type: "value", min: 200, max: 14000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
+        64: { getCommand: OW_GET_HALL_SENSORS_LEVELS, setCommand: OW_SET_HALL_SENSORS_LEVELS, name: "Hall Sensor Output Levels", feature: "advanced", type: "value", min: 0, max: 100, value: 0, changed: false, eever: 35, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        65: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, value: 0, changed: false, eever: 25, byteCount: 1, DeviceTypes: onAllESCs },
+        99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs } // must always be 99 and the last one
     };
 }
 
@@ -665,7 +665,7 @@ function keycollectLoop() {
             } else {
                 if (DEBUG) console.log("Key collect for device " + loopDeviceId)
                 var tmpSN = "";
-                var tmpEPROM = DEVICEs[loopDeviceId].DeviceSettings[0].active;
+                var tmpEPROM = DEVICEs[loopDeviceId].DeviceSettings[0].value;
                 var tmpID = loopDeviceId;
                 for (var y = 0; y < 12; y++)
                     tmpSN += dec2hex(DEVICEs[loopDeviceId].SN[y]);
@@ -1148,7 +1148,7 @@ function check_ESCs_In_BL() {
                 switchStatus++;
             }
             else if (switchStatus == 3) {
-                DEVICEs[loopDeviceId].DeviceSettings[0].active = responsePackage[5];
+                DEVICEs[loopDeviceId].DeviceSettings[0].value = responsePackage[5];
                 if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " eeprom version status is: " + responsePackage[5]);
                 switchStatus = 0;
                 loopDeviceId++;
@@ -1238,7 +1238,7 @@ function ChangeDisplay(displayType) {
         for (var i in DEVICEs) {
             DEVICEs[i].settingsActive[8] = 0;
             DEVICEs[i].settingsActive[9] = 0;
-            DEVICEs[i].DeviceSettings[0].active = 0;
+            DEVICEs[i].DeviceSettings[0].value = 0;
         }
         $('#overview').empty();
         $('#toolbar').empty();
@@ -1538,7 +1538,7 @@ function displayDevices(ParentElement) {
                         case "checkbox":
                             var DeviceSetting = document.createElement('div');
                             DeviceSetting.className = "setting_container";
-                            if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].active) DeviceSetting.style.display = "none";
+                            if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].value) DeviceSetting.style.display = "none";
 
                             DeviceSettingText = document.createElement('div')
                             DeviceSettingText.className = "setting_text";
@@ -1553,7 +1553,7 @@ function displayDevices(ParentElement) {
                             settingCheckbox.onchange = function () {
                                 SettingsChanged(this.id);
                             }
-                            if (DEVICEs[i].DeviceSettings[y].active) {
+                            if (DEVICEs[i].DeviceSettings[y].value) {
                                 settingCheckbox.checked = true;
                                 DeviceSetting.className += " setting_container_active";
                             } else {
@@ -1582,7 +1582,7 @@ function displayDevices(ParentElement) {
                         case "slider":
                             var DeviceSetting = document.createElement('div');
                             DeviceSetting.className = "setting_container";
-                            if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].active) DeviceSetting.style.display = "none";
+                            if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].value) DeviceSetting.style.display = "none";
                             DeviceSettingText = document.createElement('div')
                             DeviceSettingText.className = "setting_text";
                             DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
@@ -1593,7 +1593,7 @@ function displayDevices(ParentElement) {
                             settingSlider.min = DEVICEs[i].DeviceSettings[y].min
                             settingSlider.max = DEVICEs[i].DeviceSettings[y].max
                             settingSlider.className = "settings_rangeSlider"; //  ui-corner-all
-                            settingSlider.value = DEVICEs[i].DeviceSettings[y].active;
+                            settingSlider.value = DEVICEs[i].DeviceSettings[y].value;
                             settingSlider.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
                             settingSlider.onchange = function () {
                                 SettingsChanged(this.id);
@@ -1606,7 +1606,7 @@ function displayDevices(ParentElement) {
                             settingNumber = document.createElement('output');
                             settingNumber.className = "setting_value";
                             settingNumber.type = "hidden"
-                            settingNumber.value = DEVICEs[i].DeviceSettings[y].active;
+                            settingNumber.value = DEVICEs[i].DeviceSettings[y].value;
                             settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_value_" + i;
                             DeviceSetting.appendChild(settingNumber);
 
@@ -1616,7 +1616,7 @@ function displayDevices(ParentElement) {
                         case "value":
                             var DeviceSetting = document.createElement('div');
                             DeviceSetting.className = "setting_container";
-                            if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].active) DeviceSetting.style.display = "none";
+                            if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].value) DeviceSetting.style.display = "none";
                             DeviceSettingText = document.createElement('div')
                             DeviceSettingText.className = "setting_text";
                             DeviceSettingText.innerHTML = DEVICEs[i].DeviceSettings[y].name + " ";
@@ -1626,7 +1626,7 @@ function displayDevices(ParentElement) {
                             settingNumber.type = "number";
                             settingNumber.style.width = ((DEVICEs[i].DeviceSettings[y].max.toString(10).length * 12) + 5) + "px";
                             settingNumber.className = "settings_numberBox"; //  ui-corner-all
-                            settingNumber.value = DEVICEs[i].DeviceSettings[y].active;
+                            settingNumber.value = DEVICEs[i].DeviceSettings[y].value;
                             settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
                             settingNumber.onchange = function () {
                                 SettingsChanged(this.id);
@@ -1647,7 +1647,7 @@ function displayDevices(ParentElement) {
                             settingNumber.readOnly = true;
                             settingNumber.style.width = ((DEVICEs[i].DeviceSettings[y].max.toString(10).length * 12) + 20) + "px";
                             settingNumber.className = "settings_numberBox"; //  ui-corner-all
-                            settingNumber.value = DEVICEs[i].DeviceSettings[y].active;
+                            settingNumber.value = DEVICEs[i].DeviceSettings[y].value;
                             settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
                             DeviceSetting.appendChild(settingNumber);
                             break;
@@ -1665,7 +1665,7 @@ function displayDevices(ParentElement) {
                             settingNumber.readOnly = true;
                             settingNumber.style.width = ((DEVICEs[i].DeviceSettings[y].max.toString(10).length * 12) + 20) + "px";
                             settingNumber.className = "settings_numberBox"; //  ui-corner-all
-                            settingNumber.value = DEVICEs[i].DeviceSettings[y].active;
+                            settingNumber.value = DEVICEs[i].DeviceSettings[y].value;
                             settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
                             DeviceSetting.appendChild(settingNumber);
                             break;
@@ -2548,7 +2548,7 @@ function ConfigLoop() {
                 if (buttonsDisabled) enableButtons();
                 return;
             }
-            if ((DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].eever != 0 && DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].eever > DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[0].active) || DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].DeviceTypes.indexOf(DEVICEs[readDeviceIDs[deviceIdIndex]].type) == -1) {
+            if ((DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].eever != 0 && DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].eever > DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[0].value) || DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].DeviceTypes.indexOf(DEVICEs[readDeviceIDs[deviceIdIndex]].type) == -1) {
                 deviceSettingIndex++;
                 checkDEVICEsStats = 0;
                 return;
@@ -2589,14 +2589,14 @@ function ConfigLoop() {
                     }
                 } else {
                     if (DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 1) {
-                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active = responsePackage[5];
+                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value = responsePackage[5];
                     } else if (DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 2) {
-                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active = (responsePackage[5] << 8) | responsePackage[6];
+                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value = (responsePackage[5] << 8) | responsePackage[6];
                     } else if (DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 4) {
-                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
+                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
                     }
                     checkDEVICEsStats = 0;
-                    if (DEBUG) console.log("Setting " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].name + " from DEVICE with id: " + readDeviceIDs[deviceIdIndex] + " is " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active + " bytecound: " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount);
+                    if (DEBUG) console.log("Setting " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].name + " from DEVICE with id: " + readDeviceIDs[deviceIdIndex] + " is " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value + " bytecound: " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount);
                     deviceSettingIndex++;
                 }
             } else if (++timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] == timeout_delay || timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] == timeout_delay * 2 || timeoutDeviceIDs[readDeviceIDs[deviceIdIndex]] == timeout_delay * 3) {
@@ -2658,11 +2658,11 @@ function ConfigLoop() {
                     else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 4) {
                         responsePayload = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
                     }
-                    if (responsePayload == DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active) {
+                    if (responsePayload == DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value) {
                         if (DEBUG) console.log("GET response correct");
                         checkDEVICEsStats++;
                     } else {
-                        if (DEBUG) console.log("SET response not correct (" + responsePayload + ") instead of (" + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active + "). stop");
+                        if (DEBUG) console.log("SET response not correct (" + responsePayload + ") instead of (" + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value + "). stop");
                         serialBadError = 1;
                         deviceSettingIndex++;
                     }
@@ -2670,7 +2670,7 @@ function ConfigLoop() {
                 } else {
                     if (responsePackage[5] == OW_OK) {
                         DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].changed = false;
-                        DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].active = newSettingsValues[readDeviceSettings[deviceSettingIndex]];
+                        DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value = newSettingsValues[readDeviceSettings[deviceSettingIndex]];
                         checkDEVICEsStats = 0;
                         if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand == OW_GET_ID) {
                             $("#dialog").text("OneWire ID was changed. GUI must reset! please connect again.");
@@ -2727,7 +2727,7 @@ function checkChangedSettings(ID) {
                 if (newSettingsValues[y] < DEVICEs[ID].DeviceSettings[y].min) newSettingsValues[y] = DEVICEs[ID].DeviceSettings[y].min;
                 document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID).value = newSettingsValues[y];
             }
-            if (newSettingsValues[y] != DEVICEs[ID].DeviceSettings[y].active) {
+            if (newSettingsValues[y] != DEVICEs[ID].DeviceSettings[y].value) {
                 DEVICEs[ID].DeviceSettings[y].changed = true;
                 changedSettings = true;
             }
