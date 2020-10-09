@@ -200,8 +200,7 @@ var checkDeviceId = 0;
 var communicationErrorWarningDone = 0;
 var connectionType = KISS_PT;
 var connection_attempts = 0;
-var deviceActivateId = 0;
-var deviceKeyId = 0;
+var loopDeviceId = 0;
 var deviceIdIndex = 0;
 var deviceSettingIndex = 0;
 var devicesDisplayed = 0;
@@ -380,21 +379,11 @@ onload = function () {
             //console.dir(versionCheck);
             //console.log("DEBUG");
             //console.log(FW_update);
-            //OW_activate();
             //keyCollect_activate();
             //showLogoEditor(startLogoWidth, startLogoHeight, FW_update.WhiteStartLogoArr, FW_update.BlackStartLogoArr, FW_update.WhiteStartLogoPos, FW_update.BlackStartLogoPos);
             return
         });
     }
-    /*
-        if (USEAPI) {
-            $('#con_area').append('<button id="activate_button">Activate</button>');
-            $('#activate_button').button().click(function () {
-                keyCollect_activate();
-                return
-            });
-        }
-    */
 }
 
 onclose = function () {
@@ -647,53 +636,45 @@ function disconnect() {
 
 function keyCollect_activate() {
     keycollectActive = 1;
-    deviceKeyId = 0;
+    loopDeviceId = 0;
 }
 
 function OW_activate() {
     if (activationRequired == 1) {
         activationActive = 1;
-        deviceActivateId = 0;
+        loopDeviceId = 0;
     }
 }
 
 var tmpkey = [];
 
 function keycollectLoop() {
-    while ((!(deviceKeyId in DEVICEs)) && deviceKeyId < 25) deviceKeyId++;
-    if (deviceKeyId == 25) {
+    while ((!(loopDeviceId in DEVICEs)) && loopDeviceId < 25) loopDeviceId++;
+    if (loopDeviceId == 25) {
         if (DEBUG) console.log("Key collect completed")
         keycollectActive = 0;
         OW_activate();
         return;
-    }
-    if (DEVICE_types.find(x => x.id === DEVICEs[deviceKeyId].type).blOnly == true || DEVICE_types.find(x => x.id === DEVICEs[deviceKeyId].type).activation == false) {
-        if (DEBUG) console.log("Device " + deviceKeyId + " is blOnly or already activated next.");
-        deviceKeyId++;
-    }
-    if (deviceKeyId == 25) {
-        if (DEBUG) console.log("Key collect completed")
-        keycollectActive = 0;
-        OW_activate();
-        return;
+    } else if (DEVICE_types.find(x => x.id === DEVICEs[loopDeviceId].type).blOnly == true || DEVICE_types.find(x => x.id === DEVICEs[loopDeviceId].type).activation == false) {
+        if (DEBUG) console.log("Device " + loopDeviceId + " is blOnly or already activated next.");
+        loopDeviceId++;
     } else {
-
-        if (DEVICEs[deviceKeyId].activated == 1) {
-            if (DEBUG) console.log("Device " + deviceKeyId + " already actiated skip key collection.")
+        if (DEVICEs[loopDeviceId].activated == 1) {
+            if (DEBUG) console.log("Device " + loopDeviceId + " already actiated skip key collection.")
         } else {
             if (activationRequired == 0) activationRequired = 1;
-            if (DEVICEs[deviceKeyId].activationkey != null && DEVICEs[deviceKeyId].activationkey.length != null && DEVICEs[deviceKeyId].activationkey.length > 0 && DEVICEs[deviceKeyId].activationkey[0] >= 0) {
-                if (DEBUG) console.log("Key for device " + deviceKeyId + " already collected.")
+            if (DEVICEs[loopDeviceId].activationkey != null && DEVICEs[loopDeviceId].activationkey.length != null && DEVICEs[loopDeviceId].activationkey.length > 0 && DEVICEs[loopDeviceId].activationkey[0] >= 0) {
+                if (DEBUG) console.log("Key for device " + loopDeviceId + " already collected.")
             } else {
-                if (DEBUG) console.log("Key collect for device " + deviceKeyId)
+                if (DEBUG) console.log("Key collect for device " + loopDeviceId)
                 var tmpSN = "";
-                var tmpEPROM = DEVICEs[deviceKeyId].DeviceSettings[0].active;
-                var tmpID = deviceKeyId;
+                var tmpEPROM = DEVICEs[loopDeviceId].DeviceSettings[0].active;
+                var tmpID = loopDeviceId;
                 for (var y = 0; y < 12; y++)
-                    tmpSN += dec2hex(DEVICEs[deviceKeyId].SN[y]);
-                DEVICEs[deviceKeyId].activationkey = [-2, -2, -2, -2]; // -2 means to be collected
+                    tmpSN += dec2hex(DEVICEs[loopDeviceId].SN[y]);
+                DEVICEs[loopDeviceId].activationkey = [-2, -2, -2, -2]; // -2 means to be collected
                 var tmpURL = "https://licensing.fettec.net/activation.php?id=" + tmpSN + "&ver=" + tmpEPROM;
-                if (USEAPI) tmpURL += "&api=" + APIKEY + "&type=" + DEVICEs[deviceKeyId].type;
+                if (USEAPI) tmpURL += "&api=" + APIKEY + "&type=" + DEVICEs[loopDeviceId].type;
                 $.ajax({
                     url: tmpURL,
                     type: 'GET',
@@ -714,68 +695,60 @@ function keycollectLoop() {
                 waitLoops = 120;
             }
         }
-        deviceKeyId++;
+        loopDeviceId++;
     }
 }
 function activationLoop() {
     if (waitForResponseID == 0) {
-        while ((!(deviceActivateId in DEVICEs)) && deviceActivateId < 25) deviceActivateId++;
-        if (deviceActivateId == 25) {
+        while ((!(loopDeviceId in DEVICEs)) && loopDeviceId < 25) loopDeviceId++;
+        if (loopDeviceId == 25) {
             activationActive = 0;
             activationRequired = 0;
             return;
-        }
-        if (DEVICE_types.find(x => x.id === DEVICEs[deviceActivateId].type).blOnly == true || DEVICE_types.find(x => x.id === DEVICEs[deviceActivateId].type).activation == false) {
-            if (DEBUG) console.log("Device " + deviceActivateId + " is blOnly next.");
-            deviceActivateId++;
-        }
-        if (deviceActivateId == 25) {
-            activationActive = 0;
-            activationRequired = 0;
-            return;
-        }
-
-        if (switchStatus == 0) {
-            // request
-            if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OK_OK cmd");
-            send_OneWire_package(deviceActivateId, 0, [OW_OK]);
-            waitForResponseID = deviceActivateId;
-            waitForResponseType = 0;
-            waitForResponseLength = 7;
-        } else if (switchStatus == 1) {
-            if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OW_GET_ACTIVATION cmd");
-            send_OneWire_package(deviceActivateId, 0, [OW_GET_ACTIVATION]);
-            waitForResponseID = deviceActivateId;
-            waitForResponseType = 0;
-            waitForResponseLength = 7;
-        } else if (switchStatus == 2) {
-            if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OW_SET_ACTIVATION cmd '" + DEVICEs[deviceActivateId].activationkey.join() + "'");
-            send_OneWire_package(deviceActivateId, 0, [OW_SET_ACTIVATION, DEVICEs[deviceActivateId].activationkey[0], DEVICEs[deviceActivateId].activationkey[1], DEVICEs[deviceActivateId].activationkey[2], DEVICEs[deviceActivateId].activationkey[3]]);
-            waitForResponseID = deviceActivateId;
-            waitForResponseType = 0;
-            waitForResponseLength = 7;
-        } else if (switchStatus == 3) {
-            if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OW_GET_ACTIVATION cmd");
-            send_OneWire_package(deviceActivateId, 0, [OW_GET_ACTIVATION]);
-            waitForResponseID = deviceActivateId;
-            waitForResponseType = 0;
-            waitForResponseLength = 7;
+        } else if (DEVICE_types.find(x => x.id === DEVICEs[loopDeviceId].type).blOnly == true || DEVICE_types.find(x => x.id === DEVICEs[loopDeviceId].type).activation == false) {
+            if (DEBUG) console.log("Device " + loopDeviceId + " is blOnly next.");
+            loopDeviceId++;
+        } else {
+            if (switchStatus == 0) {
+                // request
+                if (DEBUG) console.log("DEVICE " + loopDeviceId + " send OK_OK cmd");
+                send_OneWire_package(loopDeviceId, 0, [OW_OK]);
+                waitForResponseID = loopDeviceId;
+                waitForResponseType = 0;
+                waitForResponseLength = 7;
+            } else if (switchStatus == 1) {
+                if (DEBUG) console.log("DEVICE " + loopDeviceId + " send OW_GET_ACTIVATION cmd");
+                send_OneWire_package(loopDeviceId, 0, [OW_GET_ACTIVATION]);
+                waitForResponseID = loopDeviceId;
+                waitForResponseType = 0;
+                waitForResponseLength = 7;
+            } else if (switchStatus == 2) {
+                if (DEBUG) console.log("DEVICE " + loopDeviceId + " send OW_SET_ACTIVATION cmd '" + DEVICEs[loopDeviceId].activationkey.join() + "'");
+                send_OneWire_package(loopDeviceId, 0, [OW_SET_ACTIVATION, DEVICEs[loopDeviceId].activationkey[0], DEVICEs[loopDeviceId].activationkey[1], DEVICEs[loopDeviceId].activationkey[2], DEVICEs[loopDeviceId].activationkey[3]]);
+                waitForResponseID = loopDeviceId;
+                waitForResponseType = 0;
+                waitForResponseLength = 7;
+            } else if (switchStatus == 3) {
+                if (DEBUG) console.log("DEVICE " + loopDeviceId + " send OW_GET_ACTIVATION cmd");
+                send_OneWire_package(loopDeviceId, 0, [OW_GET_ACTIVATION]);
+                waitForResponseID = loopDeviceId;
+                waitForResponseType = 0;
+                waitForResponseLength = 7;
+            }
         }
     } else {
         var responsePackage = checkForRespPackage();
         if (responsePackage) {
-            timeoutDeviceIDs[deviceActivateId] = 0;
+            timeoutDeviceIDs[loopDeviceId] = 0;
             if (switchStatus == 0) {
                 if (responsePackage[0] == OW_RESPONSE_IN_FW) {
                     switchStatus++;
                     waitForResponseID = 0;
-                    if (DEBUG) console.log("DEVICE " + deviceActivateId + " is in firmware");
+                    if (DEBUG) console.log("DEVICE " + loopDeviceId + " is in firmware");
                 } else {
-
-
                     if (switchProblem == 0) {
-                        if (DEBUG) console.log("DEVICE " + deviceActivateId + " send OW_BL_START_FW cmd");
-                        send_OneWire_package(deviceActivateId, 0, [OW_BL_START_FW]);
+                        if (DEBUG) console.log("DEVICE " + loopDeviceId + " send OW_BL_START_FW cmd");
+                        send_OneWire_package(loopDeviceId, 0, [OW_BL_START_FW]);
                         if (connectionType == VCP) {
                             if (DEBUG) console.log("starting reconnect procedure 1");
                             ReconnectOnSend(0);
@@ -783,34 +756,33 @@ function activationLoop() {
                         switchProblem++;
                         waitLoops = 20;
                     } else if (switchProblem < 20) {
-                        if (DEBUG) console.log("ESC with id: " + deviceActivateId + " don't switches ->retry");
-                        send_OneWire_package(deviceActivateId, 0, [OW_BL_START_FW]);
+                        if (DEBUG) console.log("ESC with id: " + loopDeviceId + " don't switches ->retry");
+                        send_OneWire_package(loopDeviceId, 0, [OW_BL_START_FW]);
                         switchProblem++;
                         waitLoops = 20;
                     } else {
-                        if (DEBUG) console.log("DEVICE with id: " + deviceActivateId + " don't switches ->stop");
+                        if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " don't switches ->stop");
                         serialBadError = 1;
                         switchProblem = 0;
                     }
                 }
             } else if (switchStatus == 1) {
-                DEVICEs[deviceActivateId].activated = (responsePackage[5]);
-                if (DEBUG) console.log("DEVICE " + deviceActivateId + " response is " + DEVICEs[deviceActivateId].activated);
+                DEVICEs[loopDeviceId].activated = (responsePackage[5]);
+                if (DEBUG) console.log("DEVICE " + loopDeviceId + " response is " + DEVICEs[loopDeviceId].activated);
                 if (responsePackage[5] == 1) {
-                    if (DEBUG) console.log("DEVICE " + deviceActivateId + " is already activated. Next.");
+                    if (DEBUG) console.log("DEVICE " + loopDeviceId + " is already activated. Next.");
                     switchStatus = 0;
-                    deviceActivateId++;
+                    loopDeviceId++;
                 } else {
                     switchStatus++;
                 }
             } else if (switchStatus == 2) {
                 if (responsePackage[5] == OW_OK) {
-                    if (DEBUG) console.log("DEVICE " + deviceActivateId + " response OK.");
-                    //switchStatus++;
+                    if (DEBUG) console.log("DEVICE " + loopDeviceId + " response OK.");
                 } else {
-                    if (DEBUG) console.log("DEVICE " + deviceActivateId + " activation wrong response: " + responsePackage[5]);
+                    if (DEBUG) console.log("DEVICE " + loopDeviceId + " activation wrong response: " + responsePackage[5]);
                     $(".ui-notification-container").notification("create", {
-                        title: "Unable to activate device " + deviceActivateId,
+                        title: "Unable to activate device " + loopDeviceId,
                         content: "Activation failed. Serial number not in database.",
                     },
                         {
@@ -820,19 +792,19 @@ function activationLoop() {
                 }
                 switchStatus++;
             } else if (switchStatus == 3) {
-                DEVICEs[deviceActivateId].activated = (responsePackage[5]);
-                if (DEBUG) console.log("DEVICE " + deviceActivateId + " response is " + DEVICEs[deviceActivateId].activated);
+                DEVICEs[loopDeviceId].activated = (responsePackage[5]);
+                if (DEBUG) console.log("DEVICE " + loopDeviceId + " response is " + DEVICEs[loopDeviceId].activated);
                 switchStatus = 0;
-                deviceActivateId++;
+                loopDeviceId++;
             }
-        } else if (++timeoutDeviceIDs[deviceActivateId] == timeout_delay || timeoutDeviceIDs[deviceActivateId] == timeout_delay * 2 || timeoutDeviceIDs[deviceActivateId] == timeout_delay * 3) {
+        } else if (++timeoutDeviceIDs[loopDeviceId] == timeout_delay || timeoutDeviceIDs[loopDeviceId] == timeout_delay * 2 || timeoutDeviceIDs[loopDeviceId] == timeout_delay * 3) {
             sendBytes(LastSentData);
             if (DEBUG) console.log("no response, retrying");
-        } else if (timeoutDeviceIDs[deviceActivateId] > timeout_delay * 3) {
-            if (DEBUG) console.log("no response from DEVICE with id: " + deviceActivateId + " ->stop");
+        } else if (timeoutDeviceIDs[loopDeviceId] > timeout_delay * 3) {
+            if (DEBUG) console.log("no response from DEVICE with id: " + loopDeviceId + " ->stop");
             serialBadError = 1;
             waitForResponseID = 0;
-            deviceActivateId++;
+            loopDeviceId++;
         }
     }
 }
