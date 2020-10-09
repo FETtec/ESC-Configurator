@@ -243,7 +243,6 @@ var settingsRead = 0;
 var settings_index_max = 0;
 var start_check = 0;
 var switchCommand = 0;
-var switchDeviceId = 0;
 var switchProblem = 0;
 var switchStatus = 0;
 var thrCommandFirstByte = 0;
@@ -1014,7 +1013,7 @@ function Internal_Loop() {
 
 function change_Devices_status(stat, enableButtonsIfDone = 0, refreshVersionIfDone = 0, checkActivationIfDone = 0) {
     disableButtons();
-    switchDeviceId = 0;
+    loopDeviceId = 0;
     switchProblem = 0;
     enableButtonsAfterSwitch = enableButtonsIfDone;
     refreshVersion = refreshVersionIfDone;
@@ -1040,8 +1039,8 @@ function check_ESCs_In_BL() {
     if (reconnectOnTxDone != 0 && connectionType == VCP) return;
 
     if (waitForResponseID == 0) {
-        while ((!(switchDeviceId in DEVICEs)) && switchDeviceId < 25) switchDeviceId++;
-        if (switchDeviceId == 25) {
+        while ((!(loopDeviceId in DEVICEs)) && loopDeviceId < 25) loopDeviceId++;
+        if (loopDeviceId == 25) {
             devicesToBL = 0;
             if (refreshVersion) {
                 refreshVersion = 0;
@@ -1060,48 +1059,48 @@ function check_ESCs_In_BL() {
             return;
         }
 
-        if ((DEVICE_types.find(x => x.id === DEVICEs[switchDeviceId].type)).blOnly == true) {
+        if ((DEVICE_types.find(x => x.id === DEVICEs[loopDeviceId].type)).blOnly == true) {
             switchStatus = 0;
-            switchDeviceId++;
+            loopDeviceId++;
             return;
         }
 
         if (switchStatus == 0) {
-            send_OneWire_package(switchDeviceId, 0, [OW_OK]);
-            waitForResponseID = switchDeviceId;
+            send_OneWire_package(loopDeviceId, 0, [OW_OK]);
+            waitForResponseID = loopDeviceId;
             waitForResponseType = 0;
             waitForResponseLength = 7;
-            if (DEBUG) console.log("check with id: " + switchDeviceId + " ");
+            if (DEBUG) console.log("check with id: " + loopDeviceId + " ");
         } else if (switchStatus == 1) {
             if (refreshVersion) {
-                send_OneWire_package(switchDeviceId, 0, [OW_REQ_SW_VER]);
-                waitForResponseID = switchDeviceId;
+                send_OneWire_package(loopDeviceId, 0, [OW_REQ_SW_VER]);
+                waitForResponseID = loopDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 8;
-                if (DEBUG) console.log("check FW version with id: " + switchDeviceId + " ");
+                if (DEBUG) console.log("check FW version with id: " + loopDeviceId + " ");
             } else {
                 switchStatus++;
             }
         } else if (switchStatus == 2) {
             if (checkActivation) {
-                send_OneWire_package(switchDeviceId, 0, [OW_GET_ACTIVATION]);
-                waitForResponseID = switchDeviceId;
+                send_OneWire_package(loopDeviceId, 0, [OW_GET_ACTIVATION]);
+                waitForResponseID = loopDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("check Activation of id: " + switchDeviceId + " ");
+                if (DEBUG) console.log("check Activation of id: " + loopDeviceId + " ");
             } else {
                 switchStatus++;
             }
         } else if (switchStatus == 3) {
             if (checkActivation) {
-                send_OneWire_package(switchDeviceId, 0, [OW_GET_EEVER]);
-                waitForResponseID = switchDeviceId;
+                send_OneWire_package(loopDeviceId, 0, [OW_GET_EEVER]);
+                waitForResponseID = loopDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                if (DEBUG) console.log("check EEPROM VERSION of id: " + switchDeviceId + " ");
+                if (DEBUG) console.log("check EEPROM VERSION of id: " + loopDeviceId + " ");
             } else {
                 switchStatus = 0;
-                switchDeviceId++;
+                loopDeviceId++;
             }
         }
 
@@ -1109,20 +1108,20 @@ function check_ESCs_In_BL() {
     } else {
         var responsePackage = checkForRespPackage();
         if (responsePackage) {
-            timeoutDeviceIDs[switchDeviceId] = 0;
+            timeoutDeviceIDs[loopDeviceId] = 0;
             if (switchStatus == 0) {
                 if (responsePackage[0] == expectedHeader) {
-                    if (expectedHeader == OW_RESPONSE_IN_BL) DEVICEs[switchDeviceId].asBL = true;
-                    else DEVICEs[switchDeviceId].asBL = false;
-                    if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " is ready");
+                    if (expectedHeader == OW_RESPONSE_IN_BL) DEVICEs[loopDeviceId].asBL = true;
+                    else DEVICEs[loopDeviceId].asBL = false;
+                    if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " is ready");
                     switchStatus++;
                 } else {
-                    if (expectedHeader != OW_RESPONSE_IN_BL) DEVICEs[switchDeviceId].asBL = false;
-                    else DEVICEs[switchDeviceId].asBL = true;
+                    if (expectedHeader != OW_RESPONSE_IN_BL) DEVICEs[loopDeviceId].asBL = false;
+                    else DEVICEs[loopDeviceId].asBL = true;
                     if (switchProblem == 0) {
-                        if (DEVICE_types.find(x => x.id === DEVICEs[switchDeviceId].type).blOnly == true) return
-                        if (DEBUG) console.log("switching DEVICE with id: " + switchDeviceId);
-                        send_OneWire_package(switchDeviceId, 0, [switchCommand]);
+                        if (DEVICE_types.find(x => x.id === DEVICEs[loopDeviceId].type).blOnly == true) return
+                        if (DEBUG) console.log("switching DEVICE with id: " + loopDeviceId);
+                        send_OneWire_package(loopDeviceId, 0, [switchCommand]);
                         if (connectionType == VCP) {
                             if (DEBUG) console.log("starting reconnect procedure 1");
                             ReconnectOnSend(0);
@@ -1130,41 +1129,41 @@ function check_ESCs_In_BL() {
                         switchProblem++;
                         waitLoops = 20;
                     } else if (switchProblem < 20) {
-                        if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " don't switches ->retry");
-                        send_OneWire_package(switchDeviceId, 0, [switchCommand]);
+                        if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " don't switches ->retry");
+                        send_OneWire_package(loopDeviceId, 0, [switchCommand]);
                         switchProblem++;
                         waitLoops = 20;
                     } else {
-                        if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " don't switches ->stop");
+                        if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " don't switches ->stop");
                         serialBadError = 1;
-                        switchDeviceId++;
+                        loopDeviceId++;
                         switchProblem = 0;
                     }
                 }
             } else if (switchStatus == 1) {
-                DEVICEs[switchDeviceId].version = (responsePackage[5] / 10);
-                DEVICEs[switchDeviceId].subversion = (responsePackage[6] / 100);
-                if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " software version is: " + DEVICEs[switchDeviceId].version + "." + DEVICEs[switchDeviceId].subversion);
+                DEVICEs[loopDeviceId].version = (responsePackage[5] / 10);
+                DEVICEs[loopDeviceId].subversion = (responsePackage[6] / 100);
+                if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " software version is: " + DEVICEs[loopDeviceId].version + "." + DEVICEs[loopDeviceId].subversion);
                 switchStatus++;
             } else if (switchStatus == 2) {
-                DEVICEs[switchDeviceId].activated = responsePackage[5];
-                if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " activation status is: " + DEVICEs[switchDeviceId].activated);
+                DEVICEs[loopDeviceId].activated = responsePackage[5];
+                if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " activation status is: " + DEVICEs[loopDeviceId].activated);
                 switchStatus++;
             }
             else if (switchStatus == 3) {
-                DEVICEs[switchDeviceId].DeviceSettings[0].active = responsePackage[5];
-                if (DEBUG) console.log("DEVICE with id: " + switchDeviceId + " eeprom version status is: " + responsePackage[5]);
+                DEVICEs[loopDeviceId].DeviceSettings[0].active = responsePackage[5];
+                if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " eeprom version status is: " + responsePackage[5]);
                 switchStatus = 0;
-                switchDeviceId++;
+                loopDeviceId++;
             }
-        } else if (++timeoutDeviceIDs[switchDeviceId] == timeout_delay || timeoutDeviceIDs[switchDeviceId] == timeout_delay * 3 || timeoutDeviceIDs[switchDeviceId] == timeout_delay * 5) {
+        } else if (++timeoutDeviceIDs[loopDeviceId] == timeout_delay || timeoutDeviceIDs[loopDeviceId] == timeout_delay * 3 || timeoutDeviceIDs[loopDeviceId] == timeout_delay * 5) {
             sendBytes(LastSentData);
             if (DEBUG) console.log("no response, retrying");
-        } else if (timeoutDeviceIDs[switchDeviceId] > timeout_delay * 5) {
-            if (DEBUG) console.log("no response from DEVICE with id: " + switchDeviceId + " ->stop");
+        } else if (timeoutDeviceIDs[loopDeviceId] > timeout_delay * 5) {
+            if (DEBUG) console.log("no response from DEVICE with id: " + loopDeviceId + " ->stop");
             serialBadError = 1;
             waitForResponseID = 0;
-            switchDeviceId++;
+            loopDeviceId++;
         }
     }
 }
