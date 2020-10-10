@@ -91,3 +91,40 @@ function send_OneWire_package(id, type, bytes) {
     sendBytes(DevicePackage);
     if (SERIALDEBUG) console.log("SND: " + DevicePackage)
 }
+
+function checkForRespPackage() {
+    var responsePackage = [];
+    while (SerialAvailable()) {
+        var testByte = readByte();
+        if (responseIndex == 0 && testByte != 2 && testByte != 3) continue;
+        if (responseIndex == 1 && waitForResponseID != testByte) {
+            responseIndex = 0;
+            continue;
+        }
+
+        if (responseIndex == 3 && waitForResponseType != ((testByte << 8) | RespBuf[2])) {
+            responseIndex = 0;
+            continue;
+        }
+        if (responseIndex == 4) {
+            getLength = testByte;
+        }
+        RespBuf[responseIndex++] = testByte;
+        if (responseIndex == getLength && responseIndex > 4) {
+            if (getCRC(RespBuf, getLength - 1) == RespBuf[getLength - 1]) {
+                for (var i = 0; i < getLength; i++) responsePackage[i] = RespBuf[i];
+                if (DEBUG) console.log("valid package with " + getLength + "bytes received");
+            }
+            responseIndex = 0;
+            getLength = 5;
+            waitForResponseID = 0;
+            waitForResponseType = 0;
+            waitForResponseLength = 0;
+        }
+    }
+    if (responsePackage.length > 1) {
+        if (SERIALDEBUG) console.log("RCV: " + responsePackage)
+        return responsePackage;
+    }
+    else return false;
+}

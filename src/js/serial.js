@@ -13,7 +13,7 @@ chrome.serial.onReceive.addListener(function RX_data(DataIn) {
     if (DataIn) {
         if (DataIn.data.byteLength > 0) {
             var data = new Uint8Array(DataIn.data);
-            if (DEBUG) console.log(data);
+            //if (DEBUG) console.log(data);
             for (var i = 0; i < data.length; i++) {
                 if (onewire) {
                     if (ignoreOwnBytesIndex > 0) {

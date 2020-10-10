@@ -1,6 +1,6 @@
 "user strict";
 
-const DEBUG = 0;
+const DEBUG = 1;
 const SERIALDEBUG = 0; /* show send/receive */
 
 const APIKEY = "";
@@ -364,6 +364,17 @@ onload = function () {
 
     /* Debug output */
     if (DEBUG) {
+        $('#con_area').append('<button id="rescan_button">ReScan</button>');
+        $('#rescan_button').button().click(function () {
+
+            ReScanForDevices();
+            return
+        });
+        $("#rescan_button").attr('disabled', true);
+        $("#rescan_button").addClass("ui-state-disabled");
+        
+    }
+    if (DEBUG) {
         $('#con_area').append('<button id="debug_button">Debug</button>');
         $('#debug_button').button().click(function () {
             // Return debug to console
@@ -375,6 +386,7 @@ onload = function () {
             //console.log('Update details');
             //console.dir(versionCheck);
             //console.log("DEBUG");
+            //ReScanForDevices();
             return
         });
     }
@@ -390,11 +402,19 @@ function UpdateSerialSection(status) {
     if (status === "connect") {
         $("#con_port").attr('disabled', true);
         $("#con_type").attr('disabled', true);
+        $("#rescan_button").attr('disabled', false);
+        $("#rescan_button").removeClass("ui-state-disabled");
+
         $("#con_button").text("Disconnect");
     } else if (status === "disconnect") {
         $("#con_port").attr('disabled', false);
         $("#con_type").attr('disabled', false);
+        $("rescan_button").attr('disabled', false);
+        $("#rescan_button").attr('disabled', true);
+        $("#rescan_button").addClass("ui-state-disabled");
+
         $("#con_button").text("Connect");
+
     }
 
     $('#con_type').selectmenu("refresh");
@@ -462,10 +482,14 @@ function Gen_Menu_Buttons(active_id, is_disabled) {
     if (is_disabled && SerialConnection.connected == true) {
         $("#con_button").attr('disabled', true);
         $("#con_button").addClass("ui-state-disabled");
+        $("#rescan_button").attr('disabled', true);
+        $("#rescan_button").addClass("ui-state-disabled");
 
     } else {
         $("#con_button").attr('disabled', false);
         $("#con_button").removeClass("ui-state-disabled");
+        $("#rescan_button").attr('disabled', false);
+        $("#rescan_button").removeClass("ui-state-disabled");
     }
 }
 
@@ -580,6 +604,7 @@ function disconnect() {
     is_USB_only_bootloader = 0;
 
     scanDone = 0;
+    scanID = 1;
     devicesDisplayed = 0;
 
     DEVICEs = [];
@@ -1261,41 +1286,20 @@ function ChangeDisplay(displayType) {
 }
 /* DEVICE communication */
 
-function checkForRespPackage() {
-    var responsePackage = [];
-    while (SerialAvailable()) {
-        var testByte = readByte();
-        if (responseIndex == 0 && testByte != 2 && testByte != 3) continue;
-        if (responseIndex == 1 && waitForResponseID != testByte) {
-            responseIndex = 0;
-            continue;
-        }
 
-        if (responseIndex == 3 && waitForResponseType != ((testByte << 8) | RespBuf[2])) {
-            responseIndex = 0;
-            continue;
-        }
-        if (responseIndex == 4) {
-            getLength = testByte;
-        }
-        RespBuf[responseIndex++] = testByte;
-        if (responseIndex == getLength && responseIndex > 4) {
-            if (getCRC(RespBuf, getLength - 1) == RespBuf[getLength - 1]) {
-                for (var i = 0; i < getLength; i++) responsePackage[i] = RespBuf[i];
-                if (DEBUG) console.log("valid package with " + getLength + "bytes received");
-            }
-            responseIndex = 0;
-            getLength = 5;
-            waitForResponseID = 0;
-            waitForResponseType = 0;
-            waitForResponseLength = 0;
-        }
-    }
-    if (responsePackage.length > 1) {
-        if (SERIALDEBUG) console.log("RCV: " + responsePackage)
-        return responsePackage;
-    }
-    else return false;
+function ReScanForDevices() {
+    scanDone = 0;
+    scanID = 1;
+    devicesDisplayed = 0;
+    DEVICEs = [];
+    timeoutDeviceIDs = [];
+    $('#overview').empty();
+    $('#toolbar').empty();
+    $("#progressbar").show();
+    $("#rescan_button").attr('disabled', true);
+    $("#rescan_button").addClass("ui-state-disabled");
+
+    ScanForDevices()
 }
 
 function ScanForDevices() {
