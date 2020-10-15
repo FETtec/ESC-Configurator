@@ -372,7 +372,6 @@ onload = function () {
         });
         $("#rescan_button").attr('disabled', true);
         $("#rescan_button").addClass("ui-state-disabled");
-        
     }
     if (DEBUG) {
         $('#con_area').append('<button id="debug_button">Debug</button>');
@@ -1098,21 +1097,21 @@ function check_ESCs_In_BL() {
             }
         } else if (switchStatus == 2) {
             if (checkActivation) {
-                send_OneWire_package(loopDeviceId, 0, [OW_GET_ACTIVATION]);
-                waitForResponseID = loopDeviceId;
-                waitForResponseType = 0;
-                waitForResponseLength = 7;
-                if (DEBUG) console.log("check Activation of id: " + loopDeviceId + " ");
-            } else {
-                switchStatus++;
-            }
-        } else if (switchStatus == 3) {
-            if (checkActivation) {
                 send_OneWire_package(loopDeviceId, 0, [OW_GET_EEVER]);
                 waitForResponseID = loopDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
                 if (DEBUG) console.log("check EEPROM VERSION of id: " + loopDeviceId + " ");
+            } else {
+                switchStatus++;
+            }
+        } else if (switchStatus == 3) {
+            if (checkActivation) {
+                send_OneWire_package(loopDeviceId, 0, [OW_GET_ACTIVATION]);
+                waitForResponseID = loopDeviceId;
+                waitForResponseType = 0;
+                waitForResponseLength = 7;
+                if (DEBUG) console.log("check Activation of id: " + loopDeviceId + " ");
             } else {
                 switchStatus = 0;
                 loopDeviceId++;
@@ -1161,13 +1160,21 @@ function check_ESCs_In_BL() {
                 if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " software version is: " + DEVICEs[loopDeviceId].version + "." + DEVICEs[loopDeviceId].subversion);
                 switchStatus++;
             } else if (switchStatus == 2) {
-                DEVICEs[loopDeviceId].activated = responsePackage[5];
-                if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " activation status is: " + DEVICEs[loopDeviceId].activated);
-                switchStatus++;
+                DEVICEs[loopDeviceId].DeviceSettings[0].value = responsePackage[5];
+
+                if (responsePackage[5] >= 25) {
+                    if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " eeprom version status is: " + responsePackage[5] + " check for activation");
+                    switchStatus++;
+                } else {
+                    if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " eeprom version status is: " + responsePackage[5] + " activation not supported");
+                    DEVICEs[loopDeviceId].activated = 1;
+                    switchStatus = 0;
+                    loopDeviceId++;
+                }
             }
             else if (switchStatus == 3) {
-                DEVICEs[loopDeviceId].DeviceSettings[0].value = responsePackage[5];
-                if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " eeprom version status is: " + responsePackage[5]);
+                DEVICEs[loopDeviceId].activated = responsePackage[5];
+                if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " activation status is: " + DEVICEs[loopDeviceId].activated);
                 switchStatus = 0;
                 loopDeviceId++;
             }
