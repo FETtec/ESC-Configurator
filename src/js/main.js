@@ -1,6 +1,6 @@
 "user strict";
 
-const DEBUG = 1;
+const DEBUG = 0;
 const SERIALDEBUG = 0; /* show send/receive */
 
 const APIKEY = "";
@@ -232,6 +232,7 @@ var readSetting = 0;
 var reconnectOnTxDone = 0;
 var reconnectTry = 0;
 var refreshVersion = 0;
+var rescanDone = 0;
 var checkActivation = 0;
 var responseIndex = 0;
 var saveNewSettingsToId = 0;
@@ -362,17 +363,15 @@ onload = function () {
         }
     }, 1000);
 
-    /* Debug output */
-    if (DEBUG) {
-        $('#con_area').append('<button id="rescan_button">ReScan</button>');
-        $('#rescan_button').button().click(function () {
+    $('#con_area').append('<button id="rescan_button">ReScan</button>');
+    $('#rescan_button').button().click(function () {
+        ReScanForDevices();
+        return
+    });
+    $("#rescan_button").attr('disabled', true);
+    $("#rescan_button").addClass("ui-state-disabled");
 
-            ReScanForDevices();
-            return
-        });
-        $("#rescan_button").attr('disabled', true);
-        $("#rescan_button").addClass("ui-state-disabled");
-    }
+    /* Debug output */
     if (DEBUG) {
         $('#con_area').append('<button id="debug_button">Debug</button>');
         $('#debug_button').button().click(function () {
@@ -494,6 +493,8 @@ function Gen_Menu_Buttons(active_id, is_disabled) {
 
 function OpenPort(port) {
     UpdateSerialSection("connect");
+    $("#rescan_button").attr('disabled', true);
+    $("#rescan_button").addClass("ui-state-disabled");
     connectionType = parseInt(document.getElementById("con_type").value);
 
     SerialConnection.Port = port;
@@ -582,6 +583,8 @@ function Reconnect() {
     ptStatus = 0;
     SerialConnection.pass_through = SerialConnection.Port;
     if (DEBUG) console.log("changed Baud to: " + newBaud);
+    $("#rescan_button").attr('disabled', true);
+    $("#rescan_button").addClass("ui-state-disabled");
 }
 
 function disconnect() {
@@ -592,6 +595,7 @@ function disconnect() {
     bytesCount = 1;
     connection_attempts = 0;
     loopDeviceId = 0;
+
 
     sentTestPackage = 0;
     SerialConnection.pass_through = 0;
@@ -651,6 +655,8 @@ function disconnect() {
     $('#overview').empty();
     $('#toolbar').empty();
     Gen_Menu_Buttons(-1, true);
+    $("#rescan_button").attr('disabled', true);
+    $("#rescan_button").addClass("ui-state-disabled");
 }
 
 function keyCollect_activate() {
@@ -688,10 +694,11 @@ function keycollectLoop() {
                 var tmpEPROM = DEVICEs[loopDeviceId].DeviceSettings[0].value;
                 var tmpID = loopDeviceId;
                 for (var y = 0; y < 12; y++)
-                    tmpSN += dec2hex(DEVICEs[loopDeviceId].SN[y]);
+                    tmpSN += String(dec2hex(DEVICEs[loopDeviceId].SN[y]));
                 DEVICEs[loopDeviceId].activationkey = [-2, -2, -2, -2]; // -2 means to be collected
                 var tmpURL = "https://licensing.fettec.net/activation.php?id=" + tmpSN + "&ver=" + tmpEPROM;
                 if (USEAPI) tmpURL += "&api=" + APIKEY + "&type=" + DEVICEs[loopDeviceId].type;
+                if (DEBUG) console.log("URL =  " + tmpURL)
                 $.ajax({
                     url: tmpURL,
                     type: 'GET',
@@ -998,6 +1005,9 @@ function Internal_Loop() {
             initFWUpdater();
             change_Devices_status(1, 1, 0, 1);
             firmwareUpdaterInitDone = 1;
+        } else if (rescanDone == 1) {
+            initConfig();
+            rescanDone = 0;
         }
     }
     if (SerialConnection.connected == 1) {
@@ -1162,7 +1172,7 @@ function check_ESCs_In_BL() {
             } else if (switchStatus == 2) {
                 DEVICEs[loopDeviceId].DeviceSettings[0].value = responsePackage[5];
 
-                if (responsePackage[5] >= 25) {
+                if (responsePackage[5] >= 25) { // TODO fix this (refer to EEPROM)
                     if (DEBUG) console.log("DEVICE with id: " + loopDeviceId + " eeprom version status is: " + responsePackage[5] + " check for activation");
                     switchStatus++;
                 } else {
@@ -1301,12 +1311,13 @@ function ReScanForDevices() {
     DEVICEs = [];
     timeoutDeviceIDs = [];
     $('#overview').empty();
-    $('#toolbar').empty();
+    //$('#toolbar').empty();
     $("#progressbar").show();
     $("#rescan_button").attr('disabled', true);
     $("#rescan_button").addClass("ui-state-disabled");
 
     ScanForDevices()
+    rescanDone = 1;
 }
 
 function ScanForDevices() {
@@ -2677,6 +2688,7 @@ function ConfigLoop() {
                         DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value = newSettingsValues[readDeviceSettings[deviceSettingIndex]];
                         checkDEVICEsStats = 0;
                         if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand == OW_GET_ID) {
+/*
                             $("#dialog").text("OneWire ID was changed. GUI must reset! please connect again.");
                             $("#dialog").dialog({
                                 modal: true,
@@ -2687,6 +2699,18 @@ function ConfigLoop() {
                                 }
                             });
                             disconnect();
+*/
+                            
+                            ReScanForDevices();
+                            settingsRead = 0;
+                            readDeviceIDs = [];
+                            readDeviceSettings = [];
+                            deviceIdIndex = 0;
+                            deviceSettingIndex = 0;
+                            checkDEVICEsStats = 0;
+                            saveNewSettingsToId = 0;
+                            //ConfigLoop();
+
                             return;
                         }
                         if (DEBUG) console.log("saved setting: " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].name);
