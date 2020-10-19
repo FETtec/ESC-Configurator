@@ -114,7 +114,7 @@ function showLogoEditor(width, height, WhiteLogoArr, BlackLogoArr, WhiteLogoPos,
                     loadCanvas("canvasLogo", width, height, inverted);
                 }));
         $("#imgRt").append().html("&#8250;"); // right
-
+/*
         $("#imgMovr").append(
             $('<button/>')
                 .attr({ id: 'imgCntr' })
@@ -140,7 +140,7 @@ function showLogoEditor(width, height, WhiteLogoArr, BlackLogoArr, WhiteLogoPos,
                 }))
             ;
         $("#imgInvert").append().html("Invert");
-
+*/
     }
 
 
@@ -272,11 +272,11 @@ function searchStartLogo(ByteArr) {
                 getA2sign(ByteArr[i + 13]) == "A" &&
                 getA2sign(ByteArr[i + 14]) == "C" &&
                 getA2sign(ByteArr[i + 15]) == "K" &&
-                getA2sign(ByteArr[i + 16]) == ">"
+                getA2sign(ByteArr[i + 24]) == ">" 
             ) {
-                FW_update.BlackStartLogoPos = i + 17;
+                FW_update.BlackStartLogoPos = i + 25;
                 for (i2 = 0; i2 < (Math.ceil(startLogoWidth / 8) * startLogoHeight); i2++) {
-                    FW_update.BlackStartLogoArr.push(ByteArr[i + i2 + 17]);
+                    FW_update.BlackStartLogoArr.push(ByteArr[i + i2 + 25]);
                 }
                 if (DEBUG) console.log("Black Start Logo found at position " + FW_update.BlackStartLogoPos);
             }
@@ -299,11 +299,11 @@ function searchStartLogo(ByteArr) {
                 getA2sign(ByteArr[i + 13]) == "I" &&
                 getA2sign(ByteArr[i + 14]) == "T" &&
                 getA2sign(ByteArr[i + 15]) == "E" &&
-                getA2sign(ByteArr[i + 16]) == ">"
+                getA2sign(ByteArr[i + 24]) == ">"
             ) {
-                FW_update.WhiteStartLogoPos = i + 17;
+                FW_update.WhiteStartLogoPos = i + 25;
                 for (i2 = 0; i2 < (Math.ceil(startLogoWidth / 8) * startLogoHeight); i2++) {
-                    FW_update.WhiteStartLogoArr.push(ByteArr[i + i2 + 17]);
+                    FW_update.WhiteStartLogoArr.push(ByteArr[i + i2 + 25]);
                 }
                 if (DEBUG) console.log("White Start Logo found at position " + FW_update.WhiteStartLogoPos);
             }

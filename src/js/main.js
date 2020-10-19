@@ -1996,9 +1996,7 @@ function PrepareUpdate() {
     }
 
 
-    var StartLogo = searchStartLogo(FW_update.binaryString);
-
-    if (StartLogo == 1) { // Logo
+    if (searchStartLogo(FW_update.binaryString) == 1) { // Logo
         $("#toolbar").append(
             $('<button/>')
                 .attr({ id: 'FW_chSlogo' })
