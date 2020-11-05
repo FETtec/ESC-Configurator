@@ -183,6 +183,8 @@ function DEVICE() {
         63: { getCommand: OW_GET_MAX_OUTPUT_CURRENT_LIMIT, setCommand: OW_SET_MAX_OUTPUT_CURRENT_LIMIT, name: "Motor Current Limit", feature: "advanced", type: "value", min: 200, max: 14000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
         64: { getCommand: OW_GET_HALL_SENSORS_LEVELS, setCommand: OW_SET_HALL_SENSORS_LEVELS, name: "Hall Sensor Output Levels", feature: "advanced", type: "value", min: 0, max: 100, value: 0, changed: false, eever: 35, byteCount: 1, DeviceTypes: [4, 5, 9] },
         65: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, value: 0, changed: false, eever: 25, byteCount: 1, DeviceTypes: onAllESCs },
+        66: { getCommand: OW_GET_MASTER_ESC_MODE, setCommand: OW_SET_MASTER_ESC_MODE, name: "Dual Mode Master", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 36, byteCount: 1, DeviceTypes: [4,9] },
+        67: { getCommand: OW_GET_TRAPEZOIDAL_MODE, setCommand: OW_SET_TRAPEZOIDAL_MODE, name: "Trapeziodal commutation", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 37, byteCount: 1, DeviceTypes: onAllESCs },
         99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs } // must always be 99 and the last one
     };
 }
@@ -706,6 +708,12 @@ function keycollectLoop() {
                     success: function (data) {
                         if (DEBUG) console.log("Collect key '" + data + "' for SN: " + tmpSN);
                         DEVICEs[tmpID].activationkey = data.split(",");
+                        if (data == "0,0,0,0") {
+                            $(".ui-notification-container").notification("create", {
+                                title: "Unable to activate",
+                                content: "SN: "+ tmpSN + "not in Database.",
+                            });
+                        }
                     },
                     error: function (data) {
                         if (DEBUG) console.log("ERROR on collect key")
@@ -1473,6 +1481,14 @@ function displayDevices(ParentElement) {
             var DeviceSerialDiv = document.createElement('div');
             DeviceSerialDiv.className = "Device_Info_sn";
             DeviceSerialDiv.innerHTML = "SN: ";
+/*            $('#SN2').on('click', function (e) {
+                copyTextToClipboard(MCUid);
+                $('#SN2text').text($.i18n("text.serial-clipboard"));
+                setTimeout(function () {
+                    $('#SN2text').text("");
+                }, 1000);
+            });
+*/
             for (var y = 0; y < 12; y++)
                 DeviceSerialDiv.innerHTML += dec2hex(DEVICEs[i].SN[y]) + " ";
             DeviceInfoDiv.appendChild(DeviceSerialDiv);
