@@ -93,7 +93,7 @@ function send_OneWire_package(id, type, bytes) {
     for (var i = 0; i < bytes.length; i++) DevicePackage.push(bytes[i]);
     DevicePackage.push(getCRC(DevicePackage, B_length - 1));
     sendBytes(DevicePackage);
-    if (SERIALDEBUG) console.log("SND: " + DevicePackage)
+    eventMessage("SND: " + DevicePackage, -2)
 }
 
 function checkForRespPackage() {
@@ -117,7 +117,7 @@ function checkForRespPackage() {
         if (responseIndex == getLength && responseIndex > 4) {
             if (getCRC(RespBuf, getLength - 1) == RespBuf[getLength - 1]) {
                 for (var i = 0; i < getLength; i++) responsePackage[i] = RespBuf[i];
-                if (DEBUG) console.log("valid package with " + getLength + "bytes received");
+                eventMessage("valid package with " + getLength + "bytes received", -1);
             }
             responseIndex = 0;
             getLength = 5;
@@ -127,7 +127,7 @@ function checkForRespPackage() {
         }
     }
     if (responsePackage.length > 1) {
-        if (SERIALDEBUG) console.log("RCV: " + responsePackage)
+        eventMessage("RCV: " + responsePackage, -2)
         return responsePackage;
     }
     else return false;
