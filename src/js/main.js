@@ -1,6 +1,6 @@
 "user strict";
 
-const DEBUG = 1;
+const DEBUG = 0;
 const SERIALDEBUG = 0; /* show send/receive */
 
 const APIKEY = "";
@@ -248,6 +248,7 @@ var settingsRead = 0;
 var settings_index_max = 0;
 var start_check = 0;
 var switchCommand = 0;
+var switchLoopDeviceId = 0;
 var switchProblem = 0;
 var switchStatus = 0;
 var thrCommandFirstByte = 0;
@@ -258,7 +259,6 @@ var use_bit_rate = 2000000;
 var waitForResponseID = 0;
 var waitForResponseLength = 0;
 var waitForResponseType = 0;
-var waitLoops = 0;
 var waitLoops = 0;
 var wait_for_TLM = 0;
 var wait_for_TLM_loops = 0;
@@ -424,7 +424,7 @@ function UpdateSerialSection(status) {
 function GenSerialDropdown(ports) {
     $('#con_port').empty()
     for (var i in ports) {
-        if (ports[i].path.toLowerCase().indexOf("/dev/cu.") === -1) // ignore cu. interfaces
+        if (ports[i].path.toLowerCase().indexOf("/dev/tty.") === -1) // ignore cu. interfaces
             $('#con_port').append($("<option/>", {
                 value: ports[i].path,
                 text: ports[i].path
@@ -551,7 +551,6 @@ function onPortOpen(cInfo) {
         if (connectionType == BF_PT) {
             sendBytes([0x23]);
             waitLoops = 10;
-
             eventMessage("Entered BF CLI", -1);
         }
         if (reconnectOnTxDone == 0) $("#progressbar").show();
@@ -590,76 +589,76 @@ function Reconnect() {
     $("#rescan_button").addClass("ui-state-disabled");
 }
 
-function disconnect() {
-    selectedMenu = 0;
-    activationActive = 0;
-    keycollectActive = 0;
-    activationRequired = 0;
-    bytesCount = 1;
-    connection_attempts = 0;
-    loopDeviceId = 0;
+function disconnect(rescan = 1) {
+    if (rescan) {
+        selectedMenu = 0;
+        activationActive = 0;
+        keycollectActive = 0;
+        activationRequired = 0;
+        bytesCount = 1;
+        connection_attempts = 0;
+        loopDeviceId = 0;
 
+        sentTestPackage = 0;
+        SerialConnection.pass_through = 0;
+        SerialConnection.pass_through_fails = 0;
+        SerialConnection.connected = false;
+        interval_Speedup_Done = 0;
+        ptStatus = 0;
+        waitLoops = 0;
+        is_USB_only_bootloader = 0;
 
-    sentTestPackage = 0;
-    SerialConnection.pass_through = 0;
-    SerialConnection.pass_through_fails = 0;
-    SerialConnection.connected = false;
-    interval_Speedup_Done = 0;
-    ptStatus = 0;
-    waitLoops = 0;
-    is_USB_only_bootloader = 0;
+        scanDone = 0;
+        scanID = 1;
+        devicesDisplayed = 0;
 
-    scanDone = 0;
-    scanID = 1;
-    devicesDisplayed = 0;
+        DEVICEs = [];
+        timeoutDeviceIDs = [];
 
-    DEVICEs = [];
-    timeoutDeviceIDs = [];
+        firmwareUpdaterInitDone = 0;
+        FW_update.hexString = [];
+        FW_update.binaryString = [];
+        FW_update.preparedPages = [];
+        FW_update.pagesCount = 0;
+        FW_update.startAddr = null;
+        FW_update.WhitePilotLogoPos = null;
+        FW_update.BlackPilotLogoPos = null;
+        FW_update.WhitePilotLogoArr = [];
+        FW_update.BlackPilotLogoArr = [];
+        FW_update.WhiteStartLogoPos = null;
+        FW_update.BlackStartLogoPos = null;
+        FW_update.WhiteStartLogoArr = [];
+        FW_update.BlackStartLogoArr = [];
 
-    firmwareUpdaterInitDone = 0;
-    FW_update.hexString = [];
-    FW_update.binaryString = [];
-    FW_update.preparedPages = [];
-    FW_update.pagesCount = 0;
-    FW_update.startAddr = null;
-    FW_update.WhitePilotLogoPos = null;
-    FW_update.BlackPilotLogoPos = null;
-    FW_update.WhitePilotLogoArr = [];
-    FW_update.BlackPilotLogoArr = [];
-    FW_update.WhiteStartLogoPos = null;
-    FW_update.BlackStartLogoPos = null;
-    FW_update.WhiteStartLogoArr = [];
-    FW_update.BlackStartLogoArr = [];
+        if (SerialConnection.connectionErr < 10)
+            ChangeDisplay(99);
 
+        clearInterval(loopInterval);
+
+        $('#overview').empty();
+        $('#toolbar').empty();
+
+        // recheck for port changes
+        chrome.serial.getDevices(function (ports) {
+            checkPorts(ports, true);
+        });
+
+        interval_Speedup_Done = 0;
+        clearInterval(loopInterval);
+        loopInterval = setInterval(function () { Internal_Loop(); }, 50);
+
+        UpdateSerialSection("disconnect");
+
+        // cleanup
+        $("#progressbar").hide();
+        $('#overview').empty();
+        $('#toolbar').empty();
+        Gen_Menu_Buttons(-1, true);
+        $("#rescan_button").attr('disabled', true);
+        $("#rescan_button").addClass("ui-state-disabled");
+    }
     if (typeof SerialConnection.connection.connectionId !== 'undefined')
         chrome.serial.disconnect(SerialConnection.connection.connectionId, function () { });
-
-    if (SerialConnection.connectionErr < 10)
-        ChangeDisplay(99);
-
-    clearInterval(loopInterval);
-
-    $('#overview').empty();
-    $('#toolbar').empty();
-
-    // recheck for port changes
-    chrome.serial.getDevices(function (ports) {
-        checkPorts(ports, true);
-    });
-
-    interval_Speedup_Done = 0;
-    clearInterval(loopInterval);
-    loopInterval = setInterval(function () { Internal_Loop(); }, 50);
-
-    UpdateSerialSection("disconnect");
-
-    // cleanup
-    $("#progressbar").hide();
-    $('#overview').empty();
-    $('#toolbar').empty();
-    Gen_Menu_Buttons(-1, true);
-    $("#rescan_button").attr('disabled', true);
-    $("#rescan_button").addClass("ui-state-disabled");
 }
 
 function keyCollect_activate() {
@@ -1024,6 +1023,10 @@ function Internal_Loop() {
             check_ESCs_In_BL();
         } else {
             if (FW_update.FlashProcessActive == 1) {
+                change_Devices_status(0);
+                FW_update.FlashProcessActive = 2;
+            }
+            if (FW_update.FlashProcessActive == 3) {
                 FlashProcessLoop();
             }
             if (selectedMenu == 2) {
@@ -1044,9 +1047,10 @@ function Internal_Loop() {
 
 /* Switch from Bootloader to Firmware and back */
 
+
 function change_Devices_status(stat, enableButtonsIfDone = 0, refreshVersionIfDone = 0, checkActivationIfDone = 0) {
     disableButtons();
-    loopDeviceId = 0;
+    switchLoopDeviceId = 0;
     switchProblem = 0;
     enableButtonsAfterSwitch = enableButtonsIfDone;
     refreshVersion = refreshVersionIfDone;
@@ -1072,9 +1076,10 @@ function check_ESCs_In_BL() {
     if (reconnectOnTxDone != 0 && connectionType == VCP) return;
 
     if (waitForResponseID == 0) {
-        while ((!(loopDeviceId in DEVICEs)) && loopDeviceId < 25) loopDeviceId++;
-        if (loopDeviceId == 25) {
+        while ((!(switchLoopDeviceId in DEVICEs)) && switchLoopDeviceId < 25) switchLoopDeviceId++;
+        if (switchLoopDeviceId == 25) {
             devicesToBL = 0;
+            if (FW_update.FlashProcessActive == 2) FW_update.FlashProcessActive = 3;
             if (refreshVersion) {
                 refreshVersion = 0;
                 document.getElementById("overview").innerHTML = "";
@@ -1092,48 +1097,48 @@ function check_ESCs_In_BL() {
             return;
         }
 
-        if ((DEVICE_types.find(x => x.id === DEVICEs[loopDeviceId].type)).blOnly == true) {
+        if ((DEVICE_types.find(x => x.id === DEVICEs[switchLoopDeviceId].type)).blOnly == true) {
             switchStatus = 0;
-            loopDeviceId++;
+            switchLoopDeviceId++;
             return;
         }
 
         if (switchStatus == 0) {
-            send_OneWire_package(loopDeviceId, 0, [OW_OK]);
-            waitForResponseID = loopDeviceId;
+            send_OneWire_package(switchLoopDeviceId, 0, [OW_OK]);
+            waitForResponseID = switchLoopDeviceId;
             waitForResponseType = 0;
             waitForResponseLength = 7;
-            eventMessage("check with id: " + loopDeviceId + " ");
+            eventMessage("check with id: " + switchLoopDeviceId + " ");
         } else if (switchStatus == 1) {
             if (refreshVersion) {
-                send_OneWire_package(loopDeviceId, 0, [OW_REQ_SW_VER]);
-                waitForResponseID = loopDeviceId;
+                send_OneWire_package(switchLoopDeviceId, 0, [OW_REQ_SW_VER]);
+                waitForResponseID = switchLoopDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 8;
-                eventMessage("check FW version with id: " + loopDeviceId + " ");
+                eventMessage("check FW version with id: " + switchLoopDeviceId + " ");
             } else {
                 switchStatus++;
             }
         } else if (switchStatus == 2) {
             if (checkActivation) {
-                send_OneWire_package(loopDeviceId, 0, [OW_GET_EEVER]);
-                waitForResponseID = loopDeviceId;
+                send_OneWire_package(switchLoopDeviceId, 0, [OW_GET_EEVER]);
+                waitForResponseID = switchLoopDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                eventMessage("check EEPROM VERSION of id: " + loopDeviceId + " ");
+                eventMessage("check EEPROM VERSION of id: " + switchLoopDeviceId + " ");
             } else {
                 switchStatus++;
             }
         } else if (switchStatus == 3) {
             if (checkActivation) {
-                send_OneWire_package(loopDeviceId, 0, [OW_GET_ACTIVATION]);
-                waitForResponseID = loopDeviceId;
+                send_OneWire_package(switchLoopDeviceId, 0, [OW_GET_ACTIVATION]);
+                waitForResponseID = switchLoopDeviceId;
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
-                eventMessage("check Activation of id: " + loopDeviceId + " ");
+                eventMessage("check Activation of id: " + switchLoopDeviceId + " ");
             } else {
                 switchStatus = 0;
-                loopDeviceId++;
+                switchLoopDeviceId++;
             }
         }
 
@@ -1141,20 +1146,20 @@ function check_ESCs_In_BL() {
     } else {
         var responsePackage = checkForRespPackage();
         if (responsePackage) {
-            timeoutDeviceIDs[loopDeviceId] = 0;
+            timeoutDeviceIDs[switchLoopDeviceId] = 0;
             if (switchStatus == 0) {
                 if (responsePackage[0] == expectedHeader) {
-                    if (expectedHeader == OW_RESPONSE_IN_BL) DEVICEs[loopDeviceId].asBL = true;
-                    else DEVICEs[loopDeviceId].asBL = false;
-                    eventMessage("DEVICE with id: " + loopDeviceId + " is ready");
+                    if (expectedHeader == OW_RESPONSE_IN_BL) DEVICEs[switchLoopDeviceId].asBL = true;
+                    else DEVICEs[switchLoopDeviceId].asBL = false;
+                    eventMessage("DEVICE with id: " + switchLoopDeviceId + " is ready");
                     switchStatus++;
                 } else {
-                    if (expectedHeader != OW_RESPONSE_IN_BL) DEVICEs[loopDeviceId].asBL = false;
-                    else DEVICEs[loopDeviceId].asBL = true;
+                    if (expectedHeader != OW_RESPONSE_IN_BL) DEVICEs[switchLoopDeviceId].asBL = false;
+                    else DEVICEs[switchLoopDeviceId].asBL = true;
                     if (switchProblem == 0) {
-                        if (DEVICE_types.find(x => x.id === DEVICEs[loopDeviceId].type).blOnly == true) return
-                        eventMessage("switching DEVICE with id: " + loopDeviceId);
-                        send_OneWire_package(loopDeviceId, 0, [switchCommand]);
+                        if (DEVICE_types.find(x => x.id === DEVICEs[switchLoopDeviceId].type).blOnly == true) return
+                        eventMessage("switching DEVICE with id: " + switchLoopDeviceId);
+                        send_OneWire_package(switchLoopDeviceId, 0, [switchCommand]);
                         if (connectionType == VCP) {
                             eventMessage("starting reconnect procedure 1");
                             ReconnectOnSend(0);
@@ -1162,49 +1167,49 @@ function check_ESCs_In_BL() {
                         switchProblem++;
                         waitLoops = 20;
                     } else if (switchProblem < 20) {
-                        eventMessage("DEVICE with id: " + loopDeviceId + " don't switches ->retry");
-                        send_OneWire_package(loopDeviceId, 0, [switchCommand]);
+                        eventMessage("DEVICE with id: " + switchLoopDeviceId + " don't switches ->retry");
+                        send_OneWire_package(switchLoopDeviceId, 0, [switchCommand]);
                         switchProblem++;
                         waitLoops = 20;
                     } else {
-                        eventMessage("DEVICE with id: " + loopDeviceId + " don't switches ->stop");
+                        eventMessage("DEVICE with id: " + switchLoopDeviceId + " don't switches ->stop");
                         serialBadError = 1;
-                        loopDeviceId++;
+                        switchLoopDeviceId++;
                         switchProblem = 0;
                     }
                 }
             } else if (switchStatus == 1) {
-                DEVICEs[loopDeviceId].version = (responsePackage[5] / 10);
-                DEVICEs[loopDeviceId].subversion = (responsePackage[6] / 100);
-                eventMessage("DEVICE with id: " + loopDeviceId + " software version is: " + DEVICEs[loopDeviceId].version + "." + DEVICEs[loopDeviceId].subversion);
+                DEVICEs[switchLoopDeviceId].version = (responsePackage[5] / 10);
+                DEVICEs[switchLoopDeviceId].subversion = (responsePackage[6] / 100);
+                eventMessage("DEVICE with id: " + switchLoopDeviceId + " software version is: " + DEVICEs[switchLoopDeviceId].version + "." + DEVICEs[switchLoopDeviceId].subversion);
                 switchStatus++;
             } else if (switchStatus == 2) {
-                DEVICEs[loopDeviceId].DeviceSettings[0].value = responsePackage[5];
+                DEVICEs[switchLoopDeviceId].DeviceSettings[0].value = responsePackage[5];
 
                 if (responsePackage[5] >= 25) { // TODO fix this (refer to EEPROM)
-                    eventMessage("DEVICE with id: " + loopDeviceId + " eeprom version status is: " + responsePackage[5] + " check for activation");
+                    eventMessage("DEVICE with id: " + switchLoopDeviceId + " eeprom version status is: " + responsePackage[5] + " check for activation");
                     switchStatus++;
                 } else {
-                    eventMessage("DEVICE with id: " + loopDeviceId + " eeprom version status is: " + responsePackage[5] + " activation not supported");
-                    DEVICEs[loopDeviceId].activated = 1;
+                    eventMessage("DEVICE with id: " + switchLoopDeviceId + " eeprom version status is: " + responsePackage[5] + " activation not supported");
+                    DEVICEs[switchLoopDeviceId].activated = 1;
                     switchStatus = 0;
-                    loopDeviceId++;
+                    switchLoopDeviceId++;
                 }
             }
             else if (switchStatus == 3) {
-                DEVICEs[loopDeviceId].activated = responsePackage[5];
-                eventMessage("DEVICE with id: " + loopDeviceId + " activation status is: " + DEVICEs[loopDeviceId].activated);
+                DEVICEs[switchLoopDeviceId].activated = responsePackage[5];
+                eventMessage("DEVICE with id: " + switchLoopDeviceId + " activation status is: " + DEVICEs[switchLoopDeviceId].activated);
                 switchStatus = 0;
-                loopDeviceId++;
+                switchLoopDeviceId++;
             }
-        } else if (++timeoutDeviceIDs[loopDeviceId] == timeout_delay || timeoutDeviceIDs[loopDeviceId] == timeout_delay * 3 || timeoutDeviceIDs[loopDeviceId] == timeout_delay * 5) {
+        } else if (++timeoutDeviceIDs[switchLoopDeviceId] == timeout_delay || timeoutDeviceIDs[switchLoopDeviceId] == timeout_delay * 3 || timeoutDeviceIDs[switchLoopDeviceId] == timeout_delay * 5) {
             sendBytes(LastSentData);
             eventMessage("no response, retrying");
-        } else if (timeoutDeviceIDs[loopDeviceId] > timeout_delay * 5) {
-            eventMessage("no response from DEVICE with id: " + loopDeviceId + " ->stop");
+        } else if (timeoutDeviceIDs[switchLoopDeviceId] > timeout_delay * 5) {
+            eventMessage("no response from DEVICE with id: " + switchLoopDeviceId + " ->stop");
             serialBadError = 1;
             waitForResponseID = 0;
-            loopDeviceId++;
+            switchLoopDeviceId++;
         }
     }
 }
@@ -1297,8 +1302,10 @@ function ChangeDisplay(displayType) {
 
         switch (displayType) {
             case 0:
-                initFWUpdater();
-                change_Devices_status(1, 1, 0);
+                if (FW_update.FlashProcessActive == 0) {
+                    initFWUpdater();
+                    change_Devices_status(1, 1, 0);
+                }
                 break;
             case 1:
                 initConfig();
@@ -1401,10 +1408,8 @@ function ScanForDevices() {
 
                     for (var i = 0; i < 12; i++) DEVICEs[scanID].SN[i] = responsePackage[i + 5];
 
-                    if (DEBUG) {
-                        console.log("DEVICE with id: " + scanID + " serialnumber is: ");
-                        console.log(DEVICEs[scanID].SN);
-                    }
+                    eventMessage("DEVICE with id: " + scanID + " serialnumber is: ", DEVICEs[scanID].SN);
+
                     scanStep = 0;
                     if (++scanID == 25) {
                         $("#progressbar").hide();
@@ -2227,7 +2232,9 @@ function FlashProcessLoop() {
             FW_update.FlashProcessActive = 0;
             FW_update.fileUploadInput.disabled = false;
             FW_update.startUpdateInput.disabled = false;
-            if (is_USB_only_bootloader == 0) change_Devices_status(1, 1, 1, 1);
+            if (is_USB_only_bootloader == 0) {
+                change_Devices_status(1, 1, 1, 1);
+            }
             $('#toolbar').empty();
             initFWUpdater(); //lets reset the
         }
