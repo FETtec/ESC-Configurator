@@ -4,6 +4,7 @@
 var ignoreOwnBytesIndex = 0;
 var TX_busy = 0;
 var oldPortPath;
+var oldPortsPaths = [];
 
 // Begin functions
 
@@ -94,6 +95,10 @@ function ReconnectOnSend(reconnectState) {
     eventMessage("ReconnectOnSend - " + reconnectState, -1)
     if (connectionType == VCP) {
         if (reconnectState == 0) { // wait for data to be sent
+            oldPortsPaths = [];
+            for (var i in SerialConnection.FoundPorts) {
+                oldPortsPaths.push(SerialConnection.FoundPorts[i].path);
+            }
             eventMessage("reconnect, wait for data to be sent", -1);
             reconnectOnTxDone = 1;
         } else if (reconnectState == 2) { // close com port
@@ -117,6 +122,14 @@ function ReconnectToOldPort(ports) {
     eventMessage("reconnect, oldPortPath = " + oldPortPath, -1);
     for (var i in ports) {
         if (ports[i].path == oldPortPath) {
+            eventMessage("reconnect, connect to new port foundPortPath = " + ports[i].path, -1);
+            chrome.serial.connect(ports[i].path, { bitrate: use_bit_rate, bufferSize: 200000, persistent: true }, onPortOpen);
+            UpdateSerialSection("connect");
+            return;
+        }
+    }
+    for (var i in ports) {
+        if (!oldPortsPaths.includes(ports[i].path)) {
             eventMessage("reconnect, connect to new port foundPortPath = " + ports[i].path, -1);
             chrome.serial.connect(ports[i].path, { bitrate: use_bit_rate, bufferSize: 200000, persistent: true }, onPortOpen);
             UpdateSerialSection("connect");
