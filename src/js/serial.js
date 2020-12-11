@@ -124,9 +124,10 @@ function ReconnectToOldPort(ports) {
         }
     }
     eventMessage("reconnect, port not found - try " + reconnectTry, -1);
-    if (reconnectTry > 2000)
+    if (reconnectTry > 4000) {
+        disconnect();
         return;
-
+    }
     ReconnectOnSend(3);
 }
 
