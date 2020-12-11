@@ -2082,7 +2082,7 @@ function FlashProcessLoop() {
                 waitForResponseType = 0;
                 waitForResponseLength = 7;
                 extraDelay = 1;
-		if(connectionType == VCP)waitLoops = 500;
+                if (connectionType == VCP) waitLoops = 500;
                 eventMessage("sent to DEVICE with ID: " + loopDeviceId + " the block count that need to be flashed & erase flash command. ");
             } else if (actDeviceFlashStat == 3) {
                 if (actDeviceFlashPage > 0) {
