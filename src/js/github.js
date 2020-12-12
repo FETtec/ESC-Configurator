@@ -34,7 +34,7 @@ function checkGithubRelease(url, currVersion) {
     var releaseInfo = [];
 
     getAjax(url).done(function (response) {
-        console.log('Latest release found: ' + response[0].tag_name, ' current version: ' + currVersion);
+        eventMessage('Latest release found: ' + response[0].tag_name, ' current version: ' + currVersion, 1);
         if (semver.gt(response[0].tag_name, currVersion)) {
             // only apply to array when we are outdated
             if (DEBUG) console.log("Update available!");

@@ -54,6 +54,36 @@ const OW_GET_SOFT_BRAKE = 54;
 const OW_SET_SOFT_BRAKE = 55;
 const OW_GET_ACTIVATION = 56;
 const OW_SET_ACTIVATION = 57;
+const OW_GET_HALL_SENSOR_USAGE = 58;
+const OW_SET_HALL_SENSOR_USAGE = 59;
+const OW_GET_CURRENT_LIMIT = 60;
+const OW_SET_CURRENT_LIMIT = 61;
+const OW_GET_NO_ACTIVE_START = 62;
+const OW_SET_NO_ACTIVE_START = 63;
+const OW_SET_ANALOG_THROTTLE = 64;
+const OW_GET_ANALOG_THROTTLE = 65;
+const OW_SET_CELL_COUNT = 66;
+const OW_GET_CELL_COUNT = 67;
+const OW_SET_TURNOFF_VOLTAGE = 68;
+const OW_GET_TURNOFF_VOLTAGE = 69;
+const OW_SET_CELL_MAX_VOLTAGE = 70;
+const OW_GET_CELL_MAX_VOLTAGE = 71;
+const OW_SET_CM_PER_ERPM = 72;
+const OW_GET_CM_PER_ERPM = 73;
+const OW_SET_BRAKE_ACTIVE = 74;
+const OW_GET_BRAKE_ACTIVE = 75;
+const OW_SET_ANALOG_BRAKE = 76;
+const OW_GET_ANALOG_BRAKE = 77;
+const OW_SET_BEC_VOLTAGE = 78;
+const OW_GET_BEC_VOLTAGE = 79;
+const OW_SET_MAX_OUTPUT_CURRENT_LIMIT = 80;
+const OW_GET_MAX_OUTPUT_CURRENT_LIMIT = 81;
+const OW_SET_HALL_SENSORS_LEVELS = 82;
+const OW_GET_HALL_SENSORS_LEVELS = 83;
+const OW_SET_MASTER_ESC_MODE = 84;
+const OW_GET_MASTER_ESC_MODE = 85;
+const OW_SET_TRAPEZOIDAL_MODE = 86;
+const OW_GET_TRAPEZOIDAL_MODE = 87;
 
 // Begin functions
 
@@ -63,5 +93,42 @@ function send_OneWire_package(id, type, bytes) {
     for (var i = 0; i < bytes.length; i++) DevicePackage.push(bytes[i]);
     DevicePackage.push(getCRC(DevicePackage, B_length - 1));
     sendBytes(DevicePackage);
-    if (SERIALDEBUG) console.log("SND: " + DevicePackage)
+    eventMessage("SND: " + DevicePackage, -2)
+}
+
+function checkForRespPackage() {
+    var responsePackage = [];
+    while (SerialAvailable()) {
+        var testByte = readByte();
+        if (responseIndex == 0 && testByte != 2 && testByte != 3) continue;
+        if (responseIndex == 1 && waitForResponseID != testByte) {
+            responseIndex = 0;
+            continue;
+        }
+
+        if (responseIndex == 3 && waitForResponseType != ((testByte << 8) | RespBuf[2])) {
+            responseIndex = 0;
+            continue;
+        }
+        if (responseIndex == 4) {
+            getLength = testByte;
+        }
+        RespBuf[responseIndex++] = testByte;
+        if (responseIndex == getLength && responseIndex > 4) {
+            if (getCRC(RespBuf, getLength - 1) == RespBuf[getLength - 1]) {
+                for (var i = 0; i < getLength; i++) responsePackage[i] = RespBuf[i];
+                eventMessage("valid package with " + getLength + "bytes received", -1);
+            }
+            responseIndex = 0;
+            getLength = 5;
+            waitForResponseID = 0;
+            waitForResponseType = 0;
+            waitForResponseLength = 0;
+        }
+    }
+    if (responsePackage.length > 1) {
+        eventMessage("RCV: " + responsePackage, -2)
+        return responsePackage;
+    }
+    else return false;
 }

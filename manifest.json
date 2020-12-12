@@ -4,7 +4,7 @@
     "description": "Configuration tool for FETtec devices",
     "offline_enabled": true,
     "author": "FETtec",
-    "version": "0.1.23",
+    "version": "0.1.27",
     "manifest_version": 2,
     "minimum_chrome_version": "40",
     "permissions": [
@@ -14,7 +14,8 @@
         "fileSystem",
         "notifications",
         "https://*.github.com/",
-        "https://*.s3.amazonaws.com/"
+        "https://*.s3.amazonaws.com/",
+        "https://licensing.fettec.net/"
     ],
     "icons": {
         "144": "src/images/fettec-256x256.png"

@@ -4,6 +4,7 @@
 var ignoreOwnBytesIndex = 0;
 var TX_busy = 0;
 var oldPortPath;
+var oldPortsPaths = [];
 
 // Begin functions
 
@@ -13,7 +14,6 @@ chrome.serial.onReceive.addListener(function RX_data(DataIn) {
     if (DataIn) {
         if (DataIn.data.byteLength > 0) {
             var data = new Uint8Array(DataIn.data);
-            if (DEBUG) console.log(data);
             for (var i = 0; i < data.length; i++) {
                 if (onewire) {
                     if (ignoreOwnBytesIndex > 0) {
@@ -35,7 +35,7 @@ chrome.serial.onReceiveError.addListener(function check_receive_error(info) {
         case 'disconnected':
             break;
         default:
-            console.log(info.error)
+            eventMessage(info.error, 0)
             break;
 
     }
@@ -92,12 +92,17 @@ function TX() {
 
 
 function ReconnectOnSend(reconnectState) {
+    eventMessage("ReconnectOnSend - " + reconnectState, -1)
     if (connectionType == VCP) {
         if (reconnectState == 0) { // wait for data to be sent
-            if (DEBUG) console.log("reconnect, wait for data to be sent");
+            oldPortsPaths = [];
+            for (var i in SerialConnection.FoundPorts) {
+                oldPortsPaths.push(SerialConnection.FoundPorts[i].path);
+            }
+            eventMessage("reconnect, wait for data to be sent", -1);
             reconnectOnTxDone = 1;
         } else if (reconnectState == 2) { // close com port
-            if (DEBUG) console.log("reconnect, closing old port");
+            eventMessage("reconnect, closing old port", -1);
             oldPortPath = SerialConnection.Port;
             if (typeof SerialConnection.connection.connectionId !== 'undefined')
                 chrome.serial.disconnect(SerialConnection.connection.connectionId, function () { ReconnectOnSend(3); });
@@ -112,19 +117,30 @@ function ReconnectOnSend(reconnectState) {
 }
 
 function ReconnectToOldPort(ports) {
-    if (DEBUG) console.log("reconnect, search new port");
-    //var foundPort;
-    if (DEBUG) console.log("reconnect, oldPortPath = " + oldPortPath);
+    reconnectTry++;
+    eventMessage("reconnect, search new port", -1);
+    eventMessage("reconnect, oldPortPath = " + oldPortPath, -1);
     for (var i in ports) {
         if (ports[i].path == oldPortPath) {
-            if (DEBUG) console.log("reconnect, connect to new port");
-            if (DEBUG) console.log("reconnect, foundPortPath = " + ports[i].path);
+            eventMessage("reconnect, connect to new port foundPortPath = " + ports[i].path, -1);
             chrome.serial.connect(ports[i].path, { bitrate: use_bit_rate, bufferSize: 200000, persistent: true }, onPortOpen);
             UpdateSerialSection("connect");
             return;
         }
     }
-    if (DEBUG) console.log("reconnect, port not found");
+    for (var i in ports) {
+        if (!oldPortsPaths.includes(ports[i].path)) {
+            eventMessage("reconnect, connect to new port foundPortPath = " + ports[i].path, -1);
+            chrome.serial.connect(ports[i].path, { bitrate: use_bit_rate, bufferSize: 200000, persistent: true }, onPortOpen);
+            UpdateSerialSection("connect");
+            return;
+        }
+    }
+    eventMessage("reconnect, port not found - try " + reconnectTry, -1);
+    if (reconnectTry > 4000) {
+        disconnect();
+        return;
+    }
     ReconnectOnSend(3);
 }
 
@@ -134,17 +150,14 @@ function TX_done() {
         TX_busy = 0;
         if (reconnectOnTxDone == 1) {
             reconnectOnTxDone = 2;
-            if (DEBUG) console.log("reconnect, data sent...");
+            eventMessage("reconnect, data sent...", -1);
             setTimeout(function () { ReconnectOnSend(reconnectOnTxDone); }, 500);
         }
     }
 }
 
 function checkPorts(ports, force) {
-    // check if not connected and if serial port count change
-    //    if ((SerialConnection.connected == 0 && arr_diff(SerialConnection.FoundPorts, ports).length != 0) || typeof (force) !== 'undefined') {
     if ((SerialConnection.connected == 0 && ports.length != SerialConnection.FoundPorts.length) || typeof (force) !== 'undefined') {
-
         SerialConnection.FoundPorts = ports;
         GenSerialDropdown(SerialConnection.FoundPorts);
     }
