@@ -78,7 +78,7 @@ const DEVICE_types = [
     { id: 111, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
     //    { id: 112, name: "ESC 100A", filename: '' },
     //    { id: 113, name: "ESC 100A", filename: '' },
-    { id: 127, name: "FETtec F3 NANO-FC", filename: 'FETTEC_FC_NANO-', start_addr: 3800, blOnly: true, activation: false },
+    { id: 127, name: "FETtec F3 MINI-FC", filename: 'FETTEC_MINI_FC_F3-', start_addr: 3800, blOnly: true, activation: false },
     { id: 128, name: "FETtec G4 FC", filename: 'FETTEC_FC_G4-', start_addr: 3800, blOnly: true, activation: false },
     { id: 129, name: "FETtec G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true, activation: false }
 ];
