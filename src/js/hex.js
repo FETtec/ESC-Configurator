@@ -38,6 +38,7 @@ function parseHexFile(hexData) {
     FW_update.binaryString = [];
     FW_update.preparedPages = [];
     FW_update.pagesCount = 0;
+    FW_update.hexSize = 0;
     for (var i = 0; i < tempHexString.length; i++) {
         lineArr = tempHexString[i].split("");
         var hex_Line_Address = parseInt('0x' + lineArr[2] + '' + lineArr[3] + '' + lineArr[4] + '' + lineArr[5]);
@@ -72,4 +73,5 @@ function parseHexFile(hexData) {
             }
         }
     }
+    FW_update.hexSize = FW_update.binaryString.length;
 }

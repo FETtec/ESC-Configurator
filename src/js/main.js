@@ -19,68 +19,68 @@ const VCP = 3;
 
 const DEVICE_types = [
     { id: 0, name: "none", filename: '', blOnly: false, activation: false },
-    { id: 1, name: "FETtec ESC 35A", filename: 'FETTEC_35A_ESC_G0_', start_addr: 1800, blOnly: false, activation: false },
-    { id: 2, name: "FETtec ESC 50A", filename: 'FETTEC_50A_ESC_G0_', start_addr: 1800, blOnly: false, activation: false },
-    { id: 3, name: "FETtec ESC 7A", filename: 'FETTEC_7A_ESC_G0_', start_addr: 1800, blOnly: false, activation: false },
-    { id: 4, name: "FETtec PRO ESC 80A", filename: 'FETTEC_PRO_80A_ESC_G4_', start_addr: 3800, blOnly: false, activation: false },
-    { id: 5, name: "FETtec PRO ESC 60A", filename: 'FETTEC_PRO_60A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: false },
-    { id: 6, name: "FETtec ESC 45A", filename: 'FETTEC_45A_ESC_G0_', start_addr: 1800, blOnly: false, activation: false },
-    { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_', start_addr: 1800, blOnly: false, activation: false },
-    { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
-    { id: 9, name: "FETtec PRO ESC 45A", filename: 'FETTEC_PRO_45A_ESC_G4_', start_addr: 3800, blOnly: false, activation: false },
-    { id: 64, name: "ESC 15A", filename: 'ESC_DEF_GD_15A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
-    { id: 65, name: "ESC 15A", filename: 'ESC_ADV_GD_15A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 1, name: "FETtec ESC 35A", filename: 'FETTEC_35A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false },
+    { id: 2, name: "FETtec ESC 50A", filename: 'FETTEC_50A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false },
+    { id: 3, name: "FETtec ESC 7A", filename: 'FETTEC_7A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false },
+    { id: 4, name: "FETtec PRO ESC 80A", filename: 'FETTEC_PRO_80A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: false },
+    { id: 5, name: "FETtec PRO ESC 60A", filename: 'FETTEC_PRO_60A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: false },
+    { id: 6, name: "FETtec ESC 45A", filename: 'FETTEC_45A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false },
+    { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false },
+    { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
+    { id: 9, name: "FETtec PRO ESC 45A", filename: 'FETTEC_PRO_45A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: false },
+    { id: 64, name: "ESC 15A", filename: 'ESC_DEF_GD_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
+    { id: 65, name: "ESC 15A", filename: 'ESC_ADV_GD_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
     //    { id: 66, name: "ESC 15A", filename: '' },
     //    { id: 67, name: "ESC 15A", filename: '' },
-    { id: 68, name: "ESC 25A", filename: 'ESC_DEF_GD_25A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
-    { id: 69, name: "ESC 25A", filename: 'ESC_ADV_GD_25A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
+    { id: 68, name: "ESC 25A", filename: 'ESC_DEF_GD_25A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
+    { id: 69, name: "ESC 25A", filename: 'ESC_ADV_GD_25A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
     //    { id: 70, name: "ESC 25A", filename: '' },
     //    { id: 71, name: "ESC 25A", filename: '' },
-    { id: 72, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
-    { id: 73, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
-    { id: 74, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 75, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
+    { id: 72, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
+    { id: 73, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
+    { id: 74, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
+    { id: 75, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
     //    { id: 76, name: "ESC 35A", filename: '' },
     //    { id: 77, name: "ESC 35A", filename: '' },
-    { id: 78, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
-    { id: 79, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
-    { id: 80, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 81, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 82, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
-    { id: 83, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 78, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
+    { id: 79, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
+    { id: 80, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
+    { id: 81, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
+    { id: 82, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
+    { id: 83, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
     //    { id: 84, name: "ESC 45A", filename: '' },
     //    { id: 85, name: "ESC 45A", filename: '' },
-    { id: 86, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
-    { id: 87, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
-    { id: 88, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 89, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 90, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
-    { id: 91, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 86, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
+    { id: 87, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
+    { id: 88, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
+    { id: 89, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
+    { id: 90, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
+    { id: 91, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
     //    { id: 92, name: "ESC 55A", filename: '' },
     //    { id: 93, name: "ESC 55A", filename: '' },
-    { id: 94, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
-    { id: 95, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_G0_', start_addr: 1800, blOnly: false, activation: true },
-    { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 97, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 98, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
-    { id: 99, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 94, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
+    { id: 95, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
+    { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
+    { id: 97, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
+    { id: 98, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
+    { id: 99, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
     //    { id: 100, name: "ESC 65A", filename: '' },
     //    { id: 101, name: "ESC 65A", filename: '' },
-    { id: 102, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 103, name: "ESC 80A", filename: 'ESC_ADV_GD_80A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 104, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
-    { id: 105, name: "ESC 80A", filename: 'ESC_ADV_GD_80A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 102, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
+    { id: 103, name: "ESC 80A", filename: 'ESC_ADV_GD_80A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
+    { id: 104, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
+    { id: 105, name: "ESC 80A", filename: 'ESC_ADV_GD_80A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
     //    { id: 106, name: "ESC 80A", filename: '' },
     //    { id: 107, name: "ESC 80A", filename: '' },
-    { id: 108, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 109, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, blOnly: false, activation: true },
-    { id: 110, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
-    { id: 111, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, blOnly: false, activation: true },
+    { id: 108, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
+    { id: 109, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
+    { id: 110, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
+    { id: 111, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
     //    { id: 112, name: "ESC 100A", filename: '' },
     //    { id: 113, name: "ESC 100A", filename: '' },
-    { id: 127, name: "FETtec F3 MINI-FC", filename: 'FETTEC_MINI_FC-', start_addr: 3800, blOnly: true, activation: false },
-    { id: 128, name: "FETtec G4 FC", filename: 'FETTEC_FC_G4-', start_addr: 3800, blOnly: true, activation: false },
-    { id: 129, name: "FETtec G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, blOnly: true, activation: false }
+    { id: 127, name: "FETtec F3 MINI-FC", filename: 'FETTEC_MINI_FC-', start_addr: 3800, fw_maxsize: 240, blOnly: true, activation: false },
+    { id: 128, name: "FETtec G4 FC", filename: 'FETTEC_FC_G4-', start_addr: 3800, fw_maxsize: 496, blOnly: true, activation: false },
+    { id: 129, name: "FETtec G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, fw_maxsize: 124, blOnly: true, activation: false }
 ];
 
 const Serial_Options = [
@@ -157,34 +157,37 @@ function DEVICE() {
         0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "hidden", min: 0, max: 0, value: 0, changed: false, eever: 0, byteCount: 1, DeviceTypes: onAllESCs }, // must always be 0
         40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse motor direction", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
         41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
-        42: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
-        43: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min.", type: "slider", feature: "advanced", min: 1000, max: 1400, value: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
-        44: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max.", type: "slider", feature: "advanced", min: 1600, max: 2000, value: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
-        45: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 23, byteCount: 1, DeviceTypes: onAllESCs },
-        46: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 1, byteCount: 1, DeviceTypes: onAllESCs },
-        47: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, value: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
+        42: { getCommand: OW_GET_SOFT_START, setCommand: OW_SET_SOFT_START, name: "Soft start", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 41, byteCount: 1, DeviceTypes: onAllESCs },
+        43: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
+        44: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min.", type: "slider", feature: "advanced", min: 1000, max: 1400, value: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
+        45: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max.", type: "slider", feature: "advanced", min: 1600, max: 2000, value: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
+        46: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 23, byteCount: 1, DeviceTypes: onAllESCs },
+        47: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 1, byteCount: 1, DeviceTypes: onAllESCs },
+        48: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, value: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
         /*
-                48: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
-                49: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
-                50: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
-                51: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, value: 1, changed: false, eever: 22, byteCount: 4, DeviceTypes: onAllESCs },
+                49: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
+                50: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
+                51: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
+                52: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, value: 1, changed: false, eever: 22, byteCount: 4, DeviceTypes: onAllESCs },
         */
-        52: { getCommand: OW_GET_HALL_SENSOR_USAGE, setCommand: OW_SET_HALL_SENSOR_USAGE, name: "Hall Sensors", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        53: { getCommand: OW_GET_CURRENT_LIMIT, setCommand: OW_SET_CURRENT_LIMIT, name: "Current limit", feature: "advanced", type: "value", min: 100, max: 12000, value: 0, changed: false, eever: 27, byteCount: 2, DeviceTypes: [4, 5, 9] },
-        54: { getCommand: OW_GET_NO_ACTIVE_START, setCommand: OW_SET_NO_ACTIVE_START, name: "No Active Start", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        55: { getCommand: OW_GET_ANALOG_THROTTLE, setCommand: OW_SET_ANALOG_THROTTLE, name: "Analog Throttle", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 9] },
-        56: { getCommand: OW_GET_CELL_COUNT, setCommand: OW_SET_CELL_COUNT, name: "Battery Cell count", feature: "advanced", type: "value", min: 1, max: 255, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        57: { getCommand: OW_GET_TURNOFF_VOLTAGE, setCommand: OW_SET_TURNOFF_VOLTAGE, name: "Turn Off Cell Voltage", feature: "advanced", type: "value", min: 0, max: 1000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 5, 9] },
-        58: { getCommand: OW_GET_CELL_MAX_VOLTAGE, setCommand: OW_SET_CELL_MAX_VOLTAGE, name: "Max Cell Voltage", feature: "advanced", type: "value", min: 0, max: 1000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 5, 9] },
-        59: { getCommand: OW_GET_CM_PER_ERPM, setCommand: OW_SET_CM_PER_ERPM, name: "mm per Erpm", feature: "advanced", type: "value", min: 0, max: 10000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
-        60: { getCommand: OW_GET_BRAKE_ACTIVE, setCommand: OW_SET_BRAKE_ACTIVE, name: "Motor brake", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        61: { getCommand: OW_GET_ANALOG_BRAKE, setCommand: OW_SET_ANALOG_BRAKE, name: "Use analog brake signal", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 9] },
-        62: { getCommand: OW_GET_BEC_VOLTAGE, setCommand: OW_SET_BEC_VOLTAGE, name: "BEC output Voltage", feature: "advanced", type: "value", min: 0, max: 2000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
-        63: { getCommand: OW_GET_MAX_OUTPUT_CURRENT_LIMIT, setCommand: OW_SET_MAX_OUTPUT_CURRENT_LIMIT, name: "Motor Current Limit", feature: "advanced", type: "value", min: 200, max: 14000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
-        64: { getCommand: OW_GET_HALL_SENSORS_LEVELS, setCommand: OW_SET_HALL_SENSORS_LEVELS, name: "Hall Sensor Output Levels", feature: "advanced", type: "value", min: 0, max: 100, value: 0, changed: false, eever: 35, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        65: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, value: 0, changed: false, eever: 25, byteCount: 1, DeviceTypes: onAllESCs },
-        66: { getCommand: OW_GET_MASTER_ESC_MODE, setCommand: OW_SET_MASTER_ESC_MODE, name: "Dual Mode Master", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 36, byteCount: 1, DeviceTypes: [4, 9] },
-        67: { getCommand: OW_GET_TRAPEZOIDAL_MODE, setCommand: OW_SET_TRAPEZOIDAL_MODE, name: "Trapeziodal commutation", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 37, byteCount: 1, DeviceTypes: onAllESCs },
+        53: { getCommand: OW_GET_HALL_SENSOR_USAGE, setCommand: OW_SET_HALL_SENSOR_USAGE, name: "Hall Sensors", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        54: { getCommand: OW_GET_CURRENT_LIMIT, setCommand: OW_SET_CURRENT_LIMIT, name: "Current limit", feature: "advanced", type: "value", min: 100, max: 12000, value: 0, changed: false, eever: 27, byteCount: 2, DeviceTypes: [4, 5, 9] },
+        55: { getCommand: OW_GET_NO_ACTIVE_START, setCommand: OW_SET_NO_ACTIVE_START, name: "No Active Start", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        56: { getCommand: OW_GET_ANALOG_THROTTLE, setCommand: OW_SET_ANALOG_THROTTLE, name: "Analog Throttle", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 9] },
+        57: { getCommand: OW_GET_CELL_COUNT, setCommand: OW_SET_CELL_COUNT, name: "Battery Cell count", feature: "advanced", type: "value", min: 1, max: 255, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        58: { getCommand: OW_GET_TURNOFF_VOLTAGE, setCommand: OW_SET_TURNOFF_VOLTAGE, name: "Turn Off Cell Voltage", feature: "advanced", type: "value", min: 0, max: 1000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 5, 9] },
+        59: { getCommand: OW_GET_CELL_MAX_VOLTAGE, setCommand: OW_SET_CELL_MAX_VOLTAGE, name: "Max Cell Voltage", feature: "advanced", type: "value", min: 0, max: 1000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 5, 9] },
+        60: { getCommand: OW_GET_CM_PER_ERPM, setCommand: OW_SET_CM_PER_ERPM, name: "mm per Erpm", feature: "advanced", type: "value", min: 0, max: 10000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
+        61: { getCommand: OW_GET_BRAKE_ACTIVE, setCommand: OW_SET_BRAKE_ACTIVE, name: "Motor brake", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        62: { getCommand: OW_GET_ANALOG_BRAKE, setCommand: OW_SET_ANALOG_BRAKE, name: "Use analog brake signal", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 9] },
+        63: { getCommand: OW_GET_BEC_VOLTAGE, setCommand: OW_SET_BEC_VOLTAGE, name: "BEC output Voltage", feature: "advanced", type: "value", min: 0, max: 2000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
+        64: { getCommand: OW_GET_MAX_OUTPUT_CURRENT_LIMIT, setCommand: OW_SET_MAX_OUTPUT_CURRENT_LIMIT, name: "Motor Current Limit", feature: "advanced", type: "value", min: 200, max: 14000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
+        65: { getCommand: OW_GET_HALL_SENSORS_LEVELS, setCommand: OW_SET_HALL_SENSORS_LEVELS, name: "Hall Sensor Output Levels", feature: "advanced", type: "value", min: 0, max: 255, value: 0, changed: false, eever: 35, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        66: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, value: 0, changed: false, eever: 25, byteCount: 1, DeviceTypes: onAllESCs },
+        67: { getCommand: OW_GET_MASTER_ESC_MODE, setCommand: OW_SET_MASTER_ESC_MODE, name: "Dual Mode Master", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 36, byteCount: 1, DeviceTypes: [4, 9] },
+        68: { getCommand: OW_GET_TRAPEZOIDAL_MODE, setCommand: OW_SET_TRAPEZOIDAL_MODE, name: "Trapeziodal commutation", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 37, byteCount: 1, DeviceTypes: onAllESCs },
+        69: { getCommand: OW_GET_FIELD_WEAKENING, setCommand: OW_SET_FIELD_WEAKENING, name: "Field Weakening", feature: "advanced", type: "value", min: 0, max: 10, value: 0, changed: false, eever: 41, byteCount: 1, DeviceTypes: [4, 5, 9] },
+
         99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs } // must always be 99 and the last one
     };
 }
@@ -217,6 +220,7 @@ var enableButtonsAfterSwitch = 0;
 var expectedHeader = 0;
 var extraDelay = 1;
 var firmwareUpdaterInitDone = 0;
+var firmwareSizeExceeded = 0;
 var getLength = 5;
 var interval_Speedup_Done = 0;
 var is_USB_only_bootloader = 0
@@ -300,6 +304,7 @@ var FW_update = {
     binaryString: [],
     preparedPages: [],
     pagesCount: 0,
+    hexSize: 0,
     fileUploadInput: 0,
     startUpdateInput: 0,
     FlashProcessActive: 0,
@@ -620,6 +625,7 @@ function disconnect(rescan = 1) {
         FW_update.binaryString = [];
         FW_update.preparedPages = [];
         FW_update.pagesCount = 0;
+        FW_update.hexSize = 0;
         FW_update.startAddr = null;
         FW_update.WhitePilotLogoPos = null;
         FW_update.BlackPilotLogoPos = null;
@@ -1912,7 +1918,7 @@ function initFWUpdater() {
             .button()
             .click(function () {
                 eventMessage("check for remote firmware");
-                loadGithubReleases("https://api.github.com/repos/FETtec/ESC-Firmware/releases", function (data) {
+                loadGithubReleases("https://api.github.com/repos/FETtec/Firmware/releases", function (data) {
                     if ($('#remoteFWSelect').length == 0) {
                         $("#toolbar").append($('<select/>').attr({ id: 'remoteFWSelect' }));
                     }
@@ -2050,6 +2056,7 @@ function StartFlashProcess() {
         FW_update.startUpdateInput.disabled = true;
         // Disable disconnect
         loopDeviceId = 0;
+        firmwareSizeExceeded = 0;
         FW_update.FlashProcessActive = 1;
         afterFlashedDisplay = 0;
         disableButtons();
@@ -2059,157 +2066,177 @@ function StartFlashProcess() {
 function FlashProcessLoop() {
     while ((!(loopDeviceId in DEVICEs) || !DEVICEs[loopDeviceId].selected) && loopDeviceId < 25) loopDeviceId++;
     if (loopDeviceId != 25) {
-        if (waitForResponseID == 0) {
-            if (actDeviceFlashStat < 2) {
-                if (actDeviceFlashStat == 0) {
-                    eventMessage("Starting to flash DEVICE with ID: " + loopDeviceId + "...");
-                    if (!DEVICEs[loopDeviceId].asBL) {
-                        send_OneWire_package(loopDeviceId, 0, [OW_RESET_TO_BL]);
-                        eventMessage("reset DEVICE with ID: " + loopDeviceId + " to bootloader");
-                    }
-                    actDeviceFlashStat = 1;
-                } else {
-                    send_OneWire_package(loopDeviceId, 0, [OW_OK]);
-                    waitForResponseID = loopDeviceId;
-                    waitForResponseType = 0;
-                    waitForResponseLength = 7;
-                    eventMessage("check if DEVICE with ID: " + loopDeviceId + " is in bootloader mode");
-                }
-            } else if (actDeviceFlashStat == 2) {
-                send_OneWire_package(loopDeviceId, 0, [OW_BL_PAGES_TO_FLASH, (FW_update.pagesCount & 0xFF), (FW_update.pagesCount >> 8)]);
-                actDeviceFlashPage = FW_update.pagesCount;
-                waitForResponseID = loopDeviceId;
-                waitForResponseType = 0;
-                waitForResponseLength = 7;
-                extraDelay = 1;
-                if (connectionType == VCP) waitLoops = 500;
-                eventMessage("sent to DEVICE with ID: " + loopDeviceId + " the block count that need to be flashed & erase flash command. ");
-            } else if (actDeviceFlashStat == 3) {
-                if (actDeviceFlashPage > 0) {
-                    send_OneWire_package(loopDeviceId, actDeviceFlashPage, FW_update.preparedPages[actDeviceFlashPage - 1]);
-                    eventMessage("sent to DEVICE with ID: " + loopDeviceId + " flash block number: " + actDeviceFlashPage);
-                    waitForResponseID = loopDeviceId;
-                    waitForResponseType = actDeviceFlashPage;
-                    waitForResponseLength = 134;
-                    $("#Device_Info_progress_bar_" + loopDeviceId).progressbar({
-                        value: Math.round((99 - (99 / FW_update.pagesCount * actDeviceFlashPage)))
-                    });
-                } else {
-                    $("#Device_Info_progress_bar_" + loopDeviceId).progressbar({
-                        value: 100
-                    });
-                    eventMessage("DEVICE with ID: " + loopDeviceId + " update done");
-                    actDeviceFlashStat = 0;
-                    actDeviceFlashPage = 0;
-                    DEVICEs[loopDeviceId].asBL = false;
-                    loopDeviceId++;
-                }
-            } else if (actDeviceFlashStat == 4) {
-                send_OneWire_package(loopDeviceId, 0, [OW_BL_PAGE_CORRECT]);
-                waitForResponseID = loopDeviceId;
-                waitForResponseType = 0;
-                waitForResponseLength = 7;
-                eventMessage("verification done, sended write command");
-            }
-        } else {
-            var responsePackage = checkForRespPackage();
-            if (responsePackage) {
-                if (responsePackage[1] == loopDeviceId) {
-                    timeoutDeviceIDs[loopDeviceId] = 0;
-                    if (actDeviceFlashStat == 1) {
-                        if (responsePackage[0] == OW_RESPONSE_IN_BL) {
-                            DEVICEs[loopDeviceId].asBL = true;
-                            eventMessage("DEVICE with ID: " + loopDeviceId + " is in bootloader mode");
-                            actDeviceFlashStat = 2;
-                        } else {
-                            eventMessage("DEVICE with ID: " + loopDeviceId + " don't moves to bootloader!");
+        if ((DEVICE_types.find(x => x.id === DEVICEs[1].type).fw_maxsize * 1024) <= FW_update.hexSize) {
+            eventMessage("DEVICE with ID: " + loopDeviceId + " has less space as Firmware... Jump to the next")
+            firmwareSizeExceeded = 1;
+            actDeviceFlashStat = 0;
+            actDeviceFlashPage = 0;
+            DEVICEs[loopDeviceId].asBL = false;
+            loopDeviceId++;
+        } else
+            if (waitForResponseID == 0) {
+                if (actDeviceFlashStat < 2) {
+                    if (actDeviceFlashStat == 0) {
+                        eventMessage("Starting to flash DEVICE with ID: " + loopDeviceId + "...");
+                        if (!DEVICEs[loopDeviceId].asBL) {
                             send_OneWire_package(loopDeviceId, 0, [OW_RESET_TO_BL]);
                             eventMessage("reset DEVICE with ID: " + loopDeviceId + " to bootloader");
                         }
-                    } else if (actDeviceFlashStat == 2) {
-                        if (responsePackage[5] == 0) {
-                            eventMessage("DEVICE with ID: " + loopDeviceId + " confirmed flash erase");
-                            actDeviceFlashStat = 3;
-                            extraDelay = is_USB_only_bootloader;
-                        } else {
-                            eventMessage("DEVICE with ID: " + loopDeviceId + " reported error: " + responsePackage[5]);
-                        }
-                    } else if (actDeviceFlashStat == 3) {
-                        eventMessage("received from DEVICE with ID: " + loopDeviceId + " block number: " + actDeviceFlashPage + " for verification.");
-                        var verifyFailed = 0;
-                        for (i = 0; i < 128; i++) {
-                            if (FW_update.preparedPages[actDeviceFlashPage - 1][i] != responsePackage[i + 5]) {
-                                verifyFailed = 1;
-                                break;
+                        actDeviceFlashStat = 1;
+                    } else {
+                        send_OneWire_package(loopDeviceId, 0, [OW_OK]);
+                        waitForResponseID = loopDeviceId;
+                        waitForResponseType = 0;
+                        waitForResponseLength = 7;
+                        eventMessage("check if DEVICE with ID: " + loopDeviceId + " is in bootloader mode");
+                    }
+                } else if (actDeviceFlashStat == 2) {
+                    send_OneWire_package(loopDeviceId, 0, [OW_BL_PAGES_TO_FLASH, (FW_update.pagesCount & 0xFF), (FW_update.pagesCount >> 8)]);
+                    actDeviceFlashPage = FW_update.pagesCount;
+                    waitForResponseID = loopDeviceId;
+                    waitForResponseType = 0;
+                    waitForResponseLength = 7;
+                    extraDelay = 1;
+                    if (connectionType == VCP) waitLoops = 500;
+                    eventMessage("sent to DEVICE with ID: " + loopDeviceId + " the block count that need to be flashed & erase flash command. ");
+                } else if (actDeviceFlashStat == 3) {
+                    if (actDeviceFlashPage > 0) {
+                        send_OneWire_package(loopDeviceId, actDeviceFlashPage, FW_update.preparedPages[actDeviceFlashPage - 1]);
+                        eventMessage("sent to DEVICE with ID: " + loopDeviceId + " flash block number: " + actDeviceFlashPage);
+                        waitForResponseID = loopDeviceId;
+                        waitForResponseType = actDeviceFlashPage;
+                        waitForResponseLength = 134;
+                        $("#Device_Info_progress_bar_" + loopDeviceId).progressbar({
+                            value: Math.round((99 - (99 / FW_update.pagesCount * actDeviceFlashPage)))
+                        });
+                    } else {
+                        $("#Device_Info_progress_bar_" + loopDeviceId).progressbar({
+                            value: 100
+                        });
+                        eventMessage("DEVICE with ID: " + loopDeviceId + " update done");
+                        actDeviceFlashStat = 0;
+                        actDeviceFlashPage = 0;
+                        DEVICEs[loopDeviceId].asBL = false;
+                        loopDeviceId++;
+                    }
+                } else if (actDeviceFlashStat == 4) {
+                    send_OneWire_package(loopDeviceId, 0, [OW_BL_PAGE_CORRECT]);
+                    waitForResponseID = loopDeviceId;
+                    waitForResponseType = 0;
+                    waitForResponseLength = 7;
+                    eventMessage("verification done, sended write command");
+                }
+            } else {
+                var responsePackage = checkForRespPackage();
+                if (responsePackage) {
+                    if (responsePackage[1] == loopDeviceId) {
+                        timeoutDeviceIDs[loopDeviceId] = 0;
+                        if (actDeviceFlashStat == 1) {
+                            if (responsePackage[0] == OW_RESPONSE_IN_BL) {
+                                DEVICEs[loopDeviceId].asBL = true;
+                                eventMessage("DEVICE with ID: " + loopDeviceId + " is in bootloader mode");
+                                actDeviceFlashStat = 2;
+                            } else {
+                                eventMessage("DEVICE with ID: " + loopDeviceId + " don't moves to bootloader!");
+                                send_OneWire_package(loopDeviceId, 0, [OW_RESET_TO_BL]);
+                                eventMessage("reset DEVICE with ID: " + loopDeviceId + " to bootloader");
                             }
-                        }
-                        if (verifyFailed == 0) {
-                            actDeviceFlashStat = 4;
-                            FlashProcessLoop();
-                        } else {
-                            eventMessage("verification failed");
-                        }
-                    } else if (actDeviceFlashStat == 4) {
-                        if (responsePackage[5] == 0) {
-                            eventMessage("page written.");
-                            actDeviceFlashPage--;
-                            actDeviceFlashStat = 3;
-                            FlashProcessLoop();
-                        } else {
-                            eventMessage("page could not be written. error: " + responsePackage[5]);
-                            // unable to write block 255 (require BL Update)
-                            if (actDeviceFlashPage == 255 && responsePackage[5] == 2) {
-                                eventMessage("Bootloader not supporting more than 255 pages ");
-                                $("#dialog").text("This DEVICE doesn't have the latest bootloader and can't support this firmware. Please flash the available bootloader update. Once completed please flash again this version.");
-                                loopDeviceId = 0;
-                                FW_update.FlashProcessActive = 0;
-                                $("#dialog").dialog({
-                                    modal: true,
-                                    buttons: {
-                                        Ok: function () {
-                                            $(this).dialog("close");
-                                            FW_update.fileUploadInput.disabled = false;
-                                            FW_update.startUpdateInput.disabled = false;
-                                            change_Devices_status(0, 1, 1);
-                                            $('#toolbar').empty();
-                                            initFWUpdater(); //lets reset the
+                        } else if (actDeviceFlashStat == 2) {
+                            if (responsePackage[5] == 0) {
+                                eventMessage("DEVICE with ID: " + loopDeviceId + " confirmed flash erase");
+                                actDeviceFlashStat = 3;
+                                extraDelay = is_USB_only_bootloader;
+                            } else {
+                                eventMessage("DEVICE with ID: " + loopDeviceId + " reported error: " + responsePackage[5]);
+                            }
+                        } else if (actDeviceFlashStat == 3) {
+                            eventMessage("received from DEVICE with ID: " + loopDeviceId + " block number: " + actDeviceFlashPage + " for verification.");
+                            var verifyFailed = 0;
+                            for (i = 0; i < 128; i++) {
+                                if (FW_update.preparedPages[actDeviceFlashPage - 1][i] != responsePackage[i + 5]) {
+                                    verifyFailed = 1;
+                                    break;
+                                }
+                            }
+                            if (verifyFailed == 0) {
+                                actDeviceFlashStat = 4;
+                                FlashProcessLoop();
+                            } else {
+                                eventMessage("verification failed");
+                            }
+                        } else if (actDeviceFlashStat == 4) {
+                            if (responsePackage[5] == 0) {
+                                eventMessage("page written.");
+                                actDeviceFlashPage--;
+                                actDeviceFlashStat = 3;
+                                FlashProcessLoop();
+                            } else {
+                                eventMessage("page could not be written. error: " + responsePackage[5]);
+                                // unable to write block 255 (require BL Update)
+                                if (actDeviceFlashPage == 255 && responsePackage[5] == 2) {
+                                    eventMessage("Bootloader not supporting more than 255 pages ");
+                                    $("#dialog").text("This DEVICE doesn't have the latest bootloader and can't support this firmware. Please flash the available bootloader update. Once completed please flash again this version.");
+                                    loopDeviceId = 0;
+                                    FW_update.FlashProcessActive = 0;
+                                    $("#dialog").dialog({
+                                        modal: true,
+                                        buttons: {
+                                            Ok: function () {
+                                                $(this).dialog("close");
+                                                FW_update.fileUploadInput.disabled = false;
+                                                FW_update.startUpdateInput.disabled = false;
+                                                change_Devices_status(0, 1, 1);
+                                                $('#toolbar').empty();
+                                                initFWUpdater(); //lets reset the
+                                            }
                                         }
-                                    }
-                                });
+                                    });
 
+                                }
+                                timeoutDeviceIDs[loopDeviceId] = 0;
+                                actDeviceFlashStat = 2;
+                                waitForResponseID = 0;
+                                eventMessage("restarting flash process for DEVICE with ID :" + loopDeviceId);
                             }
-                            timeoutDeviceIDs[loopDeviceId] = 0;
-                            actDeviceFlashStat = 2;
-                            waitForResponseID = 0;
-                            eventMessage("restarting flash process for DEVICE with ID :" + loopDeviceId);
                         }
                     }
+                } else if (++timeoutDeviceIDs[loopDeviceId] == timeout_delay + (350 * extraDelay) || timeoutDeviceIDs[loopDeviceId] == (timeout_delay * 2) + (500 * extraDelay) || timeoutDeviceIDs[loopDeviceId] == (timeout_delay * 3) + (650 * extraDelay)) {
+                    sendBytes(LastSentData);
+                    eventMessage("no response, retrying");
+                } else if (timeoutDeviceIDs[loopDeviceId] > (timeout_delay * 3) + (800 * extraDelay)) {
+                    send_OneWire_package(loopDeviceId, 0xFFFF, [loopDeviceId + 10, loopDeviceId + 20]);
+                    timeoutDeviceIDs[loopDeviceId] = 0;
+                    actDeviceFlashStat = 2;
+                    waitForResponseID = 0;
+                    eventMessage("restarting flash process for DEVICE with ID :" + loopDeviceId);
                 }
-            } else if (++timeoutDeviceIDs[loopDeviceId] == timeout_delay + (350 * extraDelay) || timeoutDeviceIDs[loopDeviceId] == (timeout_delay * 2) + (500 * extraDelay) || timeoutDeviceIDs[loopDeviceId] == (timeout_delay * 3) + (650 * extraDelay)) {
-                sendBytes(LastSentData);
-                eventMessage("no response, retrying");
-            } else if (timeoutDeviceIDs[loopDeviceId] > (timeout_delay * 3) + (800 * extraDelay)) {
-                send_OneWire_package(loopDeviceId, 0xFFFF, [loopDeviceId + 10, loopDeviceId + 20]);
-                timeoutDeviceIDs[loopDeviceId] = 0;
-                actDeviceFlashStat = 2;
-                waitForResponseID = 0;
-                eventMessage("restarting flash process for DEVICE with ID :" + loopDeviceId);
             }
-        }
     } else {
         if (afterFlashedDisplay == 0) {
             if (is_USB_only_bootloader == 0) {
                 change_Devices_status(1, 0, 1);
             } else {
-                $("#dialog").text("Firmware update done! Please power cycle board.");
-                $("#dialog").dialog({
-                    modal: true,
-                    buttons: {
-                        Ok: function () {
-                            $(this).dialog("close");
+                if (firmwareSizeExceeded == 1) {
+                    $("#dialog").text("Firmware file is bigger than available space. Flashing has been stopped.");
+                    $("#dialog").dialog({
+                        modal: true,
+                        buttons: {
+                            Ok: function () {
+                                $(this).dialog("close");
+                            }
                         }
-                    }
-                });
+                    });
+                } else {
+                    $("#dialog").text("Firmware update done! Please power cycle board.");
+                    $("#dialog").dialog({
+                        modal: true,
+                        buttons: {
+                            Ok: function () {
+                                $(this).dialog("close");
+                            }
+                        }
+                    });
+                }
                 enableButtons();
                 ChangeDisplay(0);
             }
@@ -2220,15 +2247,27 @@ function FlashProcessLoop() {
             afterFlashedDisplay = 51;
         } else if (afterFlashedDisplay == 51) {
             eventMessage('flash process done!');
-            $("#dialog").text("Firmware update done! For health and safety always remove all propellers! Please check motor direction.");
-            $("#dialog").dialog({
-                modal: true,
-                buttons: {
-                    Ok: function () {
-                        $(this).dialog("close");
+            if (firmwareSizeExceeded == 1) {
+                $("#dialog").text("Firmware file is bigger than available space. Flashing has been stopped.");
+                $("#dialog").dialog({
+                    modal: true,
+                    buttons: {
+                        Ok: function () {
+                            $(this).dialog("close");
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                $("#dialog").text("Firmware update done! For health and safety always remove all propellers! Please check motor direction.");
+                $("#dialog").dialog({
+                    modal: true,
+                    buttons: {
+                        Ok: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+            }
             loopDeviceId = 0;
             FW_update.FlashProcessActive = 0;
             FW_update.fileUploadInput.disabled = false;
@@ -2340,6 +2379,7 @@ function ToolProcessLoop() {
                 var readTlmByte = 0;
                 for (var i in DEVICEs) {
                     DEVICEs[i].TLMValues[lastRequestedTLM] = (TLM_bytes[readTlmByte++] << 8) | TLM_bytes[readTlmByte++];
+                    if (lastRequestedTLM == 2 && DEVICEs[i].TLMValues[lastRequestedTLM] > 0x7FFF) DEVICEs[i].TLMValues[lastRequestedTLM] -= 0xFFFF;
                 }
             }
             SerialConnection.RX_tail = SerialConnection.RX_head;
