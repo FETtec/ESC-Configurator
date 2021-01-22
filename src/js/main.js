@@ -2379,6 +2379,7 @@ function ToolProcessLoop() {
                 var readTlmByte = 0;
                 for (var i in DEVICEs) {
                     DEVICEs[i].TLMValues[lastRequestedTLM] = (TLM_bytes[readTlmByte++] << 8) | TLM_bytes[readTlmByte++];
+                    if (lastRequestedTLM == 2 && DEVICEs[i].TLMValues[lastRequestedTLM] > 0x7FFF) DEVICEs[i].TLMValues[lastRequestedTLM] -= 0xFFFF;
                 }
             }
             SerialConnection.RX_tail = SerialConnection.RX_head;
