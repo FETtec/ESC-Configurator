@@ -85,6 +85,11 @@ const OW_GET_MASTER_ESC_MODE = 85;
 const OW_SET_TRAPEZOIDAL_MODE = 86;
 const OW_GET_TRAPEZOIDAL_MODE = 87;
 
+const OW_SET_FIELD_WEAKENING = 88;
+const OW_GET_FIELD_WEAKENING = 89;
+const OW_SET_SOFT_START = 90;
+const OW_GET_SOFT_START = 91;
+
 // Begin functions
 
 function send_OneWire_package(id, type, bytes) {
