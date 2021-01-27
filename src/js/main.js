@@ -2066,7 +2066,7 @@ function StartFlashProcess() {
 function FlashProcessLoop() {
     while ((!(loopDeviceId in DEVICEs) || !DEVICEs[loopDeviceId].selected) && loopDeviceId < 25) loopDeviceId++;
     if (loopDeviceId != 25) {
-        if ((DEVICE_types.find(x => x.id === DEVICEs[1].type).fw_maxsize * 1024) <= FW_update.hexSize) {
+        if ((DEVICE_types.find(x => x.id === DEVICEs[loopDeviceId].type).fw_maxsize * 1024) <= FW_update.hexSize) {
             eventMessage("DEVICE with ID: " + loopDeviceId + " has less space as Firmware... Jump to the next")
             firmwareSizeExceeded = 1;
             actDeviceFlashStat = 0;
