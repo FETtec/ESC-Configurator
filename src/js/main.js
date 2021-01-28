@@ -166,8 +166,10 @@ function DEVICE() {
         48: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, value: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
         /*
                 49: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
-                50: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
-                51: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: onAllESCs },
+        */
+        50: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: [4, 5, 9] },
+        51: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: [4, 5, 9] },
+        /*
                 52: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, value: 1, changed: false, eever: 22, byteCount: 4, DeviceTypes: onAllESCs },
         */
         53: { getCommand: OW_GET_HALL_SENSOR_USAGE, setCommand: OW_SET_HALL_SENSOR_USAGE, name: "Hall Sensors", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
@@ -716,9 +718,13 @@ function keycollectLoop() {
                         DEVICEs[tmpID].activationkey = data.split(",");
                         if (data == "0,0,0,0") {
                             $(".ui-notification-container").notification("create", {
-                                title: "Unable to activate",
-                                content: "SN: " + tmpSN + "not in Database.",
-                            });
+                                title: "Unable to activate device ID " + loopDeviceId,
+                                content: "SN: " + tmpSN + " not in Database.",
+                            },
+                                {
+                                    sticky: true
+                                }
+                            );
                         }
                     },
                     error: function (data) {
@@ -2066,7 +2072,7 @@ function StartFlashProcess() {
 function FlashProcessLoop() {
     while ((!(loopDeviceId in DEVICEs) || !DEVICEs[loopDeviceId].selected) && loopDeviceId < 25) loopDeviceId++;
     if (loopDeviceId != 25) {
-        if ((DEVICE_types.find(x => x.id === DEVICEs[1].type).fw_maxsize * 1024) <= FW_update.hexSize) {
+        if ((DEVICE_types.find(x => x.id === DEVICEs[loopDeviceId].type).fw_maxsize * 1024) <= FW_update.hexSize) {
             eventMessage("DEVICE with ID: " + loopDeviceId + " has less space as Firmware... Jump to the next")
             firmwareSizeExceeded = 1;
             actDeviceFlashStat = 0;
