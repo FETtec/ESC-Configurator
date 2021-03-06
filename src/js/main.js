@@ -28,6 +28,7 @@ const DEVICE_types = [
     { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false },
     { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
     { id: 9, name: "FETtec PRO ESC 45A", filename: 'FETTEC_PRO_45A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: false },
+    { id: 10, name: "FETtec ESC 35A AIO", filename: 'FETTEC_35A_AIO_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
     { id: 64, name: "ESC 15A", filename: 'ESC_DEF_GD_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
     { id: 65, name: "ESC 15A", filename: 'ESC_ADV_GD_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
     //    { id: 66, name: "ESC 15A", filename: '' },
@@ -718,7 +719,7 @@ function keycollectLoop() {
                         DEVICEs[tmpID].activationkey = data.split(",");
                         if (data == "0,0,0,0") {
                             $(".ui-notification-container").notification("create", {
-                                title: "Unable to activate device ID " + loopDeviceId,
+                                title: "Unable to activate device ID " + tmpID,
                                 content: "SN: " + tmpSN + " not in Database.",
                             },
                                 {
