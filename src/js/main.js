@@ -808,6 +808,8 @@ function activationLoop() {
                         eventMessage("DEVICE with id: " + loopDeviceId + " don't switches ->stop");
                         serialBadError = 1;
                         switchProblem = 0;
+                        switchStatus = 0;
+                        loopDeviceId++;
                     }
                 }
             } else if (switchStatus == 1) {

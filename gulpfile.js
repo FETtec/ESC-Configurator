@@ -31,7 +31,7 @@ const RELEASE_DIR = "./release/";
 const LINUX_INSTALL_DIR = "/opt/fettec-esc-config";
 
 var nwBuilderOptions = {
-  version: "0.44.2",
+  version: "0.36.4",
   files: "./dist/**/*",
   macIcns: "./src/images/fettec-256x256.icns",
   macPlist: {
