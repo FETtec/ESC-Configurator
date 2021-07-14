@@ -90,6 +90,11 @@ const OW_GET_FIELD_WEAKENING = 89;
 const OW_SET_SOFT_START = 90;
 const OW_GET_SOFT_START = 91;
 
+const OW_SET_POWER_LIMIT = 92;
+const OW_GET_POWER_LIMIT = 93;
+const OW_SET_SPEED_LIMIT = 94;
+const OW_GET_SPEED_LIMIT = 95;
+
 // Begin functions
 
 function send_OneWire_package(id, type, bytes) {

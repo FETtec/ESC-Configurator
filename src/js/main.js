@@ -79,6 +79,7 @@ const DEVICE_types = [
     { id: 111, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
     //    { id: 112, name: "ESC 100A", filename: '' },
     //    { id: 113, name: "ESC 100A", filename: '' },
+    { id: 114, name: "WING ESC 40A", filename: 'ESC_DEF_GD_WING_40A_ESC_G4', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: false },
     { id: 127, name: "FETtec F3 MINI-FC", filename: 'FETTEC_MINI_FC-', start_addr: 3800, fw_maxsize: 240, blOnly: true, activation: false },
     { id: 128, name: "FETtec G4 FC", filename: 'FETTEC_FC_G4-', start_addr: 3800, fw_maxsize: 496, blOnly: true, activation: false },
     { id: 129, name: "FETtec G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, fw_maxsize: 124, blOnly: true, activation: false }
@@ -160,8 +161,8 @@ function DEVICE() {
         41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
         42: { getCommand: OW_GET_SOFT_START, setCommand: OW_SET_SOFT_START, name: "Soft start", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 41, byteCount: 1, DeviceTypes: onAllESCs },
         43: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
-        44: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min.", type: "slider", feature: "advanced", min: 1000, max: 1400, value: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
-        45: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max.", type: "slider", feature: "advanced", min: 1600, max: 2000, value: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
+        44: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min.", type: "slider", feature: "advanced", min: 1000, max: 1600, value: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
+        45: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max.", type: "slider", feature: "advanced", min: 1400, max: 2000, value: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
         46: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 23, byteCount: 1, DeviceTypes: onAllESCs },
         47: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 1, byteCount: 1, DeviceTypes: onAllESCs },
         48: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, value: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
@@ -190,6 +191,8 @@ function DEVICE() {
         67: { getCommand: OW_GET_MASTER_ESC_MODE, setCommand: OW_SET_MASTER_ESC_MODE, name: "Dual Mode Master", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 36, byteCount: 1, DeviceTypes: [4, 9] },
         68: { getCommand: OW_GET_TRAPEZOIDAL_MODE, setCommand: OW_SET_TRAPEZOIDAL_MODE, name: "Trapeziodal commutation", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 37, byteCount: 1, DeviceTypes: onAllESCs },
         69: { getCommand: OW_GET_FIELD_WEAKENING, setCommand: OW_SET_FIELD_WEAKENING, name: "Field Weakening", feature: "advanced", type: "value", min: 0, max: 10, value: 0, changed: false, eever: 41, byteCount: 1, DeviceTypes: [4, 5, 9] },
+        70: { getCommand: OW_GET_POWER_LIMIT, setCommand: OW_SET_POWER_LIMIT, name: "Watt limit", feature: "advanced", type: "value", min: 0, max: 60000, active: 0, changed: false, eever: 42, byteCount: 2, DeviceTypes: [4, 5, 9] },
+        71: { getCommand: OW_GET_SPEED_LIMIT, setCommand: OW_SET_SPEED_LIMIT, name: "km/h limit", feature: "advanced", type: "value", min: 0, max: 1000, active: 0, changed: false, eever: 42, byteCount: 2, DeviceTypes: [4, 5, 9] },
 
         99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs } // must always be 99 and the last one
     };

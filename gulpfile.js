@@ -31,7 +31,7 @@ const RELEASE_DIR = "./release/";
 const LINUX_INSTALL_DIR = "/opt/fettec-esc-config";
 
 var nwBuilderOptions = {
-  version: "0.36.4",
+  version: "0.50.3", // 0.44.2 // 0.36.4
   files: "./dist/**/*",
   macIcns: "./src/images/fettec-256x256.icns",
   macPlist: {
@@ -530,6 +530,7 @@ function getLinuxPackageArch(type, arch) {
   return packArch;
 }
 // Create distribution package for macOS platform
+
 function osx64_sign(done) {
   if (commandExistsSync("tmp/code-sign.js")) {
     console.log("Codesign activity...");
