@@ -6,7 +6,7 @@ const SERIALDEBUG = 0; /* show send/receive */
 const APIKEY = "";
 const USEAPI = 0;
 
-const MAX_TRY = 2;
+const MAX_TRY = 1;
 const DEFAULT_TIMEOUT = 215;
 
 const TLMcanvasWidth = 600;
@@ -17,79 +17,79 @@ const BF_PT = 1;
 const USB_UART = 2;
 const VCP = 3;
 
-const DEVICE_types = [
+var DEVICE_types = [
     { id: 0, name: "none", filename: '', blOnly: false, activation: false },
-    { id: 1, name: "FETtec ESC 35A", filename: 'FETTEC_35A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false },
-    { id: 2, name: "FETtec ESC 50A", filename: 'FETTEC_50A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false },
-    { id: 3, name: "FETtec ESC 7A", filename: 'FETTEC_7A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false },
-    { id: 4, name: "FETtec PRO ESC 80A", filename: 'FETTEC_PRO_80A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: false },
-    { id: 5, name: "FETtec PRO ESC 60A", filename: 'FETTEC_PRO_60A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: false },
-    { id: 6, name: "FETtec ESC 45A", filename: 'FETTEC_45A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false },
-    { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false },
-    { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
-    { id: 9, name: "FETtec PRO ESC 45A", filename: 'FETTEC_PRO_45A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: false },
-    { id: 10, name: "FETtec ESC 35A AIO", filename: 'FETTEC_35A_AIO_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
-    { id: 64, name: "ESC 15A", filename: 'ESC_DEF_GD_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
-    { id: 65, name: "ESC 15A", filename: 'ESC_ADV_GD_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
+    { id: 1, name: "FETtec ESC 35A", filename: 'FETTEC_35A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false, telemetryCapable: true },
+    { id: 2, name: "FETtec ESC 50A", filename: 'FETTEC_50A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false, telemetryCapable: true },
+    { id: 3, name: "FETtec ESC 7A", filename: 'FETTEC_7A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false, telemetryCapable: true },
+    { id: 4, name: "FETtec PRO ESC 80A", filename: 'FETTEC_PRO_80A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: false, telemetryCapable: true },
+    { id: 5, name: "FETtec PRO ESC 60A", filename: 'FETTEC_PRO_60A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: false, telemetryCapable: true },
+    { id: 6, name: "FETtec ESC 45A", filename: 'FETTEC_45A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false, telemetryCapable: true },
+    { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false, telemetryCapable: true },
+    { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 9, name: "FETtec PRO ESC 45A", filename: 'FETTEC_PRO_45A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: false, telemetryCapable: true },
+    { id: 10, name: "FETtec ESC 35A AIO", filename: 'FETTEC_35A_AIO_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 64, name: "ESC 15A", filename: 'ESC_DEF_GD_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 65, name: "ESC 15A", filename: 'ESC_ADV_GD_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
     //    { id: 66, name: "ESC 15A", filename: '' },
     //    { id: 67, name: "ESC 15A", filename: '' },
-    { id: 68, name: "ESC 25A", filename: 'ESC_DEF_GD_25A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
-    { id: 69, name: "ESC 25A", filename: 'ESC_ADV_GD_25A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
+    { id: 68, name: "ESC 25A", filename: 'ESC_DEF_GD_25A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 69, name: "ESC 25A", filename: 'ESC_ADV_GD_25A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
     //    { id: 70, name: "ESC 25A", filename: '' },
     //    { id: 71, name: "ESC 25A", filename: '' },
-    { id: 72, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
-    { id: 73, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
-    { id: 74, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
-    { id: 75, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
+    { id: 72, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 73, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 74, name: "ESC 35A", filename: 'ESC_DEF_GD_35A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 75, name: "ESC 35A", filename: 'ESC_ADV_GD_35A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true, telemetryCapable: true },
     //    { id: 76, name: "ESC 35A", filename: '' },
     //    { id: 77, name: "ESC 35A", filename: '' },
-    { id: 78, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
-    { id: 79, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
-    { id: 80, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
-    { id: 81, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
-    { id: 82, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
-    { id: 83, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
+    { id: 78, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 79, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 80, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 81, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 82, name: "ESC 45A", filename: 'ESC_DEF_GD_45A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 83, name: "ESC 45A", filename: 'ESC_ADV_GD_45A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true, telemetryCapable: true },
     //    { id: 84, name: "ESC 45A", filename: '' },
     //    { id: 85, name: "ESC 45A", filename: '' },
-    { id: 86, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
-    { id: 87, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
-    { id: 88, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
-    { id: 89, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
-    { id: 90, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
-    { id: 91, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
+    { id: 86, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 87, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 88, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 89, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 90, name: "ESC 55A", filename: 'ESC_DEF_GD_55A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 91, name: "ESC 55A", filename: 'ESC_ADV_GD_55A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true, telemetryCapable: true },
     //    { id: 92, name: "ESC 55A", filename: '' },
     //    { id: 93, name: "ESC 55A", filename: '' },
-    { id: 94, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
-    { id: 95, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true },
-    { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
-    { id: 97, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
-    { id: 98, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
-    { id: 99, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
+    { id: 94, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 95, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 96, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 97, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 98, name: "ESC 65A", filename: 'ESC_DEF_GD_65A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 99, name: "ESC 65A", filename: 'ESC_ADV_GD_65A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true, telemetryCapable: true },
     //    { id: 100, name: "ESC 65A", filename: '' },
     //    { id: 101, name: "ESC 65A", filename: '' },
-    { id: 102, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
-    { id: 103, name: "ESC 80A", filename: 'ESC_ADV_GD_80A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
-    { id: 104, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
-    { id: 105, name: "ESC 80A", filename: 'ESC_ADV_GD_80A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
+    { id: 102, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 103, name: "ESC 80A", filename: 'ESC_ADV_GD_80A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 104, name: "ESC 80A", filename: 'ESC_DEF_GD_80A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 105, name: "ESC 80A", filename: 'ESC_ADV_GD_80A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true, telemetryCapable: true },
     //    { id: 106, name: "ESC 80A", filename: '' },
     //    { id: 107, name: "ESC 80A", filename: '' },
-    { id: 108, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
-    { id: 109, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
-    { id: 110, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
-    { id: 111, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true },
+    { id: 108, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 109, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 110, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 111, name: "ESC 100A", filename: 'ESC_DEF_GD_100A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: true, telemetryCapable: true },
     //    { id: 112, name: "ESC 100A", filename: '' },
     //    { id: 113, name: "ESC 100A", filename: '' },
-    { id: 114, name: "WING ESC 40A", filename: 'ESC_DEF_GD_WING_40A_ESC_G4', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: false },
-    { id: 127, name: "FETtec F3 MINI-FC", filename: 'FETTEC_MINI_FC-', start_addr: 3800, fw_maxsize: 240, blOnly: true, activation: false },
-    { id: 128, name: "FETtec G4 FC", filename: 'FETTEC_FC_G4-', start_addr: 3800, fw_maxsize: 496, blOnly: true, activation: false },
-    { id: 129, name: "FETtec G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, fw_maxsize: 124, blOnly: true, activation: false }
+    { id: 114, name: "WING ESC 40A", filename: 'ESC_DEF_GD_WING_40A_ESC_G4', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
+    { id: 127, name: "FETtec F3 MINI-FC", filename: 'FETTEC_MINI_FC-', start_addr: 3800, fw_maxsize: 240, blOnly: true, activation: false, telemetryCapable: false },
+    { id: 128, name: "FETtec G4 FC", filename: 'FETTEC_FC_G4', start_addr: 3800, fw_maxsize: 496, blOnly: false, activation: false, telemetryCapable: false },
+    { id: 129, name: "FETtec G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, fw_maxsize: 124, blOnly: true, activation: false, telemetryCapable: false }
 ];
 
 const Serial_Options = [
-    { id: 0, name: 'KISS FC Passthrough', connect_bitrate: 115200, disabled: false },
-    { id: 1, name: 'Betaflight Passthrough', connect_bitrate: 115200, disabled: false },
-    { id: 2, name: 'USB UART', connect_bitrate: 2000000, disabled: false },
-    { id: 3, name: 'USB', connect_bitrate: 2000000, disabled: false }
+    { id: 0, name: 'KISS FC Passthrough', connect_bitrate: 115200, disabled: false, selected: false },
+    { id: 1, name: 'Betaflight Passthrough', connect_bitrate: 115200, disabled: false, selected: false },
+    { id: 2, name: 'USB UART', connect_bitrate: 2000000, disabled: false, selected: false },
+    { id: 3, name: 'USB', connect_bitrate: 2000000, disabled: false, selected: "selected" }
 ];
 
 const Menu_Options = [
@@ -156,45 +156,58 @@ function DEVICE() {
     this.TLMCanvasCTX;
     // end ESC specific settings
     this.DeviceSettings = {
-        0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "hidden", min: 0, max: 0, value: 0, changed: false, eever: 0, byteCount: 1, DeviceTypes: onAllESCs }, // must always be 0
-        40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse motor direction", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
-        41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
-        42: { getCommand: OW_GET_SOFT_START, setCommand: OW_SET_SOFT_START, name: "Soft start", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 41, byteCount: 1, DeviceTypes: onAllESCs },
-        43: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
-        44: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min.", type: "slider", feature: "advanced", min: 1000, max: 1600, value: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
-        45: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max.", type: "slider", feature: "advanced", min: 1400, max: 2000, value: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs },
-        46: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 23, byteCount: 1, DeviceTypes: onAllESCs },
-        47: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 1, byteCount: 1, DeviceTypes: onAllESCs },
-        48: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, value: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs },
+        0: { getCommand: OW_GET_EEVER, setCommand: null, name: "EEPROM version", type: "hidden", min: 0, max: 0, value: 0, changed: false, eever: 0, byteCount: 1, DeviceTypes: onAllDevices, CommandType: 0 }, // must always be 0
+        40: { getCommand: OW_GET_ROTATION_DIRECTION, setCommand: OW_SET_ROTATION_DIRECTION, name: "Reverse motor direction", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs, CommandType: 0 },
+        41: { getCommand: OW_GET_USE_SIN_START, setCommand: OW_SET_USE_SIN_START, name: "Slow start", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs, CommandType: 0 },
+        42: { getCommand: OW_GET_SOFT_START, setCommand: OW_SET_SOFT_START, name: "Soft start", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 41, byteCount: 1, DeviceTypes: onAllESCs, CommandType: 0 },
+        43: { getCommand: OW_GET_ESC_BEEP, setCommand: OW_SET_ESC_BEEP, name: "ESC beeps", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs, CommandType: 0 },
+        44: { getCommand: OW_GET_PWM_MIN, setCommand: OW_SET_PWM_MIN, name: "PWM Min.", type: "slider", feature: "advanced", min: 1000, max: 1400, value: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs, CommandType: 0 },
+        45: { getCommand: OW_GET_PWM_MAX, setCommand: OW_SET_PWM_MAX, name: "PWM Max.", type: "slider", feature: "advanced", min: 1600, max: 2000, value: 0, changed: false, eever: 17, byteCount: 2, DeviceTypes: onAllESCs, CommandType: 0 },
+        46: { getCommand: OW_GET_SOFT_BRAKE, setCommand: OW_SET_SOFT_BRAKE, name: "Soft brake", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 23, byteCount: 1, DeviceTypes: onAllESCs, CommandType: 0 },
+        47: { getCommand: OW_GET_3D_MODE, setCommand: OW_SET_3D_MODE, name: "3D Mode", feature: "standard", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 1, byteCount: 1, DeviceTypes: onAllESCs, CommandType: 0 },
+        48: { getCommand: OW_GET_CURRENT_CALIB, setCommand: OW_SET_CURRENT_CALIB, name: "Current calibration (%)", feature: "advanced", type: "value", min: 75, max: 125, value: 0, changed: false, eever: 18, byteCount: 1, DeviceTypes: onAllESCs, CommandType: 0 },
         /*
-                49: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs },
+                49: { getCommand: OW_GET_LINEAR_THRUST, setCommand: OW_SET_LINEAR_THRUST, name: "Linear Thrust", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs, CommandType: 0  },
         */
-        50: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: [4, 5, 9] },
-        51: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: [4, 5, 9] },
+        50: { getCommand: OW_GET_LOW_RAMP, setCommand: OW_SET_LOW_RAMP, name: "Low slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: [4, 5, 9], CommandType: 0 },
+        51: { getCommand: OW_GET_HIGH_RAMP, setCommand: OW_SET_HIGH_RAMP, name: "High slew rate", feature: "advanced", type: "value", min: 1, max: 1000, value: 1, changed: false, eever: 22, byteCount: 2, DeviceTypes: [4, 5, 9], CommandType: 0 },
         /*
-                52: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, value: 1, changed: false, eever: 22, byteCount: 4, DeviceTypes: onAllESCs },
+                52: { getCommand: OW_GET_LED_COLOR, setCommand: OW_SET_LED_COLOR, name: "Color", feature: "standard", type: "readonly", min: 0, max: 0xFFFFFFFF, value: 1, changed: false, eever: 22, byteCount: 4, DeviceTypes: onAllESCs, CommandType: 0  },
         */
-        53: { getCommand: OW_GET_HALL_SENSOR_USAGE, setCommand: OW_SET_HALL_SENSOR_USAGE, name: "Hall Sensors", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        54: { getCommand: OW_GET_CURRENT_LIMIT, setCommand: OW_SET_CURRENT_LIMIT, name: "Current limit", feature: "advanced", type: "value", min: 100, max: 12000, value: 0, changed: false, eever: 27, byteCount: 2, DeviceTypes: [4, 5, 9] },
-        55: { getCommand: OW_GET_NO_ACTIVE_START, setCommand: OW_SET_NO_ACTIVE_START, name: "No Active Start", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        56: { getCommand: OW_GET_ANALOG_THROTTLE, setCommand: OW_SET_ANALOG_THROTTLE, name: "Analog Throttle", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 9] },
-        57: { getCommand: OW_GET_CELL_COUNT, setCommand: OW_SET_CELL_COUNT, name: "Battery Cell count", feature: "advanced", type: "value", min: 1, max: 255, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        58: { getCommand: OW_GET_TURNOFF_VOLTAGE, setCommand: OW_SET_TURNOFF_VOLTAGE, name: "Turn Off Cell Voltage", feature: "advanced", type: "value", min: 0, max: 1000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 5, 9] },
-        59: { getCommand: OW_GET_CELL_MAX_VOLTAGE, setCommand: OW_SET_CELL_MAX_VOLTAGE, name: "Max Cell Voltage", feature: "advanced", type: "value", min: 0, max: 1000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 5, 9] },
-        60: { getCommand: OW_GET_CM_PER_ERPM, setCommand: OW_SET_CM_PER_ERPM, name: "mm per Erpm", feature: "advanced", type: "value", min: 0, max: 10000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
-        61: { getCommand: OW_GET_BRAKE_ACTIVE, setCommand: OW_SET_BRAKE_ACTIVE, name: "Motor brake", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        62: { getCommand: OW_GET_ANALOG_BRAKE, setCommand: OW_SET_ANALOG_BRAKE, name: "Use analog brake signal", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 9] },
-        63: { getCommand: OW_GET_BEC_VOLTAGE, setCommand: OW_SET_BEC_VOLTAGE, name: "BEC output Voltage", feature: "advanced", type: "value", min: 0, max: 2000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
-        64: { getCommand: OW_GET_MAX_OUTPUT_CURRENT_LIMIT, setCommand: OW_SET_MAX_OUTPUT_CURRENT_LIMIT, name: "Motor Current Limit", feature: "advanced", type: "value", min: 200, max: 14000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9] },
-        65: { getCommand: OW_GET_HALL_SENSORS_LEVELS, setCommand: OW_SET_HALL_SENSORS_LEVELS, name: "Hall Sensor Output Levels", feature: "advanced", type: "value", min: 0, max: 255, value: 0, changed: false, eever: 35, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        66: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, value: 0, changed: false, eever: 25, byteCount: 1, DeviceTypes: onAllESCs },
-        67: { getCommand: OW_GET_MASTER_ESC_MODE, setCommand: OW_SET_MASTER_ESC_MODE, name: "Dual Mode Master", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 36, byteCount: 1, DeviceTypes: [4, 9] },
-        68: { getCommand: OW_GET_TRAPEZOIDAL_MODE, setCommand: OW_SET_TRAPEZOIDAL_MODE, name: "Trapeziodal commutation", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 37, byteCount: 1, DeviceTypes: onAllESCs },
-        69: { getCommand: OW_GET_FIELD_WEAKENING, setCommand: OW_SET_FIELD_WEAKENING, name: "Field Weakening", feature: "advanced", type: "value", min: 0, max: 10, value: 0, changed: false, eever: 41, byteCount: 1, DeviceTypes: [4, 5, 9] },
-        70: { getCommand: OW_GET_POWER_LIMIT, setCommand: OW_SET_POWER_LIMIT, name: "Watt limit", feature: "advanced", type: "value", min: 0, max: 60000, active: 0, changed: false, eever: 42, byteCount: 2, DeviceTypes: [4, 5, 9] },
-        71: { getCommand: OW_GET_SPEED_LIMIT, setCommand: OW_SET_SPEED_LIMIT, name: "km/h limit", feature: "advanced", type: "value", min: 0, max: 1000, active: 0, changed: false, eever: 42, byteCount: 2, DeviceTypes: [4, 5, 9] },
+        53: { getCommand: OW_GET_HALL_SENSOR_USAGE, setCommand: OW_SET_HALL_SENSOR_USAGE, name: "Hall Sensors", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9], CommandType: 0 },
+        54: { getCommand: OW_GET_CURRENT_LIMIT, setCommand: OW_SET_CURRENT_LIMIT, name: "Current limit", feature: "advanced", type: "value", min: 100, max: 12000, value: 0, changed: false, eever: 27, byteCount: 2, DeviceTypes: [4, 5, 9], CommandType: 0 },
+        55: { getCommand: OW_GET_NO_ACTIVE_START, setCommand: OW_SET_NO_ACTIVE_START, name: "No Active Start", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 27, byteCount: 1, DeviceTypes: [4, 5, 9], CommandType: 0 },
+        56: { getCommand: OW_GET_ANALOG_THROTTLE, setCommand: OW_SET_ANALOG_THROTTLE, name: "Analog Throttle", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 9], CommandType: 0 },
+        57: { getCommand: OW_GET_CELL_COUNT, setCommand: OW_SET_CELL_COUNT, name: "Battery Cell count", feature: "advanced", type: "value", min: 1, max: 255, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 5, 9], CommandType: 0 },
+        58: { getCommand: OW_GET_TURNOFF_VOLTAGE, setCommand: OW_SET_TURNOFF_VOLTAGE, name: "Turn Off Cell Voltage", feature: "advanced", type: "value", min: 0, max: 1000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 5, 9], CommandType: 0 },
+        59: { getCommand: OW_GET_CELL_MAX_VOLTAGE, setCommand: OW_SET_CELL_MAX_VOLTAGE, name: "Max Cell Voltage", feature: "advanced", type: "value", min: 0, max: 1000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 5, 9], CommandType: 0 },
+        60: { getCommand: OW_GET_CM_PER_ERPM, setCommand: OW_SET_CM_PER_ERPM, name: "mm per Erpm", feature: "advanced", type: "value", min: 0, max: 10000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9], CommandType: 0 },
+        61: { getCommand: OW_GET_BRAKE_ACTIVE, setCommand: OW_SET_BRAKE_ACTIVE, name: "Motor brake", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 5, 9], CommandType: 0 },
+        62: { getCommand: OW_GET_ANALOG_BRAKE, setCommand: OW_SET_ANALOG_BRAKE, name: "Use analog brake signal", feature: "advanced", type: "checkbox", min: 0, max: 1, value: 0, changed: false, eever: 33, byteCount: 1, DeviceTypes: [4, 9], CommandType: 0 },
+        63: { getCommand: OW_GET_BEC_VOLTAGE, setCommand: OW_SET_BEC_VOLTAGE, name: "BEC output Voltage", feature: "advanced", type: "value", min: 0, max: 2000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9], CommandType: 0 },
+        64: { getCommand: OW_GET_MAX_OUTPUT_CURRENT_LIMIT, setCommand: OW_SET_MAX_OUTPUT_CURRENT_LIMIT, name: "Motor Current Limit", feature: "advanced", type: "value", min: 200, max: 14000, value: 0, changed: false, eever: 33, byteCount: 2, DeviceTypes: [4, 9], CommandType: 0 },
+        65: { getCommand: OW_GET_HALL_SENSORS_LEVELS, setCommand: OW_SET_HALL_SENSORS_LEVELS, name: "Hall Sensor Output Levels", feature: "advanced", type: "value", min: 0, max: 255, value: 0, changed: false, eever: 35, byteCount: 1, DeviceTypes: [4, 5, 9], CommandType: 0 },
+        66: { getCommand: OW_GET_ACTIVATION, setCommand: OW_GET_ACTIVATION, name: "Activated", feature: "advanced", type: "readonly", min: 0, max: 1, value: 0, changed: false, eever: 25, byteCount: 1, DeviceTypes: onAllESCs, CommandType: 0 },
+        67: { getCommand: OW_GET_MASTER_ESC_MODE, setCommand: OW_SET_MASTER_ESC_MODE, name: "Dual Mode Master", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 36, byteCount: 1, DeviceTypes: [4, 9], CommandType: 0 },
+        68: { getCommand: OW_GET_TRAPEZOIDAL_MODE, setCommand: OW_SET_TRAPEZOIDAL_MODE, name: "Trapeziodal commutation", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 37, byteCount: 1, DeviceTypes: onAllESCs, CommandType: 0 },
+        69: { getCommand: OW_GET_FIELD_WEAKENING, setCommand: OW_SET_FIELD_WEAKENING, name: "Field Weakening", feature: "advanced", type: "value", min: 0, max: 10, value: 0, changed: false, eever: 41, byteCount: 1, DeviceTypes: [4, 5, 9], CommandType: 0 },
 
-        99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs } // must always be 99 and the last one
+        70: { getCommand: OW_GET_POWER_LIMIT, setCommand: OW_SET_POWER_LIMIT, name: "Watt limit", feature: "advanced", type: "value", min: 0, max: 60000, active: 0, changed: false, eever: 42, byteCount: 2, DeviceTypes: [4, 5, 9], CommandType: 0 },
+        71: { getCommand: OW_GET_SPEED_LIMIT, setCommand: OW_SET_SPEED_LIMIT, name: "km/h limit", feature: "advanced", type: "value", min: 0, max: 1000, active: 0, changed: false, eever: 42, byteCount: 2, DeviceTypes: [4, 5, 9], CommandType: 0 },
+
+        72: { getCommand: OW_GET_FRSKY_PHY_ID, setCommand: OW_SET_FRSKY_PHY_ID, name: "Fport2 Phy. ID", feature: "advanced", type: "value", min: 0, max: 255, active: 0, changed: false, eever: 43, byteCount: 1, DeviceTypes: [4, 9, 114], CommandType: 0 },
+        73: { getCommand: OW_GET_FRSKY_APP_ID_ADD, setCommand: OW_SET_FRSKY_APP_ID_ADD, name: "Fport2 Sensor ID offset", feature: "advanced", type: "value", min: 0, max: 20, active: 0, changed: false, eever: 43, byteCount: 1, DeviceTypes: [4, 9, 114], CommandType: 0 },
+        74: { getCommand: OW_GET_FRSKY_TIME_GAP, setCommand: OW_SET_FRSKY_TIME_GAP, name: "Fport2 Time Gap", feature: "advanced", type: "value", min: 0, max: 255, active: 0, changed: false, eever: 43, byteCount: 1, DeviceTypes: [4, 9, 114], CommandType: 0 },
+
+        75: { getCommand: OW_FC_GET_PIDS, setCommand: OW_FC_SET_PIDS, name: "PID settings<float>|Roll|Pitch|Yaw|P: -100|I: -1000|D: -100", feature: "advanced", type: "3colTable", min: 0, max: 50, active: 0, changed: false, eever: 1, byteCount: OW_FC_LEN_PIDS, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
+        76: { getCommand: OW_FC_GET_EXPO, setCommand: OW_FC_SET_EXPO, name: "RC Expo<float>|Roll|Pitch|Yaw", feature: "advanced", type: "3colTable", min: 0, max: 2, active: 0, changed: false, eever: 1, byteCount: OW_FC_LEN_EXPO, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
+        77: { getCommand: OW_FC_GET_RATE, setCommand: OW_FC_SET_RATE, name: "RC Rate|Roll|Pitch|Yaw", feature: "advanced", type: "3colTable", min: 0, max: 1900, active: 0, changed: false, eever: 1, byteCount: OW_FC_LEN_RATE, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
+        78: { getCommand: OW_FC_GET_MIN_COMMAND, setCommand: OW_FC_SET_MIN_COMMAND, name: "Motor min Command", feature: "advanced", type: "value", min: 20, max: 200, active: 0, changed: false, eever: 1, byteCount: OW_FC_LEN_MIN_COMMAND, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
+        79: { getCommand: OW_FC_GET_PROP_YAW_DIRECTION, setCommand: OW_FC_SET_PROP_YAW_DIRECTION, name: "Props in", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: OW_FC_LEN_PROP_YAW_DIRECTION, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
+        80: { getCommand: OW_FC_GET_TEST_SET, setCommand: OW_FC_SET_TEST_SET, name: "Test set", feature: "advanced", type: "value", min: 0, max: 255, active: 0, changed: false, eever: 1, byteCount: OW_FC_LEN_TEST_SET, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
+
+
+        99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs, CommandType: 0 } // must always be 99 and the last one
     };
 }
 
@@ -283,7 +296,11 @@ var readDeviceSettings = [];
 var timeoutDeviceIDs = [];
 
 var onAllESCs = [];
-for (var i in DEVICE_types) onAllESCs.push(DEVICE_types[i].id);
+var onAllDevices = [];
+for (var i in DEVICE_types) {
+    if (DEVICE_types[i].id != 128) onAllESCs.push(DEVICE_types[i].id);
+    onAllDevices.push(DEVICE_types[i].id);
+}
 
 var newSettingsValues = {};
 
@@ -454,7 +471,8 @@ function Gen_Types_Dropdown(array) {
         $('#con_type').append($("<option/>", {
             value: array[i].id,
             text: array[i].name,
-            disabled: array[i].disabled
+            disabled: array[i].disabled,
+            selected: array[i].selected
         }));
     }
     $("#con_type").selectmenu();
@@ -686,7 +704,7 @@ function Activation_activate() {
 }
 
 function keycollectLoop() {
-    while ((!(loopDeviceId in DEVICEs)) && loopDeviceId < 25) loopDeviceId++;
+    while ((!(loopDeviceId in DEVICEs) || !DEVICEs[loopDeviceId].selected) && loopDeviceId < 25) loopDeviceId++;
     if (loopDeviceId == 25) {
         eventMessage("Key collect completed")
         keycollectActive = 0;
@@ -748,7 +766,7 @@ function keycollectLoop() {
 }
 function activationLoop() {
     if (waitForResponseID == 0) {
-        while ((!(loopDeviceId in DEVICEs)) && loopDeviceId < 25) loopDeviceId++;
+        while ((!(loopDeviceId in DEVICEs) || !DEVICEs[loopDeviceId].selected) && loopDeviceId < 25) loopDeviceId++;
         if (loopDeviceId == 25) {
             activationActive = 0;
             activationRequired = 0;
@@ -796,21 +814,25 @@ function activationLoop() {
                     if (switchProblem == 0) {
                         eventMessage("DEVICE " + loopDeviceId + " send OW_BL_START_FW cmd");
                         send_OneWire_package(loopDeviceId, 0, [OW_BL_START_FW]);
-                        if (connectionType == VCP) {
+                        if (connectionType == VCP && loopDeviceId == 23) {
                             eventMessage("starting reconnect procedure 1");
                             ReconnectOnSend(0);
                         }
                         switchProblem++;
                         waitLoops = 20;
-                    } else if (switchProblem < 20) {
-                        eventMessage("ESC with id: " + loopDeviceId + " don't switches ->retry");
+                    } else if (switchProblem < 4) {
+                        eventMessage("ESC with id: " + loopDeviceId + " don't switches ->retry -> activationLoop");
                         send_OneWire_package(loopDeviceId, 0, [OW_BL_START_FW]);
+                        if (connectionType == VCP && loopDeviceId == 23) {
+                            eventMessage("starting reconnect procedure 1");
+                            ReconnectOnSend(0);
+                        }
                         switchProblem++;
                         waitLoops = 20;
                     } else {
-                        eventMessage("DEVICE with id: " + loopDeviceId + " don't switches ->stop");
-                        serialBadError = 1;
-                        switchProblem = 0;
+                        eventMessage("DEVICE with id: " + loopDeviceId + " don't switches ->stop -> activationLoop");
+                        //serialBadError = 1;
+                        //switchProblem = 0;
                         switchStatus = 0;
                         loopDeviceId++;
                     }
@@ -907,16 +929,24 @@ function Internal_Loop() {
                         eventMessage("UART connected");
                         break;
                     case VCP:
-                        var getPT = usb_prepareReset();
-                        sendBytes(getPT);
-                        ReconnectOnSend(0);
-                        eventMessage("VCP requested reset ");
-                        waitLoops = 40;
+                        // TODO is this really needed?
+                        SerialConnection.RX_tail = 0;
+                        SerialConnection.RX_head = 0;
+                        var getPT = usb_prepareOWmode();
+                        if (connection_attempts == 0) {
+                            sendBytes(getPT);
+                            eventMessage("FETtec request onewire mode");
+                        } else {
+                            var hiArr = [1, 23, 0, 0, 7, 0, 89];
+                            sendBytes(hiArr);
+                            eventMessage("FETtec check if onewire mode is already active");
+                        }
+                        waitLoops = 10;
                         break;
                 }
                 do_not_Update_Progress_Bar = 0;
                 ptStatus = 2;
-            } else if (ptStatus == 2 && connection_attempts < MAX_TRY) {
+            } else if (ptStatus == 2 && connection_attempts <= MAX_TRY) {
                 connection_attempts++;
                 switch (connectionType) {
                     case KISS_PT:
@@ -967,40 +997,79 @@ function Internal_Loop() {
                         break;
                     case USB_UART:
                         break;
-                }
-            } else if (connection_attempts = MAX_TRY && ptStatus != 4) {
-                noLoop = 1;
-                eventMessage("Connection to FC failed");
-                $("#dialog").text("Unable to active FC passthrough mode. Maybe the FC is already in passthrough mode, or the FC FW version don't supports it.");
-                $("#dialog").dialog({
-                    modal: true,
-                    buttons: {
-                        Try: function () {
-                            $(this).dialog("close");
-                            switch (connectionType) {
-                                case KISS_PT:
-                                    changeBaud(921600);
-                                    eventMessage("passthrough active!");
-                                    waitLoops = 20;
-                                    ptStatus = 3;
-                                    break;
-                                case BF_PT:
-                                    changeBaud(115200);
-                                    eventMessage("passthrough active!");
-                                    waitLoops = 5;
-                                    ptStatus = 3;
-                                    break;
+                    case VCP:
+                        if (SerialAvailable() < 2) {
+                            if (connection_attempts == 1) {
+                                eventMessage("no response from FETtec FC, retry");
+                                ptStatus = 1;
+                            } else {
+                                ptStatus = 3;
+                                eventMessage("no response from FETtec FC, switch to bootloader");
                             }
-                            noLoop = 0;
-                        },
-                        Cancel: function () {
-                            $(this).dialog("close");
-                            // disconnect + cleanup
-                            disconnect();
-                            noLoop = 0;
+                            do_not_Update_Progress_Bar = 1;
+                        } else {
+                            var testByte = readBytes(7);
+                            if ((testByte[0] == 0x4F && testByte[1] == 0x4B) || (testByte[0] == 3 && testByte[1] == 23)) {
+                                eventMessage("FETtec onewire mode!");
+                                waitLoops = 20;
+                                ptStatus = 0;
+                                noLoop = 0;
+                                DEVICE_types.find(x => x.id === 128).blOnly = false;
+                                return;
+                            } else {
+                                eventMessage("wrong response from FETtec FC, retry");
+                                ptStatus = 1;
+                                do_not_Update_Progress_Bar = 1;
+                            }
                         }
-                    }
-                });
+                        break;
+                }
+            } else if (connection_attempts >= MAX_TRY && ptStatus != 4) {
+                noLoop = 1;
+                if (connectionType != VCP) {
+                    eventMessage("Connection to FC failed");
+                    $("#dialog").text("Unable to active FC passthrough mode. Maybe the FC is already in passthrough mode, or the FC FW version don't supports it.");
+                    $("#dialog").dialog({
+                        modal: true,
+                        buttons: {
+                            Try: function () {
+                                $(this).dialog("close");
+                                switch (connectionType) {
+                                    case KISS_PT:
+                                        changeBaud(921600);
+                                        eventMessage("passthrough active!");
+                                        waitLoops = 20;
+                                        ptStatus = 3;
+                                        break;
+                                    case BF_PT:
+                                        changeBaud(115200);
+                                        eventMessage("passthrough active!");
+                                        waitLoops = 5;
+                                        ptStatus = 3;
+                                        break;
+                                }
+                                noLoop = 0;
+                            },
+                            Cancel: function () {
+                                $(this).dialog("close");
+                                // disconnect + cleanup
+                                disconnect();
+                                noLoop = 0;
+                            }
+                        }
+                    });
+                } else {
+                    noLoop = 0;
+                    var getPT = usb_prepareReset();
+                    var sixEmptyBytes = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
+                    sendBytes(sixEmptyBytes);
+                    sendBytes(getPT);
+                    ReconnectOnSend(0);
+                    eventMessage("VCP requested reset ");
+                    waitLoops = 40;
+                    DEVICE_types.find(x => x.id === 128).blOnly = true;
+                    ptStatus = 3;
+                }
                 return;
             }
             if (!do_not_Update_Progress_Bar) {
@@ -1032,7 +1101,7 @@ function Internal_Loop() {
             change_Devices_status(1, 1, 0, 1);
             firmwareUpdaterInitDone = 1;
         } else if (rescanDone == 1) {
-            initConfig();
+            //initFWUpdater();
             rescanDone = 0;
         }
     }
@@ -1094,7 +1163,11 @@ function check_ESCs_In_BL() {
     if (reconnectOnTxDone != 0 && connectionType == VCP) return;
 
     if (waitForResponseID == 0) {
-        while ((!(switchLoopDeviceId in DEVICEs)) && switchLoopDeviceId < 25) switchLoopDeviceId++;
+        while ((!(switchLoopDeviceId in DEVICEs) || !DEVICEs[switchLoopDeviceId].selected) && switchLoopDeviceId < 25) switchLoopDeviceId++;
+        if (switchLoopDeviceId == 23 && expectedHeader == OW_RESPONSE_IN_FW) {
+            var getPT = usb_prepareOWmode();
+            sendBytes(getPT);
+        }
         if (switchLoopDeviceId == 25) {
             devicesToBL = 0;
             if (FW_update.FlashProcessActive == 2) FW_update.FlashProcessActive = 3;
@@ -1178,20 +1251,30 @@ function check_ESCs_In_BL() {
                         if (DEVICE_types.find(x => x.id === DEVICEs[switchLoopDeviceId].type).blOnly == true) return
                         eventMessage("switching DEVICE with id: " + switchLoopDeviceId);
                         send_OneWire_package(switchLoopDeviceId, 0, [switchCommand]);
-                        if (connectionType == VCP) {
+                        if (connectionType == VCP && switchLoopDeviceId == 23) {
                             eventMessage("starting reconnect procedure 1");
                             ReconnectOnSend(0);
                         }
                         switchProblem++;
                         waitLoops = 20;
-                    } else if (switchProblem < 20) {
-                        eventMessage("DEVICE with id: " + switchLoopDeviceId + " don't switches ->retry");
+                    } else if (switchProblem < 4) {
+                        eventMessage("DEVICE with id: " + switchLoopDeviceId + " don't switches ->retry ->check_ESCs_In_BL");
                         send_OneWire_package(switchLoopDeviceId, 0, [switchCommand]);
+                        if (connectionType == VCP && switchLoopDeviceId == 23) {
+                            eventMessage("starting reconnect procedure 1");
+                            ReconnectOnSend(0);
+                        }
                         switchProblem++;
                         waitLoops = 20;
                     } else {
-                        eventMessage("DEVICE with id: " + switchLoopDeviceId + " don't switches ->stop");
-                        serialBadError = 1;
+                        eventMessage("DEVICE with id: " + switchLoopDeviceId + " don't switches ->stop ->check_ESCs_In_BL");
+                        if (expectedHeader == OW_RESPONSE_IN_FW) {
+                            // geht nix
+                            eventMessage("zur FW failt ->check_ESCs_In_BL");
+                        } else {
+                            serialBadError = 1; // f�hrt zum fehler wenn das device keine FW starten kann und deshalb im BL steckt    
+                            eventMessage("zum BL failt ->check_ESCs_In_BL");
+                        }
                         switchLoopDeviceId++;
                         switchProblem = 0;
                     }
@@ -1225,7 +1308,7 @@ function check_ESCs_In_BL() {
             eventMessage("no response, retrying");
         } else if (timeoutDeviceIDs[switchLoopDeviceId] > timeout_delay * 5) {
             eventMessage("no response from DEVICE with id: " + switchLoopDeviceId + " ->stop");
-            serialBadError = 1;
+            serialBadError = 1; // f�hrt zum fehler wenn das device keine FW starten kann und deshalb im BL steckt    
             waitForResponseID = 0;
             switchLoopDeviceId++;
         }
@@ -1284,6 +1367,7 @@ function ChangeDisplay(displayType) {
             var ID_count = 0;
             for (var i in DEVICEs) {
                 if (DEVICE_types.find(x => x.id === DEVICEs[i].type).blOnly == true) break;
+                if (DEVICE_types.find(x => x.id === DEVICEs[i].type).telemetryCapable == false) break;
                 if (minID == 0) minID = i;
                 maxID = i;
                 ID_count++;
@@ -1345,7 +1429,7 @@ function ReScanForDevices() {
     DEVICEs = [];
     timeoutDeviceIDs = [];
     $('#overview').empty();
-    //$('#toolbar').empty();
+    $('#toolbar').empty();
     $("#progressbar").show();
     $("#rescan_button").attr('disabled', true);
     $("#rescan_button").addClass("ui-state-disabled");
@@ -1407,8 +1491,11 @@ function ScanForDevices() {
 
                     DEVICEs[scanID].type = responsePackage[5];
                     if (DEVICEs[scanID].type == 128) {
-                        is_USB_only_bootloader = 1;
-                        eventMessage("Board type is USB bootloader only!");
+                        /*
+                      trifft  ja nichtmehr zu
+                                    is_USB_only_bootloader = 1;
+                                    eventMessage("Board type is USB bootloader only!");
+                        */
                     }
 
                     eventMessage("DEVICE with id: " + scanID + " is from type: " + DEVICEs[scanID].type);
@@ -1724,6 +1811,88 @@ function displayDevices(ParentElement) {
                             settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
                             DeviceSetting.appendChild(settingNumber);
                             break;
+                        case "3colTable":
+                            //get table config
+                            var realNameSplit = DEVICEs[i].DeviceSettings[y].name.split("|");
+                            var columNames = [realNameSplit[1], realNameSplit[2], realNameSplit[3]];
+                            var rowNames = ["", "", "", "",];
+                            var rowStep = [0.01, 0.01, 0.01, 0.01];
+                            for (j = 4; j < realNameSplit.length; j++) {
+                                var rowNameSplit = realNameSplit[j].split("-");
+                                if (rowNameSplit[0] != realNameSplit[j]) {
+                                    rowStep[j - 4] = 1 / parseInt(rowNameSplit[1]);
+                                    rowNames[j - 4] = rowNameSplit[0];
+                                } else rowNames[j - 4] = realNameSplit[j];
+                            }
+                            var realName = realNameSplit[0].replace(/<float>/, '');
+                            var useFloat = (realName != realNameSplit[0]);
+
+                            var DeviceSetting = document.createElement('div');
+                            DeviceSetting.className = "setting_container";
+                            if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].value) DeviceSetting.style.display = "none";
+                            DeviceSettingText = document.createElement('div')
+                            DeviceSettingText.className = "setting_text";
+                            DeviceSettingText.innerHTML = realName + " ";
+                            DeviceSetting.appendChild(DeviceSettingText);
+                            DeviceInfoDiv.appendChild(DeviceSetting);
+                            settingsTable = document.createElement('table');
+                            settingsTable.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
+                            var TableCounter = DEVICEs[i].DeviceSettings[y].byteCount / 2;
+                            tr = document.createElement('tr');
+                            if (TableCounter > 3) {
+                                td = document.createElement('td');
+                                tr.appendChild(td);
+                            }
+                            td = document.createElement('td');
+                            td.innerHTML = columNames[0];
+                            tr.appendChild(td);
+                            td = document.createElement('td');
+                            td.innerHTML = columNames[1];
+                            tr.appendChild(td);
+                            td = document.createElement('td');
+                            td.innerHTML = columNames[2];
+                            tr.appendChild(td);
+                            settingsTable.appendChild(tr);
+
+                            DeviceSetting.style.height = 40 + (23 * ((TableCounter / 3) - 1)) + "px";
+
+                            for (j = 0; j < TableCounter; j++) {
+                                if (j == 0 || j == 3 || j == 6) {
+                                    tr = document.createElement('tr');
+                                    if (TableCounter > 3) {
+                                        var RowName = rowNames[0];
+                                        if (j == 3) RowName = rowNames[1];
+                                        if (j == 6) RowName = rowNames[2];
+                                        td = document.createElement('td');
+                                        td.innerHTML = RowName;
+                                        tr.appendChild(td);
+                                    }
+                                }
+                                td = document.createElement('td');
+                                settingNumber = document.createElement('input');
+                                settingNumber.type = "number";
+                                if (useFloat) {
+                                    if (j < 3) settingNumber.step = "" + rowStep[0] + "";
+                                    else if (j < 6) settingNumber.step = "" + rowStep[1] + "";
+                                    else if (j < 9) settingNumber.step = "" + rowStep[2] + "";
+                                    else if (j < 12) settingNumber.step = "" + rowStep[3] + "";
+                                }
+                                settingNumber.style.width = "50px";
+                                settingNumber.className = "settings_numberBox"; //  ui-corner-all
+                                if (Array.isArray(DEVICEs[i].DeviceSettings[y].value)) {
+                                    if (useFloat) settingNumber.value = getFloatFromU8s(1000, DEVICEs[i].DeviceSettings[y].value[0 + (j * 2)], DEVICEs[i].DeviceSettings[y].value[1 + (j * 2)]);
+                                    else settingNumber.value = (DEVICEs[i].DeviceSettings[y].value[0 + (j * 2)] << 8) | DEVICEs[i].DeviceSettings[y].value[1 + (j * 2)];
+                                }
+                                settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i + "_" + j;
+                                settingNumber.onchange = function () {
+                                    SettingsChanged(this.parentElement.parentElement.parentElement.id);
+                                }
+                                td.appendChild(settingNumber);
+                                tr.appendChild(td);
+                                if (j == 0 || j == 3 || j == 6) settingsTable.appendChild(tr);
+                            }
+                            DeviceSetting.appendChild(settingsTable);
+                            break;
                         default:
                     }
                 }
@@ -1742,6 +1911,7 @@ function displayDevices(ParentElement) {
         } else if (selectedMenu == 2) {
             /* Tools */
             if (DEVICE_types.find(x => x.id === DEVICEs[i].type).blOnly == true) break;
+            if (DEVICE_types.find(x => x.id === DEVICEs[i].type).telemetryCapable == false) break;
             DeviceDiv.id = "Device_Canvas_Container_" + i;
 
             var DeviceToolDiv = document.createElement('div');
@@ -2465,6 +2635,10 @@ function ToolProcessLoop() {
                 checkDeviceId++;
                 return;
             }
+            if (DEVICE_types.find(x => x.id === DEVICEs[checkDeviceId].type).telemetryCapable == false) {
+                checkDeviceId++;
+                return;
+            }
 
             if (checkDEVICEsStats == 0) {
                 send_OneWire_package(checkDeviceId, 0, [OW_OK]);
@@ -2525,6 +2699,7 @@ function displayTLMValues(tlmVal) {
     for (var i in DEVICEs) {
 
         if (DEVICE_types.find(x => x.id === DEVICEs[i].type).blOnly == true) break;
+        if (DEVICE_types.find(x => x.id === DEVICEs[i].type).telemetryCapable == false) break;
         DEVICEs[i].TLMValueElements[tlmVal].innerHTML = DEVICEs[i].TLMValues[tlmVal] * TLM_scales[tlmVal];
 
 
@@ -2650,7 +2825,7 @@ function ConfigLoop() {
                 waitForResponseLength = 7;
                 eventMessage("check with id: " + readDeviceIDs[deviceIdIndex] + " ");
             } else {
-                send_OneWire_package(readDeviceIDs[deviceIdIndex], 0, [DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand]);
+                send_OneWire_package(readDeviceIDs[deviceIdIndex], 0, [DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand], DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].CommandType);
                 waitForResponseID = readDeviceIDs[deviceIdIndex];
                 waitForResponseType = 0;
                 waitForResponseLength = 6 + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount;
@@ -2678,12 +2853,19 @@ function ConfigLoop() {
                         }
                     }
                 } else {
+                    var firstBytePos = 5;
+                    // FC commands haben ein 0xFF als "normales" command
+                    if (DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].CommandType) firstBytePos++;
+
                     if (DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 1) {
-                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value = responsePackage[5];
+                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value = responsePackage[firstBytePos];
                     } else if (DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 2) {
-                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value = (responsePackage[5] << 8) | responsePackage[6];
+                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value = (responsePackage[firstBytePos] << 8) | responsePackage[firstBytePos + 1];
                     } else if (DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 4) {
-                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
+                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value = (responsePackage[firstBytePos] << 24) | (responsePackage[firstBytePos + 1] << 16) | (responsePackage[firstBytePos + 2] << 8) | responsePackage[firstBytePos + 3];
+                    } else {
+                        DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value = [];
+                        for (i = firstBytePos; i < firstBytePos + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount; i++) DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value.push(responsePackage[i]);
                     }
                     checkDEVICEsStats = 0;
                     eventMessage("Setting " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].name + " from DEVICE with id: " + readDeviceIDs[deviceIdIndex] + " is " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value + " bytecound: " + DEVICEs[readDeviceIDs[deviceIdIndex]].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount);
@@ -2712,18 +2894,22 @@ function ConfigLoop() {
             }
 
             if (checkDEVICEsStats == 0) {
-                send_OneWire_package(saveNewSettingsToId, 0, [DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand]);
+                send_OneWire_package(saveNewSettingsToId, 0, [DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand], DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].CommandType);
                 waitForResponseID = saveNewSettingsToId;
                 waitForResponseType = 0;
-                waitForResponseLength = 7;
+                waitForResponseLength = 6 + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount;
                 eventMessage("GET Setting " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].name + " with command " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand + " from DEVICE with id: " + saveNewSettingsToId + " ");
             } else {
                 if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 1) {
-                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].setCommand), newSettingsValues[readDeviceSettings[deviceSettingIndex]]]);
+                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].setCommand), newSettingsValues[readDeviceSettings[deviceSettingIndex]]], DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].CommandType);
                 } else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 2) {
-                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].setCommand), (newSettingsValues[readDeviceSettings[deviceSettingIndex]] >> 8), (newSettingsValues[readDeviceSettings[deviceSettingIndex]] & 0xFF)]);
+                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].setCommand), (newSettingsValues[readDeviceSettings[deviceSettingIndex]] >> 8), (newSettingsValues[readDeviceSettings[deviceSettingIndex]] & 0xFF)], DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].CommandType);
                 } else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 4) {
-                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].setCommand), (newSettingsValues[readDeviceSettings[deviceSettingIndex]] >> 24), (newSettingsValues[readDeviceSettings[deviceSettingIndex]] >> 16) & 0xFF, (newSettingsValues[readDeviceSettings[deviceSettingIndex]] >> 8) & 0xFF, (newSettingsValues[readDeviceSettings[deviceSettingIndex]] & 0xFF)]);
+                    send_OneWire_package(saveNewSettingsToId, 0, [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].setCommand), (newSettingsValues[readDeviceSettings[deviceSettingIndex]] >> 24), (newSettingsValues[readDeviceSettings[deviceSettingIndex]] >> 16) & 0xFF, (newSettingsValues[readDeviceSettings[deviceSettingIndex]] >> 8) & 0xFF, (newSettingsValues[readDeviceSettings[deviceSettingIndex]] & 0xFF)], DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].CommandType);
+                } else {
+                    var sendArr = [(DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].setCommand)];
+                    for (i = 0; i < DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value.length; i++) sendArr.push(newSettingsValues[readDeviceSettings[deviceSettingIndex]][i]);
+                    send_OneWire_package(saveNewSettingsToId, 0, sendArr, DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].CommandType);
                 }
                 if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand == OW_GET_ID) {
                     waitForResponseID = newSettingsValues[readDeviceSettings[deviceSettingIndex]];
@@ -2735,20 +2921,26 @@ function ConfigLoop() {
                 eventMessage("SET Setting " + DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].name + " with command " + (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].getCommand + 1) + " to:" + newSettingsValues[readDeviceSettings[deviceSettingIndex]] + " at DEVICE with id: " + saveNewSettingsToId + " ");
             }
         } else {
+            var firstBytePos = 5;
+            // FC commands haben ein 0xFF als "normales" command
+            if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].CommandType) firstBytePos++;
             var responsePackage = checkForRespPackage();
             if (responsePackage) {
                 timeoutDeviceIDs[saveNewSettingsToId] = 0;
                 if (checkDEVICEsStats == 0) {
                     var responsePayload = 0;
                     if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 1) {
-                        responsePayload = responsePackage[5];
+                        responsePayload = responsePackage[firstBytePos];
                     } else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 2) {
-                        responsePayload = (responsePackage[5] << 8) | responsePackage[6];
+                        responsePayload = (responsePackage[firstBytePos] << 8) | responsePackage[firstBytePos + 1];
                     }
                     else if (DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount == 4) {
-                        responsePayload = (responsePackage[5] << 24) | (responsePackage[6] << 16) | (responsePackage[7] << 8) | responsePackage[8];
+                        responsePayload = (responsePackage[firstBytePos] << 24) | (responsePackage[firstBytePos + 1] << 16) | (responsePackage[firstBytePos + 2] << 8) | responsePackage[firstBytePos + 3];
+                    } else {
+                        responsePayload = [];
+                        for (i = 0; i < DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].byteCount; i++) responsePayload.push(responsePackage[firstBytePos + i]);
                     }
-                    if (responsePayload == DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value) {
+                    if ((responsePayload == DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].value) || DEVICEs[saveNewSettingsToId].DeviceSettings[readDeviceSettings[deviceSettingIndex]].type == "3colTable") {
                         eventMessage("GET response correct");
                         checkDEVICEsStats++;
                     } else {
@@ -2815,7 +3007,7 @@ function checkChangedSettings(ID) {
     var changedSettings = false;
     newSettingsValues = {};
     for (var y in DEVICEs[ID].DeviceSettings) {
-        if ((DEVICEs[ID].DeviceSettings[y].min != 0 || DEVICEs[ID].DeviceSettings[y].max != 0) && DEVICEs[ID].DeviceSettings[y].DeviceTypes.indexOf(DEVICEs[ID].type) != -1) {
+        if ((DEVICEs[ID].DeviceSettings[y].min != 0 || DEVICEs[ID].DeviceSettings[y].max != 0) && DEVICEs[ID].DeviceSettings[y].DeviceTypes.includes(DEVICEs[ID].type)) {
             if (DEVICEs[ID].DeviceSettings[y].min == 0 && DEVICEs[ID].DeviceSettings[y].max == 1) { // just active or inactive
                 if (document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID).checked) {
                     newSettingsValues[y] = 1;
@@ -2824,13 +3016,35 @@ function checkChangedSettings(ID) {
                     newSettingsValues[y] = 0;
                     document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID).parentElement.className = "setting_container setting_container_inactive";
                 }
+            } else if (DEVICEs[ID].DeviceSettings[y].type == "3colTable") { // array
+                var ArrCount = DEVICEs[ID].DeviceSettings[y].byteCount / 2;
+                var ByteArray = [];
+                for (i = 0; i < ArrCount; i++) {
+                    if (DEVICEs[ID].DeviceSettings[y].name.includes("<float>")) {
+                        var fieldValue = getI16Fromfloat(1000, document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID + "_" + i).value);
+                    } else {
+                        var fieldValue = parseInt(document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID + "_" + i).value);
+                    }
+                    ByteArray.push((fieldValue >> 8) & 0xFF);
+                    ByteArray.push(fieldValue & 0xFF);
+                }
+                var ArrayChanged = false;
+                for (i = 0; i < ByteArray.length; i++) {
+                    if (ByteArray[i] != DEVICEs[ID].DeviceSettings[y].value[i]) ArrayChanged = true;
+                }
+                if (ArrayChanged) {
+                    changedSettings = true;
+                    DEVICEs[ID].DeviceSettings[y].changed = true;
+                    newSettingsValues[y] = ByteArray;
+                }
+
             } else { /* value */
                 newSettingsValues[y] = parseInt(document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID).value);
                 if (newSettingsValues[y] > DEVICEs[ID].DeviceSettings[y].max) newSettingsValues[y] = DEVICEs[ID].DeviceSettings[y].max;
                 if (newSettingsValues[y] < DEVICEs[ID].DeviceSettings[y].min) newSettingsValues[y] = DEVICEs[ID].DeviceSettings[y].min;
                 document.getElementById(DEVICEs[ID].DeviceSettings[y].getCommand + "_setting_id_" + ID).value = newSettingsValues[y];
             }
-            if (newSettingsValues[y] != DEVICEs[ID].DeviceSettings[y].value) {
+            if (newSettingsValues[y] != DEVICEs[ID].DeviceSettings[y].value && DEVICEs[ID].DeviceSettings[y].type != "3colTable") {
                 DEVICEs[ID].DeviceSettings[y].changed = true;
                 changedSettings = true;
             }
@@ -2850,7 +3064,7 @@ function SettingsChanged(inputID) {
 function saveSettingsOfId(ID) {
     /* collect Settings-  */
     var changedSettings = checkChangedSettings(ID);
-    if (DEVICEs[ID].DeviceSettings[99].changed) {
+    if (DEVICEs[ID].DeviceSettings[99].changed && ID < 23) {
         var ID_is_free = 1;
         for (i = 0; i < readDeviceIDs.length; i++) {
             if (newSettingsValues[99] == readDeviceIDs[i]) ID_is_free = 0;
