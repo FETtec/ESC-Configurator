@@ -70,3 +70,19 @@ function byte2Bit(byte) {
     }
     return bit;
 }
+
+function findstartswith(inputlist, inputstring) {
+    var found = false;
+    if (inputlist.constructor === Array) {
+        for (var il = 0; il < inputlist.length; il++) {
+            if (inputstring.startsWith(inputlist[il])) {
+                found = true;
+            }
+        }
+    } else {
+        if (inputstring.startsWith(inputlist)) {
+            found = true;
+        }
+    }
+    return found;
+}

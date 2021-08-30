@@ -82,7 +82,7 @@ var DEVICE_types = [
     { id: 114, name: "WING ESC 40A", filename: 'ESC_DEF_GD_WING_40A_ESC_G4', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
     { id: 127, name: "FETtec F3 MINI-FC", filename: 'FETTEC_MINI_FC-', start_addr: 3800, fw_maxsize: 240, blOnly: true, activation: false, telemetryCapable: false },
     { id: 128, name: "FETtec G4 FC", filename: 'FETTEC_FC_G4', start_addr: 3800, fw_maxsize: 496, blOnly: false, activation: false, telemetryCapable: false },
-    { id: 129, name: "FETtec G0 OSD", filename: 'RG_OSD_G0', start_addr: 1000, fw_maxsize: 124, blOnly: true, activation: false, telemetryCapable: false }
+    { id: 129, name: "FETtec G0 OSD", filename: ['RG_OSD_G0', 'FETTEC_OSD_FW'], start_addr: 1000, fw_maxsize: 124, blOnly: true, activation: false, telemetryCapable: false }
 ];
 
 const Serial_Options = [
@@ -2119,7 +2119,7 @@ function initFWUpdater() {
                                     if (tmpTypes.includes(device.type)) {
                                     } else {
                                         tmpTypes.push(device.type)
-                                        if (asset.name.endsWith(".hex") && asset.name.startsWith(DEVICE_types.find(x => x.id === device.type).filename)) {
+                                        if (asset.name.endsWith(".hex") && findstartswith(DEVICE_types.find(x => x.id === device.type).filename, asset.name)) {
                                             var release_name = DEVICE_types.find(x => x.id === device.type).name + " " + release.tag_name;
                                             if (release.prerelease == true)
                                                 release_name += " (BETA)"
@@ -2178,7 +2178,7 @@ function PrepareUpdate() {
         if (device !== undefined) {
             var tmpContainer = document.getElementById("Device_container_" + device.id);
             var tmpcheckBox = document.getElementById("device_select_id_" + device.id);
-            if ((FW_update.loadedFileName).startsWith(DEVICE_types.find(x => x.id === device.type).filename)) {
+            if (findstartswith(DEVICE_types.find(x => x.id === device.type).filename, FW_update.loadedFileName)) {
                 DEVICEs[device.id].selected = true
                 tmpContainer.className = "Device_active";
                 tmpcheckBox.checked = true
