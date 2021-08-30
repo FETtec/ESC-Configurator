@@ -31,7 +31,7 @@ const RELEASE_DIR = "./release/";
 const LINUX_INSTALL_DIR = "/opt/fettec-esc-config";
 
 var nwBuilderOptions = {
-  version: "0.50.3", // 0.44.2 // 0.36.4
+  version: "0.36.4", // 0.44.2 // 0.36.4
   files: "./dist/**/*",
   macIcns: "./src/images/fettec-256x256.icns",
   macPlist: {
@@ -530,7 +530,19 @@ function getLinuxPackageArch(type, arch) {
   return packArch;
 }
 // Create distribution package for macOS platform
-
+function osx64_sign(done) {
+  if (commandExistsSync("tmp/codesign.sh")) {
+    console.log("Codesign activity...");
+    execSync("tmp/codesign.sh", function(error, stdOut, stdErr) {
+    });
+  } else {
+    console.log("No valid script for codesign");
+  }
+  //release_zip("osx64",done);
+  release_osx64(done);
+  return done();
+}
+/*
 function osx64_sign(done) {
   if (commandExistsSync("tmp/code-sign.js")) {
     console.log("Codesign activity...");
@@ -543,7 +555,7 @@ function osx64_sign(done) {
   release_osx64(done);
   return done();
 }
-
+*/
 function release_osx64(done) {
   // Create DMG
   createDirIfNotExists(RELEASE_DIR);

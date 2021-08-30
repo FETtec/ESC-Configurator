@@ -86,10 +86,10 @@ var DEVICE_types = [
 ];
 
 const Serial_Options = [
-    { id: 0, name: 'KISS FC Passthrough', connect_bitrate: 115200, disabled: false, selected: false },
+    { id: 0, name: 'KISS FC Passthrough', connect_bitrate: 115200, disabled: false, selected: "selected" },
     { id: 1, name: 'Betaflight Passthrough', connect_bitrate: 115200, disabled: false, selected: false },
     { id: 2, name: 'USB UART', connect_bitrate: 2000000, disabled: false, selected: false },
-    { id: 3, name: 'USB', connect_bitrate: 2000000, disabled: false, selected: "selected" }
+    { id: 3, name: 'USB', connect_bitrate: 2000000, disabled: false, selected: false }
 ];
 
 const Menu_Options = [
