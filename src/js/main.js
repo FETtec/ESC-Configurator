@@ -82,8 +82,7 @@ var DEVICE_types = [
     { id: 114, name: "WING ESC 40A", filename: 'ESC_DEF_GD_WING_40A_ESC_G4', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
     { id: 127, name: "FETtec F3 MINI-FC", filename: 'FETTEC_MINI_FC-', start_addr: 3800, fw_maxsize: 240, blOnly: true, activation: false, telemetryCapable: false },
     { id: 128, name: "FETtec G4 FC", filename: 'FETTEC_FC_G4', start_addr: 3800, fw_maxsize: 496, blOnly: false, activation: false, telemetryCapable: false },
-    { id: 129, name: "FETtec G0 OSD", filename: ['RG_OSD_G0', 'FETTEC_OSD_FW'], start_addr: 1000, fw_maxsize: 124, blOnly: true, activation: false, telemetryCapable: false }
-];
+    { id: 129, name: "FETtec G0 OSD", filename: ['RG_OSD_G0', 'FETTEC_OSD_FW'], start_addr: 1000, fw_maxsize: 124, blOnly: true, activation: false, telemetryCapable: false }];
 
 const Serial_Options = [
     { id: 0, name: 'KISS FC Passthrough', connect_bitrate: 115200, disabled: false, selected: "selected" },
@@ -205,9 +204,15 @@ function DEVICE() {
         78: { getCommand: OW_FC_GET_MIN_COMMAND, setCommand: OW_FC_SET_MIN_COMMAND, name: "Motor min Command", feature: "advanced", type: "value", min: 20, max: 200, active: 0, changed: false, eever: 1, byteCount: OW_FC_LEN_MIN_COMMAND, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
         79: { getCommand: OW_FC_GET_PROP_YAW_DIRECTION, setCommand: OW_FC_SET_PROP_YAW_DIRECTION, name: "Props in", feature: "advanced", type: "checkbox", min: 0, max: 1, active: 0, changed: false, eever: 1, byteCount: OW_FC_LEN_PROP_YAW_DIRECTION, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
         80: { getCommand: OW_FC_GET_TEST_SET, setCommand: OW_FC_SET_TEST_SET, name: "Test set", feature: "advanced", type: "value", min: 0, max: 255, active: 0, changed: false, eever: 1, byteCount: OW_FC_LEN_TEST_SET, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
+        81: { getCommand: OW_FC_GET_MSPD_SERIAL, setCommand: OW_FC_SET_MSPD_SERIAL, name: "MSP display:|Disabled|Serial 1|Serial 3|Serial 4", feature: "advanced", type: "dropdown", min: 0, max: 3, active: 0, changed: false, eever: 5, byteCount: OW_FC_LEN_MSPD_SERIAL, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
+        82: { getCommand: OW_FC_GET_VTX_SERIAL, setCommand: OW_FC_SET_VTX_SERIAL, name: "Analog VTX:|Disabled|Serial 1|Serial 3|Serial 4", feature: "advanced", type: "dropdown", min: 0, max: 3, active: 0, changed: false, eever: 5, byteCount: OW_FC_LEN_VTX_SERIAL, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
+        83: { getCommand: OW_FC_GET_BEC_OUTPUT, setCommand: OW_FC_SET_BEC_OUTPUT, name: "BEC voltage:|5V|16V", feature: "advanced", type: "dropdown", min: 0, max: 2, active: 0, changed: false, eever: 5, byteCount: OW_FC_LEN_BEC_OUTPUT, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
+        84: { getCommand: OW_FC_GET_CRAFT_TYPE, setCommand: OW_FC_SET_CRAFT_TYPE, name: "Craft type:|Quad X|Hexa Y|Hexa X|Octo flat X|Octo X8", feature: "advanced", type: "dropdown", min: 0, max: 4, active: 0, changed: false, eever: 5, byteCount: OW_FC_LEN_CRAFT_TYPE, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
+        85: { getCommand: OW_FC_GET_ESC_PROTOCOL, setCommand: OW_FC_SET_ESC_PROTOCOL, name: "ESC protocol:|S2M+OW|PWM|S2M|ONEWIRE|DS600|DS1200|DS2400", feature: "advanced", type: "dropdown", min: 0, max: 7, active: 0, changed: false, eever: 5, byteCount: OW_FC_LEN_ESC_PROTOCOL, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
+        86: { getCommand: OW_FC_GET_ESC_MAP14, setCommand: OW_FC_SET_ESC_MAP14, name: "ESC Mapping 1-4", feature: "advanced", type: "value", min: 1111, max: 8888, active: 0, changed: false, eever: 1, byteCount: OW_FC_LEN_ESC_MAP14, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
+        87: { getCommand: OW_FC_GET_ESC_MAP58, setCommand: OW_FC_SET_ESC_MAP14, name: "ESC Mapping 5-8", feature: "advanced", type: "value", min: 1111, max: 8888, active: 0, changed: false, eever: 1, byteCount: OW_FC_LEN_ESC_MAP58, DeviceTypes: [128], CommandType: OW_FC_COMMANDS },
 
-
-        99: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs, CommandType: 0 } // must always be 99 and the last one
+        199: { getCommand: OW_GET_ID, setCommand: OW_SET_ID, name: "OneWire ID", feature: "advanced", type: "value", min: 1, max: 24, value: 0, changed: false, eever: 16, byteCount: 1, DeviceTypes: onAllESCs, CommandType: 0 } // must always be 199 and the last one
     };
 }
 
@@ -1404,15 +1409,24 @@ function ChangeDisplay(displayType) {
 
         switch (displayType) {
             case 0:
+                if (typeof DEVICEs[23] !== 'undefined') {
+                    send_OneWire_package(23, 0, [OW_FC_SET_ESCS_NO_SIG, 1], OW_FC_COMMANDS);
+                }
                 if (FW_update.FlashProcessActive == 0) {
                     initFWUpdater();
                     change_Devices_status(1, 1, 0);
                 }
                 break;
             case 1:
+                if (typeof DEVICEs[23] !== 'undefined') {
+                    send_OneWire_package(23, 0, [OW_FC_SET_ESCS_NO_SIG, 1], OW_FC_COMMANDS);
+                }
                 initConfig();
                 break;
             case 2:
+                if (typeof DEVICEs[23] !== 'undefined') {
+                    send_OneWire_package(23, 0, [OW_FC_SET_ESCS_NO_SIG, 0], OW_FC_COMMANDS);
+                }
                 initTools();
                 break;
         }
@@ -1428,14 +1442,27 @@ function ReScanForDevices() {
     devicesDisplayed = 0;
     DEVICEs = [];
     timeoutDeviceIDs = [];
+    //var currentMenu = selectedMenu;
     $('#overview').empty();
     $('#toolbar').empty();
     $("#progressbar").show();
     $("#rescan_button").attr('disabled', true);
     $("#rescan_button").addClass("ui-state-disabled");
-
-    ScanForDevices()
+    //ChangeDisplay(99);
+    ScanForDevices();
     rescanDone = 1;
+    /*
+    console.log(currentMenu);
+    switch (currentMenu) {
+        case 0:
+            initFWUpdater();
+            break;
+        case 1:
+            initConfig();
+    }
+    */
+    //ChangeDisplay(currentMenu);
+
 }
 
 function ScanForDevices() {
@@ -1893,6 +1920,33 @@ function displayDevices(ParentElement) {
                             }
                             DeviceSetting.appendChild(settingsTable);
                             break;
+                        case "dropdown":
+                            var DeviceSetting = document.createElement('div');
+                            var optionsSplit = DEVICEs[i].DeviceSettings[y].name.split("|");
+                            DeviceSetting.className = "setting_container";
+                            if (DEVICEs[i].DeviceSettings[y].eever > DEVICEs[i].DeviceSettings[0].value) DeviceSetting.style.display = "none";
+                            DeviceSettingText = document.createElement('div');
+                            DeviceSettingText.className = "setting_text";
+                            DeviceSettingText.innerHTML = optionsSplit[0] + " ";
+                            DeviceSetting.appendChild(DeviceSettingText);
+                            DeviceInfoDiv.appendChild(DeviceSetting);
+                            settingNumber = document.createElement('select');
+                            settingNumber.className = "settings_numberBox";
+                            settingNumber.id = DEVICEs[i].DeviceSettings[y].getCommand + "_setting_id_" + i;
+                            settingNumber.onchange = function () {
+                                SettingsChanged(this.id);
+                            }
+                            for (var j = 1; j < optionsSplit.length; j++) {
+                                var optionEle = document.createElement('option');
+                                optionEle.innerHTML = optionsSplit[j];
+                                optionEle.value = j - 1;
+                                if (optionEle.value == DEVICEs[i].DeviceSettings[y].value) {
+                                    optionEle.selected = "SELECTED";
+                                }
+                                settingNumber.appendChild(optionEle);
+                            }
+                            DeviceSetting.appendChild(settingNumber);
+                            break
                         default:
                     }
                 }
@@ -2480,7 +2534,7 @@ function initTools() {
         if (i > maxDeviceId) maxDeviceId = i;
         if (i < minDeviceId) minDeviceId = i;
 
-        if (DEVICE_types.find(x => x.id === DEVICEs[i].type).blOnly != true) {
+        if (DEVICE_types.find(x => x.id === DEVICEs[i].type).blOnly != true && i != 23) {
             DEVICEs[i].TLMCanvasCTX = DEVICEs[i].TLMCanvasElement.getContext("2d");
             GraphArr[i] = [];
             for (var j = 0; j < 8; j++) {
@@ -3064,13 +3118,13 @@ function SettingsChanged(inputID) {
 function saveSettingsOfId(ID) {
     /* collect Settings-  */
     var changedSettings = checkChangedSettings(ID);
-    if (DEVICEs[ID].DeviceSettings[99].changed && ID < 23) {
+    if (DEVICEs[ID].DeviceSettings[199].changed && ID < 23) {
         var ID_is_free = 1;
         for (i = 0; i < readDeviceIDs.length; i++) {
-            if (newSettingsValues[99] == readDeviceIDs[i]) ID_is_free = 0;
+            if (newSettingsValues[199] == readDeviceIDs[i]) ID_is_free = 0;
         }
         if (ID_is_free == 0) {
-            $("#dialog").text("OneWire ID " + newSettingsValues[99] + " is already in use, please choose another one.");
+            $("#dialog").text("OneWire ID " + newSettingsValues[199] + " is already in use, please choose another one.");
             $("#dialog").dialog({
                 modal: true,
                 buttons: {
