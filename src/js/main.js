@@ -26,9 +26,9 @@ var DEVICE_types = [
     { id: 5, name: "FETtec PRO ESC 60A", filename: 'FETTEC_PRO_60A_ESC_S32K_', start_addr: 4000, fw_maxsize: 470, blOnly: false, activation: false, telemetryCapable: true },
     { id: 6, name: "FETtec ESC 45A", filename: 'FETTEC_45A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false, telemetryCapable: true },
     { id: 7, name: "FETtec ESC 45A HV", filename: 'FETTEC_45A_HV_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: false, telemetryCapable: true },
-    { id: 8, name: "FETtec ESC 15A", filename: 'FETTEC_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 8, name: "FETtec AIO 15A ESC", filename: 'FETTEC_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
     { id: 9, name: "FETtec PRO ESC 45A", filename: 'FETTEC_PRO_45A_ESC_G4_', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: false, telemetryCapable: true },
-    { id: 10, name: "FETtec ESC 35A AIO", filename: 'FETTEC_35A_AIO_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
+    { id: 10, name: "FETtec AIO 35A ESC", filename: 'FETTEC_35A_AIO_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
     { id: 64, name: "ESC 15A", filename: 'ESC_DEF_GD_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
     { id: 65, name: "ESC 15A", filename: 'ESC_ADV_GD_15A_ESC_G0_', start_addr: 1800, fw_maxsize: 41, blOnly: false, activation: true, telemetryCapable: true },
     //    { id: 66, name: "ESC 15A", filename: '' },
@@ -80,9 +80,9 @@ var DEVICE_types = [
     //    { id: 112, name: "ESC 100A", filename: '' },
     //    { id: 113, name: "ESC 100A", filename: '' },
     { id: 114, name: "WING ESC 40A", filename: 'ESC_DEF_GD_WING_40A_ESC_G4', start_addr: 3800, fw_maxsize: 88, blOnly: false, activation: true },
-    { id: 127, name: "FETtec F3 MINI-FC", filename: 'FETTEC_MINI_FC-', start_addr: 3800, fw_maxsize: 240, blOnly: true, activation: false, telemetryCapable: false },
-    { id: 128, name: "FETtec G4 FC", filename: 'FETTEC_FC_G4', start_addr: 3800, fw_maxsize: 496, blOnly: false, activation: false, telemetryCapable: false },
-    { id: 129, name: "FETtec G0 OSD", filename: ['RG_OSD_G0', 'FETTEC_OSD_FW'], start_addr: 1000, fw_maxsize: 124, blOnly: true, activation: false, telemetryCapable: false }];
+    { id: 127, name: "FETtec AIO 15A FC", filename: 'FETTEC_MINI_FC-', start_addr: 3800, fw_maxsize: 240, blOnly: true, activation: false, telemetryCapable: false },
+    { id: 128, name: "FETtec FC G4", filename: 'FETTEC_FC_G4', start_addr: 3800, fw_maxsize: 496, blOnly: false, activation: false, telemetryCapable: false },
+    { id: 129, name: "FETtec OSD", filename: ['RG_OSD_G0', 'FETTEC_OSD_FW'], start_addr: 1000, fw_maxsize: 124, blOnly: true, activation: false, telemetryCapable: false }];
 
 const Serial_Options = [
     { id: 0, name: 'KISS FC Passthrough', connect_bitrate: 115200, disabled: false, selected: false },
@@ -1286,8 +1286,8 @@ function check_ESCs_In_BL() {
                     }
                 }
             } else if (switchStatus == 1) {
-                DEVICEs[switchLoopDeviceId].version = (responsePackage[5] / 10);
-                DEVICEs[switchLoopDeviceId].subversion = (responsePackage[6] / 100);
+                DEVICEs[switchLoopDeviceId].version = (responsePackage[5] / 10).toFixed(1);
+                DEVICEs[switchLoopDeviceId].subversion = responsePackage[6];
                 eventMessage("DEVICE with id: " + switchLoopDeviceId + " software version is: " + DEVICEs[switchLoopDeviceId].version + "." + DEVICEs[switchLoopDeviceId].subversion);
                 switchStatus++;
             } else if (switchStatus == 2) {
@@ -1530,8 +1530,8 @@ function ScanForDevices() {
                     ScanForDevices();
                 } else if (scanStep == 2) {
 
-                    DEVICEs[scanID].version = (responsePackage[5] / 10);
-                    DEVICEs[scanID].subversion = (responsePackage[6] / 100);
+                    DEVICEs[scanID].version = (responsePackage[5] / 10).toFixed(1);
+                    DEVICEs[scanID].subversion = responsePackage[6];
 
                     eventMessage("DEVICE with id: " + scanID + " software version is: " + DEVICEs[scanID].version + "." + DEVICEs[scanID].subversion);
                     scanStep = 3;
@@ -1613,7 +1613,7 @@ function displayDevices(ParentElement) {
 
             var DeviceVersionDiv = document.createElement('div');
             DeviceVersionDiv.className = "Device_Info_version";
-            DeviceVersionDiv.innerHTML = "FW. ver. : " + DEVICEs[i].version + "-" + DEVICEs[i].subversion;
+            DeviceVersionDiv.innerHTML = "FW. ver. : " + DEVICEs[i].version + "." + DEVICEs[i].subversion;
             DeviceInfoDiv.appendChild(DeviceVersionDiv);
 
             var DeviceSerialDiv = document.createElement('div');
