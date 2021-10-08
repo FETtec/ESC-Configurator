@@ -106,21 +106,19 @@ const OW_GET_FRSKY_TIME_GAP = 101;
 
 const OW_FC_COMMANDS = 255;
 
-
-
 // FC commands
 const OW_FC_GET_PIDS = 0;
 const OW_FC_SET_PIDS = 1;
 const OW_FC_LEN_PIDS = 18;
-	
+
 const OW_FC_GET_EXPO = 2;
-const OW_FC_SET_EXPO = 3;	
+const OW_FC_SET_EXPO = 3;
 const OW_FC_LEN_EXPO = 6;
-	
+
 const OW_FC_GET_RATE = 4;
 const OW_FC_SET_RATE = 5;
 const OW_FC_LEN_RATE = 6;
-	
+
 const OW_FC_GET_MIN_COMMAND = 6;
 const OW_FC_SET_MIN_COMMAND = 7;
 const OW_FC_LEN_MIN_COMMAND = 2;
@@ -133,28 +131,60 @@ const OW_FC_GET_TEST_SET = 10;
 const OW_FC_SET_TEST_SET = 11;
 const OW_FC_LEN_TEST_SET = 1;
 
+// tell the FC to not send Signal pin data (for bootloader)
+const OW_FC_SET_ESCS_NO_SIG = 12;
 
 
+const OW_FC_GET_MSPD_SERIAL1 = 13;
+const OW_FC_SET_MSPD_SERIAL1 = 14;
+const OW_FC_LEN_MSPD_SERIAL1 = 1;
 
+const OW_FC_GET_VTX_SERIAL = 15;
+const OW_FC_SET_VTX_SERIAL = 16;
+const OW_FC_LEN_VTX_SERIAL = 1;
+
+const OW_FC_GET_BEC_OUTPUT = 17;
+const OW_FC_SET_BEC_OUTPUT = 18;
+const OW_FC_LEN_BEC_OUTPUT = 1;
+
+const OW_FC_GET_CRAFT_TYPE = 19;
+const OW_FC_SET_CRAFT_TYPE = 20;
+const OW_FC_LEN_CRAFT_TYPE = 1;
+
+const OW_FC_GET_ESC_PROTOCOL = 21;
+const OW_FC_SET_ESC_PROTOCOL = 22;
+const OW_FC_LEN_ESC_PROTOCOL = 1;
+
+const OW_FC_GET_ESC_MAP14 = 23;
+const OW_FC_SET_ESC_MAP14 = 24;
+const OW_FC_LEN_ESC_MAP14 = 2;
+
+const OW_FC_GET_ESC_MAP58 = 25;
+const OW_FC_SET_ESC_MAP58 = 26;
+const OW_FC_LEN_ESC_MAP58 = 2;
+
+const OW_FC_GET_MSPD_SERIAL2 = 27;
+const OW_FC_SET_MSPD_SERIAL2 = 28;
+const OW_FC_LEN_MSPD_SERIAL2 = 1;
 
 
 // Begin functions
 
 
-function getFloatFromU8s(Div, val1, val2){
-	return ((val1<<8)|val2)/Div;
+function getFloatFromU8s(Div, val1, val2) {
+    return ((val1 << 8) | val2) / Div;
 }
-function getI16Fromfloat(Multi,val){
-	return Math.round(val*Multi);
+function getI16Fromfloat(Multi, val) {
+    return Math.round(val * Multi);
 }
 
 
 
 function send_OneWire_package(id, type, bytes, FCcommand = 0) {
     var B_length = bytes.length + 6;
-    if(FCcommand) B_length++;
+    if (FCcommand) B_length++;
     DevicePackage = [0x01, id, type, ((type >> 8) & 0xFF), B_length];
-    if(FCcommand) DevicePackage.push(OW_FC_COMMANDS);
+    if (FCcommand) DevicePackage.push(OW_FC_COMMANDS);
     for (var i = 0; i < bytes.length; i++) DevicePackage.push(bytes[i]);
     DevicePackage.push(getCRC(DevicePackage, B_length - 1));
     sendBytes(DevicePackage);
@@ -194,7 +224,7 @@ function checkForRespPackage() {
     }
     if (responsePackage.length > 1) {
         eventMessage("RCV: " + responsePackage, -2);
-	//console.log("RCV: " + responsePackage, -2);
+        //console.log("RCV: " + responsePackage, -2);
         return responsePackage;
     }
     else return false;

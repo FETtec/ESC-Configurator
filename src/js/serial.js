@@ -30,7 +30,7 @@ chrome.serial.onReceive.addListener(function RX_data(DataIn) {
 chrome.serial.onReceiveError.addListener(function check_receive_error(info) {
     switch (info.error) {
         case 'device_lost':
-	    // führt in chrome zum abbruch des flashens nach switch zum BL oder anderstrum mit VCP
+            // fï¿½hrt in chrome zum abbruch des flashens nach switch zum BL oder anderstrum mit VCP
             //disconnect(); 
             break;
         case 'disconnected':
@@ -126,7 +126,7 @@ function ReconnectToOldPort(ports) {
             eventMessage("reconnect, connect to new port foundPortPath = " + ports[i].path, -1);
             chrome.serial.connect(ports[i].path, { bitrate: use_bit_rate, bufferSize: 200000, persistent: true }, onPortOpen);
             UpdateSerialSection("connect");
-	    waitLoops = 40;
+            waitLoops = 40;
             return;
         }
     }
@@ -135,7 +135,7 @@ function ReconnectToOldPort(ports) {
             eventMessage("reconnect, connect to new port foundPortPath = " + ports[i].path, -1);
             chrome.serial.connect(ports[i].path, { bitrate: use_bit_rate, bufferSize: 200000, persistent: true }, onPortOpen);
             UpdateSerialSection("connect");
-	    waitLoops = 40;
+            waitLoops = 40;
             return;
         }
     }
