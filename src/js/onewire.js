@@ -106,8 +106,6 @@ const OW_GET_FRSKY_TIME_GAP = 101;
 
 const OW_FC_COMMANDS = 255;
 
-
-
 // FC commands
 const OW_FC_GET_PIDS = 0;
 const OW_FC_SET_PIDS = 1;

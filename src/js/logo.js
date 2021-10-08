@@ -114,33 +114,33 @@ function showLogoEditor(width, height, WhiteLogoArr, BlackLogoArr, WhiteLogoPos,
                     loadCanvas("canvasLogo", width, height, inverted);
                 }));
         $("#imgRt").append().html("&#8250;"); // right
-/*
-        $("#imgMovr").append(
-            $('<button/>')
-                .attr({ id: 'imgCntr' })
-                .button()
-                .click(function () {
-                    img_x = 0;
-                    img_y = 0;
-                    loadCanvas("canvasLogo", width, height, inverted);
-
-                }));
-        $("#imgCntr").append().html("Reset Pos");
-
-        $("#imgMovr").append(
-            $('<button/>')
-                .attr({ id: 'imgInvert' })
-                .button()
-                .click(function () {
-                    if (inverted == 0)
-                        inverted = 1;
-                    else
-                        inverted = 0;
-                    loadCanvas("canvasLogo", width, height, inverted);
-                }))
-            ;
-        $("#imgInvert").append().html("Invert");
-*/
+        /*
+                $("#imgMovr").append(
+                    $('<button/>')
+                        .attr({ id: 'imgCntr' })
+                        .button()
+                        .click(function () {
+                            img_x = 0;
+                            img_y = 0;
+                            loadCanvas("canvasLogo", width, height, inverted);
+        
+                        }));
+                $("#imgCntr").append().html("Reset Pos");
+        
+                $("#imgMovr").append(
+                    $('<button/>')
+                        .attr({ id: 'imgInvert' })
+                        .button()
+                        .click(function () {
+                            if (inverted == 0)
+                                inverted = 1;
+                            else
+                                inverted = 0;
+                            loadCanvas("canvasLogo", width, height, inverted);
+                        }))
+                    ;
+                $("#imgInvert").append().html("Invert");
+        */
     }
 
 
@@ -272,7 +272,7 @@ function searchStartLogo(ByteArr) {
                 getA2sign(ByteArr[i + 13]) == "A" &&
                 getA2sign(ByteArr[i + 14]) == "C" &&
                 getA2sign(ByteArr[i + 15]) == "K" &&
-                getA2sign(ByteArr[i + 24]) == ">" 
+                getA2sign(ByteArr[i + 24]) == ">"
             ) {
                 FW_update.BlackStartLogoPos = i + 25;
                 for (i2 = 0; i2 < (Math.ceil(startLogoWidth / 8) * startLogoHeight); i2++) {
